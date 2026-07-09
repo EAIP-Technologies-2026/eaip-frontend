@@ -1,0 +1,57 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": ["**/.env.*local", "tsconfig.json"],
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"]
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "dist/**", "build/**", ".out/**"]
+    },
+    "lint": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "test:watch": {
+      "cache": false,
+      "persistent": true
+    },
+    "test:coverage": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "clean": {
+      "cache": false
+    },
+    "storybook": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "storybook:build": {
+      "dependsOn": ["^build"],
+      "outputs": ["storybook-static/**"]
+    },
+    "chromatic": {
+      "dependsOn": ["storybook:build"]
+    },
+    "e2e": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "e2e:ui": {
+      "dependsOn": ["^build"],
+      "cache": false
+    }
+  }
+}
