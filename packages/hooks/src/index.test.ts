@@ -1,17 +1,18 @@
-import { describe, it, expect } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { describe, it } from "vitest";
+import { expect } from "@storybook/test";
+import { renderHook } from "@testing-library/react";
 import { useDebounce, useLocalStorage } from "./index";
 
 describe("useDebounce", () => {
-  it("returns initial value immediately", () => {
+  it("returns initial value immediately", async () => {
     const { result } = renderHook(() => useDebounce("hello", 500));
-    expect(result.current).toBe("hello");
+    await expect(result.current).toBe("hello");
   });
 });
 
 describe("useLocalStorage", () => {
-  it("returns initial value", () => {
+  it("returns initial value", async () => {
     const { result } = renderHook(() => useLocalStorage("test", "default"));
-    expect(result.current[0]).toBe("default");
+    await expect(result.current[0]).toBe("default");
   });
 });

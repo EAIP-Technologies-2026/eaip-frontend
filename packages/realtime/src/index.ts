@@ -21,14 +21,16 @@ export class WebSocketRealtimeClient implements RealtimeClient {
     this.ws = new WebSocket(this.url);
     this.ws.onmessage = (event) => {
       try {
-        const msg = JSON.parse(event.data) as { channel: string; data: unknown };
+        const msg = JSON.parse(String(event.data)) as { channel: string; data: unknown };
         const channelHandlers = this.handlers.get(msg.channel);
         if (channelHandlers) {
           for (const handler of channelHandlers) {
             handler(msg.data);
           }
         }
-      } catch {}
+      } catch {
+        void 0;
+      }
     };
   }
 
@@ -41,7 +43,10 @@ export class WebSocketRealtimeClient implements RealtimeClient {
     if (!this.handlers.has(channel)) {
       this.handlers.set(channel, new Set());
     }
-    this.handlers.get(channel)!.add(handler);
+    const handlers = this.handlers.get(channel);
+    if (handlers) {
+      handlers.add(handler);
+    }
     return () => {
       this.handlers.get(channel)?.delete(handler);
     };

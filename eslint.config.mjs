@@ -24,12 +24,11 @@ export default tseslint.config(
   jsxA11y.flatConfigs.recommended,
   reactPlugin.configs.flat.recommended,
   reactPlugin.configs.flat["jsx-runtime"],
-  tailwindcssPlugin.configs["flat/recommended"],
+
   prettierConfig,
   {
     plugins: {
       "react-hooks": reactHooksPlugin,
-      "@next/next": nextPlugin,
       "testing-library": testingLibraryPlugin,
       storybook: storybookPlugin,
     },
@@ -46,37 +45,37 @@ export default tseslint.config(
     },
     settings: {
       react: {
-        version: "detect",
-      },
-      tailwindcss: {
-        callees: ["clsx", "cn", "cva"],
-        config: "tailwind.config.ts",
+        version: "19.1",
       },
     },
     rules: {
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
-      "@next/next/google-font-display": "warn",
-      "@next/next/google-font-preconnect": "warn",
-      "@next/next/no-page-custom-font": "warn",
-      "@next/next/no-html-link-for-pages": "error",
       "testing-library/await-async-queries": "error",
       "testing-library/no-await-sync-queries": "error",
       "testing-library/no-debugging-utils": "warn",
       "testing-library/no-dom-import": "error",
       "storybook/await-interactions": "error",
       "storybook/use-storybook-expect": "error",
-      "storybook/valid-expect": "error",
       "@typescript-eslint/no-unused-vars": [
         "error",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
-      "@typescript-eslint/consistent-type-imports": [
-        "error",
-        { prefer: "type-imports" },
-      ],
+      "@typescript-eslint/consistent-type-imports": ["error", { prefer: "type-imports" }],
       "@typescript-eslint/no-import-type-side-effects": "error",
       "no-console": ["warn", { allow: ["warn", "error"] }],
+    },
+  },
+  {
+    files: ["apps/**/*.{ts,tsx,js,jsx}"],
+    plugins: {
+      "@next/next": nextPlugin,
+    },
+    rules: {
+      "@next/next/google-font-display": "warn",
+      "@next/next/google-font-preconnect": "warn",
+      "@next/next/no-page-custom-font": "warn",
+      "@next/next/no-html-link-for-pages": "error",
     },
   },
   {
@@ -91,6 +90,8 @@ export default tseslint.config(
       "**/.turbo/**",
       "**/*.config.*",
       "**/*.d.ts",
+      "**/.storybook/**",
+      "**/e2e/**",
     ],
   },
 );

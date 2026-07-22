@@ -3,8 +3,12 @@ import { useState, useEffect, useCallback, useRef, type RefObject } from "react"
 export function useDebounce<T>(value: T, delayMs: number): T {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), delayMs);
-    return () => clearTimeout(timer);
+    const timer = setTimeout(() => {
+      setDebounced(value);
+    }, delayMs);
+    return () => {
+      clearTimeout(timer);
+    };
   }, [value, delayMs]);
   return debounced;
 }
@@ -16,8 +20,12 @@ export function useInterval(callback: () => void, delayMs: number | null): void 
   }, [callback]);
   useEffect(() => {
     if (delayMs === null) return;
-    const id = setInterval(() => savedCallback.current(), delayMs);
-    return () => clearInterval(id);
+    const id = setInterval(() => {
+      savedCallback.current();
+    }, delayMs);
+    return () => {
+      clearInterval(id);
+    };
   }, [delayMs]);
 }
 
@@ -36,7 +44,9 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T)
       setStored(value);
       try {
         localStorage.setItem(key, JSON.stringify(value));
-      } catch {}
+      } catch {
+        void 0;
+      }
     },
     [key],
   );
@@ -44,9 +54,7 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T)
   return [stored, setValue];
 }
 
-export function useOnClickOutside<T extends HTMLElement>(
-  handler: () => void,
-): RefObject<T | null> {
+export function useOnClickOutside<T extends HTMLElement>(handler: () => void): RefObject<T | null> {
   const ref = useRef<T | null>(null);
 
   useEffect(() => {
@@ -73,9 +81,13 @@ export function useMediaQuery(query: string): boolean {
 
   useEffect(() => {
     const mq = window.matchMedia(query);
-    const handler = (event: MediaQueryListEvent) => setMatches(event.matches);
+    const handler = (event: MediaQueryListEvent) => {
+      setMatches(event.matches);
+    };
     mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
+    return () => {
+      mq.removeEventListener("change", handler);
+    };
   }, [query]);
 
   return matches;

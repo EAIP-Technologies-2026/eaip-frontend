@@ -1,4 +1,4 @@
-import { type ReactNode, type ElementType, type HTMLAttributes } from "react";
+import type { ReactNode, ElementType, HTMLAttributes } from "react";
 
 type Variant = "h1" | "h2" | "h3" | "h4" | "body" | "small" | "code";
 

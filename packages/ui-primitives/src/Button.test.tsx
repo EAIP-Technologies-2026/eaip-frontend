@@ -1,15 +1,16 @@
-import { describe, it, expect } from "vitest";
+import { describe, it } from "vitest";
+import { expect } from "@storybook/test";
 import { render, screen } from "@testing-library/react";
 import { Button } from "./index";
 
 describe("Button", () => {
-  it("renders children", () => {
+  it("renders children", async () => {
     render(<Button>Click me</Button>);
-    expect(screen.getByText("Click me")).toBeDefined();
+    await expect(screen.getByText("Click me")).toBeDefined();
   });
 
-  it("renders as disabled", () => {
+  it("renders as disabled", async () => {
     render(<Button disabled>Disabled</Button>);
-    expect(screen.getByText("Disabled")).toBeDefined();
+    await expect(screen.getByText("Disabled")).toBeDefined();
   });
 });

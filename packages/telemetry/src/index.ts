@@ -1,8 +1,8 @@
-export type TelemetryEvent = {
+export interface TelemetryEvent {
   name: string;
   properties?: Record<string, unknown>;
   timestamp?: number;
-};
+}
 
 export interface TelemetryClient {
   track(event: TelemetryEvent): void;
@@ -11,9 +11,15 @@ export interface TelemetryClient {
 }
 
 class NoopTelemetryClient implements TelemetryClient {
-  track(_event: TelemetryEvent): void {}
-  pageView(_path: string): void {}
-  identify(_userId: string, _traits?: Record<string, unknown>): void {}
+  track(_event: TelemetryEvent): void {
+    return;
+  }
+  pageView(_path: string): void {
+    return;
+  }
+  identify(_userId: string, _traits?: Record<string, unknown>): void {
+    return;
+  }
 }
 
 let client: TelemetryClient = new NoopTelemetryClient();

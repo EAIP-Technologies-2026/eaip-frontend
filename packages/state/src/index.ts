@@ -12,7 +12,11 @@ export const useAppStore = create<AppState>()(
   subscribeWithSelector((set) => ({
     sidebarOpen: true,
     sidebarWidth: 280,
-    toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
-    setSidebarWidth: (width: number) => set({ sidebarWidth: width }),
+    toggleSidebar: () => {
+      set((state) => ({ sidebarOpen: !state.sidebarOpen }));
+    },
+    setSidebarWidth: (width: number) => {
+      set({ sidebarWidth: width });
+    },
   })),
 );

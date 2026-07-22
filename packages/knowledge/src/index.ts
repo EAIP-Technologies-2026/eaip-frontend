@@ -26,7 +26,10 @@ export class ApiKnowledgeClient implements KnowledgeClient {
 
   async search(query: string, tags?: string[]): Promise<KnowledgeSearchResult[]> {
     const params = new URLSearchParams({ query });
-    if (tags) tags.forEach((t) => params.append("tags", t));
+    if (tags)
+      tags.forEach((t) => {
+        params.append("tags", t);
+      });
     const res = await fetch(`${this.baseUrl}/knowledge/search?${params.toString()}`);
     return res.json() as Promise<KnowledgeSearchResult[]>;
   }
@@ -34,13 +37,15 @@ export class ApiKnowledgeClient implements KnowledgeClient {
   async getDocument(id: string): Promise<KnowledgeDocument | null> {
     try {
       const res = await fetch(`${this.baseUrl}/knowledge/documents/${id}`);
-      return res.ok ? (res.json() as Promise<KnowledgeDocument>) : null;
+      return res.ok ? ((await res.json()) as KnowledgeDocument) : null;
     } catch {
       return null;
     }
   }
 
-  async indexDocument(doc: Omit<KnowledgeDocument, "id" | "createdAt">): Promise<KnowledgeDocument> {
+  async indexDocument(
+    doc: Omit<KnowledgeDocument, "id" | "createdAt">,
+  ): Promise<KnowledgeDocument> {
     const res = await fetch(`${this.baseUrl}/knowledge/documents`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

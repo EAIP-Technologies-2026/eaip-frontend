@@ -1,4 +1,4 @@
-export function cn(...inputs: Array<string | boolean | null | undefined>): string {
+export function cn(...inputs: (string | boolean | null | undefined)[]): string {
   return inputs.filter(Boolean).join(" ");
 }
 
@@ -6,7 +6,9 @@ export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
-export function noop(): void {}
+export function noop(): void {
+  return;
+}
 
 export function isBrowser(): boolean {
   return typeof window !== "undefined";

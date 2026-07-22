@@ -22,7 +22,7 @@ export class ApiMemoryClient implements MemoryClient {
   async get(key: string): Promise<MemoryEntry | null> {
     try {
       const res = await fetch(`${this.baseUrl}/memory/${encodeURIComponent(key)}`);
-      return res.ok ? (res.json() as Promise<MemoryEntry>) : null;
+      return res.ok ? ((await res.json()) as MemoryEntry) : null;
     } catch {
       return null;
     }

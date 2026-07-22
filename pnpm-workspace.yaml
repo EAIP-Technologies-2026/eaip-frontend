@@ -1,10 +1,12 @@
 packages:
   - "apps/*"
   - "packages/*"
+overrides:
+  "@types/node": "^26.0.0"
 allowBuilds:
-  '@swc/core': true
-  core-js-pure: set this to true or false
+  "@swc/core": true
+  core-js-pure: false
   esbuild: true
   msw: true
   sharp: true
-  unrs-resolver: set this to true or false
+  unrs-resolver: true

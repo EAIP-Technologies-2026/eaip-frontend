@@ -1,10 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { describe, it } from "vitest";
+import { expect } from "@storybook/test";
 import { render, screen } from "@testing-library/react";
 import Home from "./page";
 
 describe("Home page", () => {
-  it("renders heading", () => {
+  it("renders heading", async () => {
     render(<Home />);
-    expect(screen.getByRole("heading")).toBeDefined();
+    await expect(screen.getByRole("heading")).toBeDefined();
   });
 });

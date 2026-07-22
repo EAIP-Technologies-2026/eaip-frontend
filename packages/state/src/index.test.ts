@@ -1,15 +1,16 @@
-import { describe, it, expect } from "vitest";
+import { describe, it } from "vitest";
+import { expect } from "@storybook/test";
 import { useAppStore } from "./index";
 
 describe("useAppStore", () => {
-  it("has initial state", () => {
+  it("has initial state", async () => {
     const state = useAppStore.getState();
-    expect(state.sidebarOpen).toBe(true);
-    expect(state.sidebarWidth).toBe(280);
+    await expect(state.sidebarOpen).toBe(true);
+    await expect(state.sidebarWidth).toBe(280);
   });
 
-  it("toggles sidebar", () => {
+  it("toggles sidebar", async () => {
     useAppStore.getState().toggleSidebar();
-    expect(useAppStore.getState().sidebarOpen).toBe(false);
+    await expect(useAppStore.getState().sidebarOpen).toBe(false);
   });
 });

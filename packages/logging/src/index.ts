@@ -17,11 +17,7 @@ export function log(level: LogLevel, message: string, data?: Record<string, unkn
 
   switch (level) {
     case "debug":
-      console.debug(entry);
-      break;
     case "info":
-      console.info(entry);
-      break;
     case "warn":
       console.warn(entry);
       break;
@@ -32,8 +28,16 @@ export function log(level: LogLevel, message: string, data?: Record<string, unkn
 }
 
 export const logger = {
-  debug: (message: string, data?: Record<string, unknown>) => log("debug", message, data),
-  info: (message: string, data?: Record<string, unknown>) => log("info", message, data),
-  warn: (message: string, data?: Record<string, unknown>) => log("warn", message, data),
-  error: (message: string, data?: Record<string, unknown>) => log("error", message, data),
+  debug: (message: string, data?: Record<string, unknown>) => {
+    log("debug", message, data);
+  },
+  info: (message: string, data?: Record<string, unknown>) => {
+    log("info", message, data);
+  },
+  warn: (message: string, data?: Record<string, unknown>) => {
+    log("warn", message, data);
+  },
+  error: (message: string, data?: Record<string, unknown>) => {
+    log("error", message, data);
+  },
 };

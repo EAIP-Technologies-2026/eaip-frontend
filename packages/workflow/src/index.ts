@@ -1,7 +1,7 @@
 export interface WorkflowDefinition {
   id: string;
   name: string;
-  steps: Array<{ id: string; name: string; agentId: string }>;
+  steps: { id: string; name: string; agentId: string }[];
 }
 
 export interface WorkflowRun {
@@ -27,7 +27,7 @@ export class ApiWorkflowClient implements WorkflowClient {
   async getWorkflow(id: string): Promise<WorkflowDefinition | null> {
     try {
       const res = await fetch(`${this.baseUrl}/workflows/${id}`);
-      return res.ok ? (res.json() as Promise<WorkflowDefinition>) : null;
+      return res.ok ? ((await res.json()) as WorkflowDefinition) : null;
     } catch {
       return null;
     }
@@ -41,7 +41,7 @@ export class ApiWorkflowClient implements WorkflowClient {
   async getRun(runId: string): Promise<WorkflowRun | null> {
     try {
       const res = await fetch(`${this.baseUrl}/workflows/runs/${runId}`);
-      return res.ok ? (res.json() as Promise<WorkflowRun>) : null;
+      return res.ok ? ((await res.json()) as WorkflowRun) : null;
     } catch {
       return null;
     }

@@ -41,7 +41,7 @@ export class ApiAgentClient implements AgentClient {
     try {
       const res = await fetch(`${this.baseUrl}/agent/sessions/${sessionId}`);
       if (!res.ok) return null;
-      return res.json() as Promise<AgentSession>;
+      return (await res.json()) as AgentSession;
     } catch {
       return null;
     }

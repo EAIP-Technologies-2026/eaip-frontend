@@ -30,7 +30,7 @@ export class ApiClient {
         headers: this.getHeaders(),
       });
       const data = res.ok ? ((await res.json()) as T) : null;
-      return { data, error: res.ok ? null : `HTTP ${res.status}`, status: res.status };
+      return { data, error: res.ok ? null : `HTTP ${String(res.status)}`, status: res.status };
     } catch (err) {
       return { data: null, error: err instanceof Error ? err.message : "Unknown error", status: 0 };
     }
@@ -44,7 +44,7 @@ export class ApiClient {
         body: JSON.stringify(body),
       });
       const data = res.ok ? ((await res.json()) as T) : null;
-      return { data, error: res.ok ? null : `HTTP ${res.status}`, status: res.status };
+      return { data, error: res.ok ? null : `HTTP ${String(res.status)}`, status: res.status };
     } catch (err) {
       return { data: null, error: err instanceof Error ? err.message : "Unknown error", status: 0 };
     }

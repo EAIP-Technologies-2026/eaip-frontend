@@ -1,4 +1,4 @@
-import { type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode } from "react";
+import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from "react";
 
 type ButtonVariant = "primary" | "secondary" | "danger" | "ghost";
 type ButtonSize = "sm" | "md" | "lg";
@@ -19,7 +19,8 @@ export function Button({
   className,
   ...props
 }: ButtonProps) {
-  const base = "inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
+  const base =
+    "inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
   const variants: Record<ButtonVariant, string> = {
     primary: "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500",
     secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500",
@@ -35,10 +36,12 @@ export function Button({
   return (
     <button
       className={[base, variants[variant], sizes[size], className].filter(Boolean).join(" ")}
-      disabled={disabled || loading}
+      disabled={disabled === true || loading}
       {...props}
     >
-      {loading && <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />}
+      {loading && (
+        <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+      )}
       {children}
     </button>
   );
@@ -62,16 +65,18 @@ export function Input({ label, error, className, id, ...props }: InputProps) {
         id={inputId}
         className={[
           "block w-full rounded-lg border px-3 py-2 text-sm shadow-sm transition-colors",
-          "border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500",
+          "border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none",
           error && "border-red-500 focus:border-red-500 focus:ring-red-500",
           className,
-        ].filter(Boolean).join(" ")}
+        ]
+          .filter(Boolean)
+          .join(" ")}
         aria-invalid={error ? "true" : undefined}
-        aria-describedby={error ? `${inputId}-error` : undefined}
+        aria-describedby={error ? `${String(inputId)}-error` : undefined}
         {...props}
       />
       {error && (
-        <p id={`${inputId}-error`} className="text-sm text-red-600" role="alert">
+        <p id={`${String(inputId)}-error`} className="text-sm text-red-600" role="alert">
           {error}
         </p>
       )}

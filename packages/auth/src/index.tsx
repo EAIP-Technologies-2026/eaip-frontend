@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback } from "react";
+import type { ReactNode } from "react";
 
 export interface AuthUser {
   id: string;
@@ -24,14 +25,10 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({ user: null, token: null, loading: false });
 
-  const login = useCallback(async (_email: string, _password: string) => {
+  const login = useCallback((_email: string, _password: string) => {
     setState((s) => ({ ...s, loading: true }));
-    try {
-      const mockUser: AuthUser = { id: "1", email: _email, name: "User", roles: ["user"] };
-      setState({ user: mockUser, token: "mock-token", loading: false });
-    } catch {
-      setState((s) => ({ ...s, loading: false }));
-    }
+    const mockUser: AuthUser = { id: "1", email: _email, name: "User", roles: ["user"] };
+    setState({ user: mockUser, token: "mock-token", loading: false });
   }, []);
 
   const logout = useCallback(() => {

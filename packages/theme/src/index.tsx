@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect } from "react";
+import type { ReactNode } from "react";
 
 export type ThemeMode = "light" | "dark" | "system";
 
@@ -26,25 +27,29 @@ export interface ThemeProviderProps {
 export function ThemeProvider({ children, defaultMode = "system" }: ThemeProviderProps) {
   const [mode, setModeState] = useState<ThemeMode>(defaultMode);
 
+  const resolved = resolveTheme(mode);
+
   const setMode = useCallback((newMode: ThemeMode) => {
     setModeState(newMode);
     try {
       localStorage.setItem("eaip-theme", newMode);
-    } catch {}
+    } catch {
+      void 0;
+    }
   }, []);
 
   const toggle = useCallback(() => {
     setMode(resolved === "dark" ? "light" : "dark");
-  }, [resolved]);
+  }, [setMode, resolved]);
 
   useEffect(() => {
     try {
       const stored = localStorage.getItem("eaip-theme") as ThemeMode | null;
       if (stored) setModeState(stored);
-    } catch {}
+    } catch {
+      void 0;
+    }
   }, []);
-
-  const resolved = resolveTheme(mode);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", resolved === "dark");

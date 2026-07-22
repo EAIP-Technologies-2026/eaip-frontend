@@ -1,7 +1,7 @@
-import { type ReactNode, type TableHTMLAttributes } from "react";
+import type { ReactNode } from "react";
 
 export interface DataGridProps<T> {
-  columns: Array<{ key: string; header: string; render?: (item: T) => ReactNode }>;
+  columns: { key: string; header: string; render?: (item: T) => ReactNode }[];
   data: T[];
   keyExtractor: (item: T) => string;
 }
@@ -13,7 +13,10 @@ export function DataGrid<T>({ columns, data, keyExtractor }: DataGridProps<T>) {
         <thead className="bg-gray-50">
           <tr>
             {columns.map((col) => (
-              <th key={col.key} className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th
+                key={col.key}
+                className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
+              >
                 {col.header}
               </th>
             ))}
@@ -23,8 +26,10 @@ export function DataGrid<T>({ columns, data, keyExtractor }: DataGridProps<T>) {
           {data.map((item) => (
             <tr key={keyExtractor(item)} className="hover:bg-gray-50">
               {columns.map((col) => (
-                <td key={col.key} className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                  {col.render ? col.render(item) : String((item as Record<string, unknown>)[col.key] ?? "")}
+                <td key={col.key} className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
+                  {col.render
+                    ? col.render(item)
+                    : ((item as Record<string, string>)[col.key] ?? "")}
                 </td>
               ))}
             </tr>

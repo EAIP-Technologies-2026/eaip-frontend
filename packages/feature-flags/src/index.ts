@@ -1,7 +1,7 @@
 export interface FeatureFlag {
   key: string;
   enabled: boolean;
-  rules?: Array<{ condition: string; value: boolean }>;
+  rules?: { condition: string; value: boolean }[];
 }
 
 const flags = new Map<string, FeatureFlag>();
