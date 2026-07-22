@@ -1,3 +1,5 @@
+import { getDefaultClient, type ApiClient } from "@eaip/api";
+
 export interface MemoryEntry {
   id: string;
   key: string;
@@ -13,36 +15,46 @@ export interface MemoryClient {
 }
 
 export class ApiMemoryClient implements MemoryClient {
-  private baseUrl: string;
+  private client: ApiClient;
 
-  constructor(baseUrl: string) {
-    this.baseUrl = baseUrl;
+  constructor(client?: ApiClient) {
+    this.client = client ?? getDefaultClient();
   }
 
   async get(key: string): Promise<MemoryEntry | null> {
-    try {
-      const res = await fetch(`${this.baseUrl}/memory/${encodeURIComponent(key)}`);
-      return res.ok ? ((await res.json()) as MemoryEntry) : null;
-    } catch {
-      return null;
+    const response = await this.client.get<MemoryEntry>(`/memory/${encodeURIComponent(key)}`);
+    if (response.error) {
+      if (response.error.status === 404) return null;
+      throw response.error;
     }
+    return response.data;
   }
 
   async set(key: string, value: unknown): Promise<void> {
-    await fetch(`${this.baseUrl}/memory/${encodeURIComponent(key)}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ value }),
-    });
+    const response = await this.client.put<Record<string, unknown>>(
+      `/memory/${encodeURIComponent(key)}`,
+      { value },
+    );
+    if (response.error) throw response.error;
   }
 
   async delete(key: string): Promise<void> {
-    await fetch(`${this.baseUrl}/memory/${encodeURIComponent(key)}`, { method: "DELETE" });
+    const response = await this.client.delete<Record<string, unknown>>(
+      `/memory/${encodeURIComponent(key)}`,
+    );
+    if (response.error) throw response.error;
   }
 
   async list(prefix?: string): Promise<MemoryEntry[]> {
-    const qs = prefix ? `?prefix=${encodeURIComponent(prefix)}` : "";
-    const res = await fetch(`${this.baseUrl}/memory${qs}`);
-    return res.json() as Promise<MemoryEntry[]>;
+    const response = await this.client.get<MemoryEntry[]>(
+      "/memory",
+      prefix ? { prefix } : undefined,
+    );
+    if (response.error) throw response.error;
+    return response.data ?? [];
   }
+}
+
+export function createMemoryClient(client?: ApiClient): MemoryClient {
+  return new ApiMemoryClient(client);
 }

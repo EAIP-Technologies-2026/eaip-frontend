@@ -1,8 +1,10 @@
 {
   "dependencies": {
     "react": "^19.1.0",
+    "next": "^15.3.2",
     "@eaip/api": "workspace:*",
-    "@eaip/config": "workspace:*"
+    "@eaip/config": "workspace:*",
+    "@eaip/logging": "workspace:*"
   },
   "types": "./src/index.ts",
   "exports": {

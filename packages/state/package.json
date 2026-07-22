@@ -1,7 +1,8 @@
 {
   "dependencies": {
     "zustand": "^5.0.5",
-    "react": "^19.1.0"
+    "react": "^19.1.0",
+    "@eaip/auth": "workspace:*"
   },
   "types": "./src/index.ts",
   "exports": {

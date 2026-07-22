@@ -193,6 +193,75 @@ importers:
 
   apps/administration:
     dependencies:
+      "@eaip/accessibility":
+        specifier: workspace:*
+        version: link:../../packages/accessibility
+      "@eaip/agent":
+        specifier: workspace:*
+        version: link:../../packages/agent
+      "@eaip/api":
+        specifier: workspace:*
+        version: link:../../packages/api
+      "@eaip/auth":
+        specifier: workspace:*
+        version: link:../../packages/auth
+      "@eaip/config":
+        specifier: workspace:*
+        version: link:../../packages/config
+      "@eaip/design-tokens":
+        specifier: workspace:*
+        version: link:../../packages/design-tokens
+      "@eaip/feature-flags":
+        specifier: workspace:*
+        version: link:../../packages/feature-flags
+      "@eaip/hooks":
+        specifier: workspace:*
+        version: link:../../packages/hooks
+      "@eaip/icons":
+        specifier: workspace:*
+        version: link:../../packages/icons
+      "@eaip/knowledge":
+        specifier: workspace:*
+        version: link:../../packages/knowledge
+      "@eaip/logging":
+        specifier: workspace:*
+        version: link:../../packages/logging
+      "@eaip/memory":
+        specifier: workspace:*
+        version: link:../../packages/memory
+      "@eaip/realtime":
+        specifier: workspace:*
+        version: link:../../packages/realtime
+      "@eaip/state":
+        specifier: workspace:*
+        version: link:../../packages/state
+      "@eaip/telemetry":
+        specifier: workspace:*
+        version: link:../../packages/telemetry
+      "@eaip/theme":
+        specifier: workspace:*
+        version: link:../../packages/theme
+      "@eaip/typography":
+        specifier: workspace:*
+        version: link:../../packages/typography
+      "@eaip/ui-enterprise":
+        specifier: workspace:*
+        version: link:../../packages/ui-enterprise
+      "@eaip/ui-foundation":
+        specifier: workspace:*
+        version: link:../../packages/ui-foundation
+      "@eaip/ui-primitives":
+        specifier: workspace:*
+        version: link:../../packages/ui-primitives
+      "@eaip/ui-visualizations":
+        specifier: workspace:*
+        version: link:../../packages/ui-visualizations
+      "@eaip/utilities":
+        specifier: workspace:*
+        version: link:../../packages/utilities
+      "@eaip/workflow":
+        specifier: workspace:*
+        version: link:../../packages/workflow
       next:
         specifier: ^15.3.2
         version: 15.5.20(@babel/core@7.29.7)(@playwright/test@1.61.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -278,6 +347,75 @@ importers:
 
   apps/enterprise-console:
     dependencies:
+      "@eaip/accessibility":
+        specifier: workspace:*
+        version: link:../../packages/accessibility
+      "@eaip/agent":
+        specifier: workspace:*
+        version: link:../../packages/agent
+      "@eaip/api":
+        specifier: workspace:*
+        version: link:../../packages/api
+      "@eaip/auth":
+        specifier: workspace:*
+        version: link:../../packages/auth
+      "@eaip/config":
+        specifier: workspace:*
+        version: link:../../packages/config
+      "@eaip/design-tokens":
+        specifier: workspace:*
+        version: link:../../packages/design-tokens
+      "@eaip/feature-flags":
+        specifier: workspace:*
+        version: link:../../packages/feature-flags
+      "@eaip/hooks":
+        specifier: workspace:*
+        version: link:../../packages/hooks
+      "@eaip/icons":
+        specifier: workspace:*
+        version: link:../../packages/icons
+      "@eaip/knowledge":
+        specifier: workspace:*
+        version: link:../../packages/knowledge
+      "@eaip/logging":
+        specifier: workspace:*
+        version: link:../../packages/logging
+      "@eaip/memory":
+        specifier: workspace:*
+        version: link:../../packages/memory
+      "@eaip/realtime":
+        specifier: workspace:*
+        version: link:../../packages/realtime
+      "@eaip/state":
+        specifier: workspace:*
+        version: link:../../packages/state
+      "@eaip/telemetry":
+        specifier: workspace:*
+        version: link:../../packages/telemetry
+      "@eaip/theme":
+        specifier: workspace:*
+        version: link:../../packages/theme
+      "@eaip/typography":
+        specifier: workspace:*
+        version: link:../../packages/typography
+      "@eaip/ui-enterprise":
+        specifier: workspace:*
+        version: link:../../packages/ui-enterprise
+      "@eaip/ui-foundation":
+        specifier: workspace:*
+        version: link:../../packages/ui-foundation
+      "@eaip/ui-primitives":
+        specifier: workspace:*
+        version: link:../../packages/ui-primitives
+      "@eaip/ui-visualizations":
+        specifier: workspace:*
+        version: link:../../packages/ui-visualizations
+      "@eaip/utilities":
+        specifier: workspace:*
+        version: link:../../packages/utilities
+      "@eaip/workflow":
+        specifier: workspace:*
+        version: link:../../packages/workflow
       next:
         specifier: ^15.3.2
         version: 15.5.20(@babel/core@7.29.7)(@playwright/test@1.61.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -363,6 +501,75 @@ importers:
 
   apps/mission-control:
     dependencies:
+      "@eaip/accessibility":
+        specifier: workspace:*
+        version: link:../../packages/accessibility
+      "@eaip/agent":
+        specifier: workspace:*
+        version: link:../../packages/agent
+      "@eaip/api":
+        specifier: workspace:*
+        version: link:../../packages/api
+      "@eaip/auth":
+        specifier: workspace:*
+        version: link:../../packages/auth
+      "@eaip/config":
+        specifier: workspace:*
+        version: link:../../packages/config
+      "@eaip/design-tokens":
+        specifier: workspace:*
+        version: link:../../packages/design-tokens
+      "@eaip/feature-flags":
+        specifier: workspace:*
+        version: link:../../packages/feature-flags
+      "@eaip/hooks":
+        specifier: workspace:*
+        version: link:../../packages/hooks
+      "@eaip/icons":
+        specifier: workspace:*
+        version: link:../../packages/icons
+      "@eaip/knowledge":
+        specifier: workspace:*
+        version: link:../../packages/knowledge
+      "@eaip/logging":
+        specifier: workspace:*
+        version: link:../../packages/logging
+      "@eaip/memory":
+        specifier: workspace:*
+        version: link:../../packages/memory
+      "@eaip/realtime":
+        specifier: workspace:*
+        version: link:../../packages/realtime
+      "@eaip/state":
+        specifier: workspace:*
+        version: link:../../packages/state
+      "@eaip/telemetry":
+        specifier: workspace:*
+        version: link:../../packages/telemetry
+      "@eaip/theme":
+        specifier: workspace:*
+        version: link:../../packages/theme
+      "@eaip/typography":
+        specifier: workspace:*
+        version: link:../../packages/typography
+      "@eaip/ui-enterprise":
+        specifier: workspace:*
+        version: link:../../packages/ui-enterprise
+      "@eaip/ui-foundation":
+        specifier: workspace:*
+        version: link:../../packages/ui-foundation
+      "@eaip/ui-primitives":
+        specifier: workspace:*
+        version: link:../../packages/ui-primitives
+      "@eaip/ui-visualizations":
+        specifier: workspace:*
+        version: link:../../packages/ui-visualizations
+      "@eaip/utilities":
+        specifier: workspace:*
+        version: link:../../packages/utilities
+      "@eaip/workflow":
+        specifier: workspace:*
+        version: link:../../packages/workflow
       next:
         specifier: ^15.3.2
         version: 15.5.20(@babel/core@7.29.7)(@playwright/test@1.61.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -448,6 +655,75 @@ importers:
 
   apps/mobile:
     dependencies:
+      "@eaip/accessibility":
+        specifier: workspace:*
+        version: link:../../packages/accessibility
+      "@eaip/agent":
+        specifier: workspace:*
+        version: link:../../packages/agent
+      "@eaip/api":
+        specifier: workspace:*
+        version: link:../../packages/api
+      "@eaip/auth":
+        specifier: workspace:*
+        version: link:../../packages/auth
+      "@eaip/config":
+        specifier: workspace:*
+        version: link:../../packages/config
+      "@eaip/design-tokens":
+        specifier: workspace:*
+        version: link:../../packages/design-tokens
+      "@eaip/feature-flags":
+        specifier: workspace:*
+        version: link:../../packages/feature-flags
+      "@eaip/hooks":
+        specifier: workspace:*
+        version: link:../../packages/hooks
+      "@eaip/icons":
+        specifier: workspace:*
+        version: link:../../packages/icons
+      "@eaip/knowledge":
+        specifier: workspace:*
+        version: link:../../packages/knowledge
+      "@eaip/logging":
+        specifier: workspace:*
+        version: link:../../packages/logging
+      "@eaip/memory":
+        specifier: workspace:*
+        version: link:../../packages/memory
+      "@eaip/realtime":
+        specifier: workspace:*
+        version: link:../../packages/realtime
+      "@eaip/state":
+        specifier: workspace:*
+        version: link:../../packages/state
+      "@eaip/telemetry":
+        specifier: workspace:*
+        version: link:../../packages/telemetry
+      "@eaip/theme":
+        specifier: workspace:*
+        version: link:../../packages/theme
+      "@eaip/typography":
+        specifier: workspace:*
+        version: link:../../packages/typography
+      "@eaip/ui-enterprise":
+        specifier: workspace:*
+        version: link:../../packages/ui-enterprise
+      "@eaip/ui-foundation":
+        specifier: workspace:*
+        version: link:../../packages/ui-foundation
+      "@eaip/ui-primitives":
+        specifier: workspace:*
+        version: link:../../packages/ui-primitives
+      "@eaip/ui-visualizations":
+        specifier: workspace:*
+        version: link:../../packages/ui-visualizations
+      "@eaip/utilities":
+        specifier: workspace:*
+        version: link:../../packages/utilities
+      "@eaip/workflow":
+        specifier: workspace:*
+        version: link:../../packages/workflow
       next:
         specifier: ^15.3.2
         version: 15.5.20(@babel/core@7.29.7)(@playwright/test@1.61.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -533,6 +809,75 @@ importers:
 
   apps/workspace:
     dependencies:
+      "@eaip/accessibility":
+        specifier: workspace:*
+        version: link:../../packages/accessibility
+      "@eaip/agent":
+        specifier: workspace:*
+        version: link:../../packages/agent
+      "@eaip/api":
+        specifier: workspace:*
+        version: link:../../packages/api
+      "@eaip/auth":
+        specifier: workspace:*
+        version: link:../../packages/auth
+      "@eaip/config":
+        specifier: workspace:*
+        version: link:../../packages/config
+      "@eaip/design-tokens":
+        specifier: workspace:*
+        version: link:../../packages/design-tokens
+      "@eaip/feature-flags":
+        specifier: workspace:*
+        version: link:../../packages/feature-flags
+      "@eaip/hooks":
+        specifier: workspace:*
+        version: link:../../packages/hooks
+      "@eaip/icons":
+        specifier: workspace:*
+        version: link:../../packages/icons
+      "@eaip/knowledge":
+        specifier: workspace:*
+        version: link:../../packages/knowledge
+      "@eaip/logging":
+        specifier: workspace:*
+        version: link:../../packages/logging
+      "@eaip/memory":
+        specifier: workspace:*
+        version: link:../../packages/memory
+      "@eaip/realtime":
+        specifier: workspace:*
+        version: link:../../packages/realtime
+      "@eaip/state":
+        specifier: workspace:*
+        version: link:../../packages/state
+      "@eaip/telemetry":
+        specifier: workspace:*
+        version: link:../../packages/telemetry
+      "@eaip/theme":
+        specifier: workspace:*
+        version: link:../../packages/theme
+      "@eaip/typography":
+        specifier: workspace:*
+        version: link:../../packages/typography
+      "@eaip/ui-enterprise":
+        specifier: workspace:*
+        version: link:../../packages/ui-enterprise
+      "@eaip/ui-foundation":
+        specifier: workspace:*
+        version: link:../../packages/ui-foundation
+      "@eaip/ui-primitives":
+        specifier: workspace:*
+        version: link:../../packages/ui-primitives
+      "@eaip/ui-visualizations":
+        specifier: workspace:*
+        version: link:../../packages/ui-visualizations
+      "@eaip/utilities":
+        specifier: workspace:*
+        version: link:../../packages/utilities
+      "@eaip/workflow":
+        specifier: workspace:*
+        version: link:../../packages/workflow
       next:
         specifier: ^15.3.2
         version: 15.5.20(@babel/core@7.29.7)(@playwright/test@1.61.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -692,6 +1037,12 @@ importers:
       "@eaip/config":
         specifier: workspace:*
         version: link:../config
+      "@eaip/logging":
+        specifier: workspace:*
+        version: link:../logging
+      next:
+        specifier: ^15.3.2
+        version: 15.5.20(@babel/core@7.29.7)(@playwright/test@1.61.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react:
         specifier: ^19.1.0
         version: 19.2.7
@@ -907,6 +1258,9 @@ importers:
 
   packages/state:
     dependencies:
+      "@eaip/auth":
+        specifier: workspace:*
+        version: link:../auth
       react:
         specifier: ^19.1.0
         version: 19.2.7
@@ -1032,12 +1386,36 @@ importers:
 
   packages/ui-enterprise:
     dependencies:
+      "@eaip/auth":
+        specifier: workspace:*
+        version: link:../auth
+      "@eaip/hooks":
+        specifier: workspace:*
+        version: link:../hooks
+      "@eaip/icons":
+        specifier: workspace:*
+        version: link:../icons
+      "@eaip/state":
+        specifier: workspace:*
+        version: link:../state
+      "@eaip/theme":
+        specifier: workspace:*
+        version: link:../theme
       "@eaip/ui-foundation":
         specifier: workspace:*
         version: link:../ui-foundation
+      "@eaip/ui-primitives":
+        specifier: workspace:*
+        version: link:../ui-primitives
       "@eaip/ui-visualizations":
         specifier: workspace:*
         version: link:../ui-visualizations
+      "@eaip/utilities":
+        specifier: workspace:*
+        version: link:../utilities
+      next:
+        specifier: ^15.3.2
+        version: 15.5.20(@babel/core@7.29.7)(@playwright/test@1.61.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react:
         specifier: ^19.1.0
         version: 19.2.7

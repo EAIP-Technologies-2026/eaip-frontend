@@ -3,9 +3,9 @@
     "@eaip/ui-foundation": "workspace:*",
     "react": "^19.1.0"
   },
-  "types": "./src/index.ts",
+  "types": "./src/index.tsx",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.tsx"
   },
   "scripts": {
     "test:coverage": "vitest run --coverage",
@@ -23,7 +23,7 @@
     "vitest": "^3.1.2"
   },
   "name": "@eaip/ui-visualizations",
-  "main": "./src/index.ts",
+  "main": "./src/index.tsx",
   "private": true,
   "type": "module",
   "version": "0.0.0"

@@ -1,12 +1,20 @@
 {
   "dependencies": {
     "react": "^19.1.0",
+    "next": "^15.3.2",
+    "@eaip/auth": "workspace:*",
+    "@eaip/hooks": "workspace:*",
+    "@eaip/icons": "workspace:*",
+    "@eaip/state": "workspace:*",
+    "@eaip/theme": "workspace:*",
     "@eaip/ui-foundation": "workspace:*",
-    "@eaip/ui-visualizations": "workspace:*"
+    "@eaip/ui-primitives": "workspace:*",
+    "@eaip/ui-visualizations": "workspace:*",
+    "@eaip/utilities": "workspace:*"
   },
-  "types": "./src/index.ts",
+  "types": "./src/index.tsx",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.tsx"
   },
   "scripts": {
     "test:coverage": "vitest run --coverage",
@@ -24,7 +32,7 @@
     "vitest": "^3.1.2"
   },
   "name": "@eaip/ui-enterprise",
-  "main": "./src/index.ts",
+  "main": "./src/index.tsx",
   "private": true,
   "type": "module",
   "version": "0.0.0"

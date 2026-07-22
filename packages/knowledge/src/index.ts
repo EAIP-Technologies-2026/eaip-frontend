@@ -1,3 +1,5 @@
+import { getDefaultClient, type ApiClient } from "@eaip/api";
+
 export interface KnowledgeDocument {
   id: string;
   title: string;
@@ -15,42 +17,53 @@ export interface KnowledgeClient {
   search(query: string, tags?: string[]): Promise<KnowledgeSearchResult[]>;
   getDocument(id: string): Promise<KnowledgeDocument | null>;
   indexDocument(doc: Omit<KnowledgeDocument, "id" | "createdAt">): Promise<KnowledgeDocument>;
+  deleteDocument(id: string): Promise<void>;
 }
 
 export class ApiKnowledgeClient implements KnowledgeClient {
-  private baseUrl: string;
+  private client: ApiClient;
 
-  constructor(baseUrl: string) {
-    this.baseUrl = baseUrl;
+  constructor(client?: ApiClient) {
+    this.client = client ?? getDefaultClient();
   }
 
   async search(query: string, tags?: string[]): Promise<KnowledgeSearchResult[]> {
-    const params = new URLSearchParams({ query });
-    if (tags)
-      tags.forEach((t) => {
-        params.append("tags", t);
-      });
-    const res = await fetch(`${this.baseUrl}/knowledge/search?${params.toString()}`);
-    return res.json() as Promise<KnowledgeSearchResult[]>;
+    const response = await this.client.get<KnowledgeSearchResult[]>("/knowledge/search", {
+      query,
+      tags,
+    });
+    if (response.error) throw response.error;
+    return response.data ?? [];
   }
 
   async getDocument(id: string): Promise<KnowledgeDocument | null> {
-    try {
-      const res = await fetch(`${this.baseUrl}/knowledge/documents/${id}`);
-      return res.ok ? ((await res.json()) as KnowledgeDocument) : null;
-    } catch {
-      return null;
+    const response = await this.client.get<KnowledgeDocument>(`/knowledge/documents/${id}`);
+    if (response.error) {
+      if (response.error.status === 404) return null;
+      throw response.error;
     }
+    return response.data;
   }
 
   async indexDocument(
     doc: Omit<KnowledgeDocument, "id" | "createdAt">,
   ): Promise<KnowledgeDocument> {
-    const res = await fetch(`${this.baseUrl}/knowledge/documents`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(doc),
-    });
-    return res.json() as Promise<KnowledgeDocument>;
+    const response = await this.client.post<KnowledgeDocument>("/knowledge/documents", doc);
+    if (response.error) throw response.error;
+    if (!response.data) {
+      throw new Error("Index document returned empty response");
+    }
+    return response.data;
   }
+
+  async deleteDocument(id: string): Promise<void> {
+    const response = await this.client.delete<Record<string, unknown>>(
+      `/knowledge/documents/${id}`,
+    );
+    if (response.error) throw response.error;
+  }
+}
+
+export function createKnowledgeClient(client?: ApiClient): KnowledgeClient {
+  return new ApiKnowledgeClient(client);
 }

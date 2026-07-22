@@ -28,6 +28,14 @@ const nextConfig: NextConfig = {
     "@eaip/accessibility",
     "@eaip/testing",
   ],
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${process.env.BACKEND_URL ?? "http://localhost:8080"}/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
