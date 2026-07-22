@@ -12,6 +12,10 @@ storybook-static/
 # Testing
 coverage/
 .nyc_output/
+playwright-report/
+test-results/
+*.last-run.json
+test-results.txt
 
 # Environment
 .env
@@ -42,4 +46,3 @@ pnpm-debug.log*
 
 # Misc
 *.tsbuildinfo
-.next
