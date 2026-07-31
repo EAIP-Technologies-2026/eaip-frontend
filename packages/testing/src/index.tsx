@@ -6,7 +6,10 @@ function AllProviders({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-export function renderWithProviders(ui: ReactElement, options?: Omit<RenderOptions, "wrapper">) {
+export function renderWithProviders(
+  ui: ReactElement,
+  options?: Omit<RenderOptions, "wrapper">,
+): ReturnType<typeof render> {
   return render(ui, { wrapper: AllProviders, ...options });
 }
 

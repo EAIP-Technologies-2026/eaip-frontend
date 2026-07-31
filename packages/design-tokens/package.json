@@ -1,7 +1,8 @@
 {
   "types": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./theme.css": "./src/theme.css"
   },
   "scripts": {
     "test:coverage": "vitest run --coverage",

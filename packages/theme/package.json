@@ -20,7 +20,9 @@
     "@types/react-dom": "^19.1.2",
     "jsdom": "^26.0.0",
     "@types/react": "^19.1.2",
-    "vitest": "^3.1.2"
+    "vitest": "^3.1.2",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/jest-dom": "^6.6.3"
   },
   "name": "@eaip/theme",
   "main": "./src/index.tsx",

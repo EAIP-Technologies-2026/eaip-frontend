@@ -12,6 +12,7 @@ export interface MemoryClient {
   set(key: string, value: unknown): Promise<void>;
   delete(key: string): Promise<void>;
   list(prefix?: string): Promise<MemoryEntry[]>;
+  search(query: string, prefix?: string): Promise<MemoryEntry[]>;
 }
 
 export class ApiMemoryClient implements MemoryClient {
@@ -50,6 +51,15 @@ export class ApiMemoryClient implements MemoryClient {
       "/memory",
       prefix ? { prefix } : undefined,
     );
+    if (response.error) throw response.error;
+    return response.data ?? [];
+  }
+
+  async search(query: string, prefix?: string): Promise<MemoryEntry[]> {
+    const response = await this.client.get<MemoryEntry[]>("/memory/search", {
+      q: query,
+      prefix,
+    });
     if (response.error) throw response.error;
     return response.data ?? [];
   }

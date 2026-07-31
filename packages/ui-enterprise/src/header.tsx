@@ -1,6 +1,7 @@
 "use client";
 
 import { usePlatformStore } from "@eaip/state";
+import { EnterpriseIcon } from "@eaip/icons";
 import { AppSwitcher } from "./app-switcher";
 import { Breadcrumbs } from "./breadcrumbs";
 import { CommandPalette } from "./command-palette";
@@ -20,19 +21,15 @@ export function Header({ appId, pageTitle }: HeaderProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-white px-4 shadow-sm">
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/50 glass-panel px-4">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={toggleSidebar}
-            className="rounded-lg p-2 hover:bg-gray-100"
+            className="rounded-button p-2 text-text-secondary transition-smooth hover:bg-surface-tertiary/70 hover:text-text press-feedback"
             aria-label="Toggle sidebar"
           >
-            <span className="block h-4 w-5">
-              <span className="mb-1 block h-0.5 w-full bg-gray-700" />
-              <span className="mb-1 block h-0.5 w-full bg-gray-700" />
-              <span className="block h-0.5 w-full bg-gray-700" />
-            </span>
+            <EnterpriseIcon name="menu" size={20} />
           </button>
           <AppSwitcher currentAppId={appId} />
           <WorkspaceSwitcher />
@@ -49,10 +46,12 @@ export function Header({ appId, pageTitle }: HeaderProps) {
         </div>
       </header>
 
-      <div className="border-b bg-gray-50 px-4 py-2">
+      <div className="border-b border-border/40 bg-surface/60 backdrop-blur-md px-4 py-3">
         <div className="flex items-center justify-between">
           <Breadcrumbs items={breadcrumbs} />
-          {pageTitle ? <h1 className="text-lg font-semibold text-gray-900">{pageTitle}</h1> : null}
+          {pageTitle ? (
+            <h1 className="text-xl font-semibold text-text tracking-tight">{pageTitle}</h1>
+          ) : null}
         </div>
       </div>
 

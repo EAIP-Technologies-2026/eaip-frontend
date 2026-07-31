@@ -87,13 +87,19 @@ export class ApiClient {
     this.config = config;
   }
 
-  private async getHeaders(overrides?: Record<string, string>): Promise<Record<string, string>> {
+  private async getHeaders(
+    overrides?: Record<string, string>,
+    body?: unknown,
+  ): Promise<Record<string, string>> {
     const headers: Record<string, string> = {
       Accept: "application/json",
-      "Content-Type": "application/json",
       ...this.config.headers,
       ...overrides,
     };
+
+    if (!(body instanceof FormData) && !(body instanceof URLSearchParams)) {
+      headers["Content-Type"] = "application/json";
+    }
 
     const token = await this.config.tokenProvider?.();
     if (token) {
@@ -127,7 +133,7 @@ export class ApiClient {
       }, timeoutMs);
 
       try {
-        const headers = await this.getHeaders(options?.headers);
+        const headers = await this.getHeaders(options?.headers, body);
         let requestInit: RequestInit = {
           method,
           headers,
@@ -136,7 +142,8 @@ export class ApiClient {
         };
 
         if (body !== undefined && method !== "GET") {
-          requestInit.body = JSON.stringify(body);
+          requestInit.body =
+            body instanceof FormData || body instanceof URLSearchParams ? body : JSON.stringify(body);
         }
 
         if (this.config.onRequest) {

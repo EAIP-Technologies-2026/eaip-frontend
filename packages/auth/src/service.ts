@@ -5,6 +5,7 @@ import { clearStoredTokens, storeTokens } from "./storage";
 
 export interface LoginResponse {
   token: string;
+  refresh_token?: string;
   user: AuthUser;
 }
 
@@ -40,8 +41,8 @@ class ApiAuthService implements AuthService {
       });
     }
 
-    const { token, user } = response.data;
-    storeTokens({ accessToken: token });
+    const { token, refresh_token: refreshToken, user } = response.data;
+    storeTokens({ accessToken: token, refreshToken });
     return user;
   }
 

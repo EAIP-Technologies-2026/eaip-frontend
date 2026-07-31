@@ -4,6 +4,7 @@ packages:
 overrides:
   "@types/node": "^26.0.0"
 allowBuilds:
+  '@sentry/cli': true
   "@swc/core": true
   core-js-pure: false
   esbuild: true

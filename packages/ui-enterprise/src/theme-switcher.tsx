@@ -5,24 +5,40 @@ import { useTheme } from "@eaip/theme";
 export function ThemeSwitcher() {
   const { mode, resolved, setMode } = useTheme();
 
+  const options: { value: "light" | "dark" | "system" }[] = [
+    { value: "light" },
+    { value: "dark" },
+    { value: "system" },
+  ];
+
   return (
-    <div className="flex items-center gap-1 rounded-lg border p-1">
-      {(["light", "dark", "system"] as const).map((value) => (
-        <button
-          key={value}
-          type="button"
-          onClick={() => {
-            setMode(value);
-          }}
-          className={`rounded-md px-2 py-1 text-xs font-medium capitalize ${
-            mode === value ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-100"
-          }`}
-          aria-pressed={mode === value}
-        >
-          {value}
-          {mode === value && value === "system" ? ` (${resolved})` : ""}
-        </button>
-      ))}
+    <div
+      className="flex items-center gap-1 rounded-button border border-border bg-surface p-1"
+      role="radiogroup"
+      aria-label="Theme"
+    >
+      {options.map((option) => {
+        const active = mode === option.value;
+        return (
+          <button
+            key={option.value}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            onClick={() => {
+              setMode(option.value);
+            }}
+            className={[
+              "rounded-button px-2 py-1 text-xs font-medium capitalize transition-smooth",
+              active ? "bg-primary-subtle text-primary" : "text-text-secondary hover:bg-surface-tertiary hover:text-text",
+            ].join(" ")}
+            title={option.value === "system" ? `System (${resolved})` : option.value}
+          >
+            {option.value}
+            {active && option.value === "system" ? ` (${resolved})` : ""}
+          </button>
+        );
+      })}
     </div>
   );
 }

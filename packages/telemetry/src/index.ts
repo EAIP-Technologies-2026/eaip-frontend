@@ -12,13 +12,13 @@ export interface TelemetryClient {
 
 class NoopTelemetryClient implements TelemetryClient {
   track(_event: TelemetryEvent): void {
-    return;
+    /* noop */
   }
   pageView(_path: string): void {
-    return;
+    /* noop */
   }
   identify(_userId: string, _traits?: Record<string, unknown>): void {
-    return;
+    /* noop */
   }
 }
 

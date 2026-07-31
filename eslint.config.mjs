@@ -72,10 +72,8 @@ export default tseslint.config(
       "@next/next": nextPlugin,
     },
     rules: {
-      "@next/next/google-font-display": "warn",
-      "@next/next/google-font-preconnect": "warn",
-      "@next/next/no-page-custom-font": "warn",
-      "@next/next/no-html-link-for-pages": "error",
+      ...nextPlugin.configs.recommended.rules,
+      ...nextPlugin.configs["core-web-vitals"].rules,
     },
   },
   {
@@ -93,5 +91,21 @@ export default tseslint.config(
       "**/.storybook/**",
       "**/e2e/**",
     ],
+  },
+  {
+    files: ["**/*.test.{ts,tsx}"],
+    rules: {
+      "storybook/use-storybook-expect": "off",
+      "storybook/await-interactions": "off",
+    },
+  },
+  {
+    rules: {
+      "@typescript-eslint/no-empty-function": [
+        "error",
+        { allow: ["methods", "arrowFunctions"] },
+      ],
+      "@typescript-eslint/no-empty-object-type": "off",
+    },
   },
 );

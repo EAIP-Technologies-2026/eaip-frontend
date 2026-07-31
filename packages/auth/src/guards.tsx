@@ -5,6 +5,17 @@ import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./context";
 
+function SessionLoading() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-surface-secondary p-4">
+      <div className="flex flex-col items-center gap-4 rounded-xl border border-border bg-surface p-8 shadow-card">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-border-subtle border-t-primary" />
+        <p className="text-sm text-text-secondary">Loading session...</p>
+      </div>
+    </div>
+  );
+}
+
 export interface RequireAuthProps {
   children: ReactNode;
   fallback?: ReactNode;
@@ -22,7 +33,7 @@ export function RequireAuth({ children, fallback, redirectTo = "/login" }: Requi
   }, [loading, isAuthenticated, router, redirectTo]);
 
   if (loading) {
-    return fallback ?? <div>Loading session...</div>;
+    return fallback ?? <SessionLoading />;
   }
 
   if (!isAuthenticated) {
@@ -52,7 +63,7 @@ export function RequireRole({
   }, [loading, isAuthenticated, hasRole, requiredRole, router, redirectTo]);
 
   if (loading) {
-    return fallback ?? <div>Loading session...</div>;
+    return fallback ?? <SessionLoading />;
   }
 
   if (!isAuthenticated || !hasRole(requiredRole)) {
@@ -81,7 +92,7 @@ export function RedirectIfAuthenticated({
   }, [loading, isAuthenticated, router, redirectTo]);
 
   if (loading) {
-    return <div>Loading session...</div>;
+    return <SessionLoading />;
   }
 
   return children;

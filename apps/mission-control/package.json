@@ -28,7 +28,8 @@
     "@eaip/ui-primitives": "workspace:*",
     "@eaip/ui-visualizations": "workspace:*",
     "@eaip/utilities": "workspace:*",
-    "@eaip/workflow": "workspace:*"
+    "@eaip/workflow": "workspace:*",
+    "@xyflow/react": "^12.11.2"
   },
   "scripts": {
     "build": "next build",

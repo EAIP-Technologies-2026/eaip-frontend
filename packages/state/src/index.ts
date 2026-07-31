@@ -40,6 +40,16 @@ export interface PlatformNotification {
   timestamp: string;
 }
 
+export type ToastType = "info" | "success" | "warning" | "error";
+
+export interface PlatformToast {
+  id: string;
+  type: ToastType;
+  title: string;
+  message?: string;
+  duration?: number;
+}
+
 export interface PlatformState {
   // UI shell
   sidebarOpen: boolean;
@@ -62,6 +72,9 @@ export interface PlatformState {
   // Notifications
   notifications: PlatformNotification[];
 
+  // Toasts
+  toasts: PlatformToast[];
+
   // Actions
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
@@ -74,6 +87,8 @@ export interface PlatformState {
   addNotification: (notification: PlatformNotification) => void;
   markNotificationRead: (id: string) => void;
   removeNotification: (id: string) => void;
+  addToast: (toast: Omit<PlatformToast, "id">) => void;
+  removeToast: (id: string) => void;
   openCommandPalette: () => void;
   closeCommandPalette: () => void;
   openGlobalSearch: () => void;
@@ -130,6 +145,7 @@ export const usePlatformStore = create<PlatformState>()(
     ],
 
     notifications: [],
+    toasts: [],
 
     toggleSidebar: () => {
       set((state) => ({ sidebarOpen: !state.sidebarOpen }));
@@ -166,6 +182,21 @@ export const usePlatformStore = create<PlatformState>()(
     removeNotification: (id: string) => {
       set((state) => ({
         notifications: state.notifications.filter((n) => n.id !== id),
+      }));
+    },
+    addToast: (toast) => {
+      const id = crypto.randomUUID();
+      set((state) => ({ toasts: [...state.toasts, { ...toast, id }] }));
+      const duration = toast.duration ?? 5000;
+      if (duration > 0) {
+        window.setTimeout(() => {
+          get().removeToast(id);
+        }, duration);
+      }
+    },
+    removeToast: (id: string) => {
+      set((state) => ({
+        toasts: state.toasts.filter((t) => t.id !== id),
       }));
     },
     openCommandPalette: () => {

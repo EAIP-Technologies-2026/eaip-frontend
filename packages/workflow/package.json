@@ -1,8 +1,9 @@
 {
   "dependencies": {
-    "react": "^19.1.0",
+    "@eaip/agent": "workspace:*",
     "@eaip/api": "workspace:*",
-    "@eaip/agent": "workspace:*"
+    "@xyflow/react": "^12.11.2",
+    "react": "^19.1.0"
   },
   "types": "./src/index.ts",
   "exports": {
@@ -17,10 +18,10 @@
     "clean": "rimraf dist .turbo"
   },
   "devDependencies": {
-    "typescript": "^5.8.3",
+    "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "jsdom": "^26.0.0",
-    "@types/react": "^19.1.2",
+    "typescript": "^5.8.3",
     "vitest": "^3.1.2"
   },
   "name": "@eaip/workflow",

@@ -5,12 +5,11 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "composite": true,
     "noEmit": false,
     "emitDeclarationOnly": false,
-    "rootDir": "./src",
+    "rootDir": "../..",
     "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
   },
-  "include": ["src"],
+  "include": ["src", "../../packages/api/src"],
   "exclude": ["node_modules", "dist"]
 }

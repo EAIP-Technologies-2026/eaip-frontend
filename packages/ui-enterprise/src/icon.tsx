@@ -1,10 +1,9 @@
-import { IconPlaceholder } from "@eaip/icons";
+import { EnterpriseIcon as EnterpriseIconBase, type IconProps } from "@eaip/icons";
 
-export interface EnterpriseIconProps {
+export interface EnterpriseIconProps extends Omit<IconProps, "name"> {
   name?: string;
-  className?: string;
 }
 
-export function EnterpriseIcon({ name, className }: EnterpriseIconProps) {
-  return <IconPlaceholder className={className} aria-label={name ?? "icon"} />;
+export function EnterpriseIcon({ name = "circle", ...props }: EnterpriseIconProps) {
+  return <EnterpriseIconBase name={name as IconProps["name"]} {...props} />;
 }

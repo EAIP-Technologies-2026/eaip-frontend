@@ -1,7 +1,9 @@
 {
   "dependencies": {
+    "@eaip/core": "workspace:*",
     "@eaip/ui-foundation": "workspace:*",
-    "react": "^19.1.0"
+    "react": "^19.1.0",
+    "recharts": "^3.10.0"
   },
   "types": "./src/index.tsx",
   "exports": {
@@ -16,10 +18,10 @@
     "clean": "rimraf dist .turbo"
   },
   "devDependencies": {
-    "typescript": "^5.8.3",
+    "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "jsdom": "^26.0.0",
-    "@types/react": "^19.1.2",
+    "typescript": "^5.8.3",
     "vitest": "^3.1.2"
   },
   "name": "@eaip/ui-visualizations",

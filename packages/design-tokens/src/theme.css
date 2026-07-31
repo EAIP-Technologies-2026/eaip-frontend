@@ -1,0 +1,585 @@
+@theme {
+  /* Semantic surface colors */
+  --color-surface: var(--color-surface);
+  --color-surface-secondary: var(--color-surface-secondary);
+  --color-surface-tertiary: var(--color-surface-tertiary);
+  --color-surface-elevated: var(--color-surface-elevated);
+  --color-surface-glass: var(--color-surface-glass);
+
+  /* Text colors */
+  --color-text: var(--color-text);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+  --color-text-inverse: var(--color-text-inverse);
+
+  /* Border colors */
+  --color-border: var(--color-border);
+  --color-border-subtle: var(--color-border-subtle);
+  --color-border-strong: var(--color-border-strong);
+
+  /* Brand / status */
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-subtle: var(--color-primary-subtle);
+  --color-success: var(--color-success);
+  --color-success-subtle: var(--color-success-subtle);
+  --color-warning: var(--color-warning);
+  --color-warning-subtle: var(--color-warning-subtle);
+  --color-danger: var(--color-danger);
+  --color-danger-subtle: var(--color-danger-subtle);
+
+  /* Premium accent / atmosphere */
+  --color-accent-glow: var(--color-accent-glow);
+  --color-ambient-light: var(--color-ambient-light);
+  --color-depth-shadow: var(--color-depth-shadow);
+
+  /* Typography */
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Radius */
+  --radius-card: var(--radius-card);
+  --radius-button: var(--radius-button);
+  --radius-input: var(--radius-input);
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-card: var(--shadow-card);
+  --shadow-elevated: var(--shadow-elevated);
+  --shadow-glow: var(--shadow-glow);
+  --shadow-depth: var(--shadow-depth);
+  --shadow-ambient: var(--shadow-ambient);
+}
+
+@layer base {
+  :root {
+    /* ================================================================
+       Enterprise Visual Language 2.0 — Light Theme
+       Pearl White / Titanium Silver / Soft Frosted Glass
+       ================================================================ */
+
+    /* Surfaces: warm pearl white with titanium silver depth */
+    --color-surface: #fafbfc;
+    --color-surface-secondary: #f5f6f8;
+    --color-surface-tertiary: #eef0f3;
+    --color-surface-elevated: #ffffff;
+    --color-surface-glass: rgba(250, 251, 252, 0.78);
+
+    --color-text: #111827;
+    --color-text-secondary: #4b5563;
+    --color-text-muted: #9ca3af;
+    --color-text-inverse: #ffffff;
+
+    /* Borders: subtle titanium-tinted lines */
+    --color-border: #e5e7eb;
+    --color-border-subtle: #f3f4f6;
+    --color-border-strong: #d1d5db;
+
+    /* Primary: refined enterprise indigo — calm authority */
+    --color-primary: #4338ca;
+    --color-primary-hover: #3730a3;
+    --color-primary-subtle: rgba(67, 56, 202, 0.08);
+    --color-success: #15803d;
+    --color-success-subtle: rgba(21, 128, 61, 0.08);
+    --color-warning: #a16207;
+    --color-warning-subtle: rgba(161, 98, 7, 0.08);
+    --color-danger: #b91c1c;
+    --color-danger-subtle: rgba(185, 28, 28, 0.08);
+
+    /* Atmosphere: soft ambient glow with titanium tint */
+    --color-accent-glow: rgba(67, 56, 202, 0.10);
+    --color-ambient-light: rgba(255, 255, 255, 0.7);
+    --color-depth-shadow: rgba(17, 24, 39, 0.04);
+
+    --radius-card: 1rem;
+    --radius-button: 0.625rem;
+    --radius-input: 0.625rem;
+
+    /* Layered premium shadows: softer, deeper, more atmospheric */
+    --shadow-card:
+      0 0 0 1px rgba(17, 24, 39, 0.02),
+      0 1px 2px rgba(17, 24, 39, 0.03),
+      0 4px 8px rgba(17, 24, 39, 0.02);
+    --shadow-elevated:
+      0 0 0 1px rgba(17, 24, 39, 0.03),
+      0 4px 12px rgba(17, 24, 39, 0.04),
+      0 16px 32px rgba(17, 24, 39, 0.05);
+    --shadow-glow: 0 0 0 3px rgba(67, 56, 202, 0.12);
+    --shadow-depth: 0 24px 48px -12px rgba(17, 24, 39, 0.10);
+    --shadow-ambient: 0 0 60px -20px rgba(67, 56, 202, 0.08);
+  }
+
+  .dark {
+    /* ================================================================
+       Enterprise Visual Language 2.0 — Dark Theme
+       Deep Obsidian / Soft Acrylic / Ambient Panel Glow
+       ================================================================ */
+
+    --color-surface: #0a0e17;
+    --color-surface-secondary: #0d1220;
+    --color-surface-tertiary: #131a2e;
+    --color-surface-elevated: #0f1525;
+    --color-surface-glass: rgba(10, 14, 23, 0.72);
+
+    --color-text: #f1f5f9;
+    --color-text-secondary: #94a3b8;
+    --color-text-muted: #64748b;
+    --color-text-inverse: #0a0e17;
+
+    --color-border: #1e293b;
+    --color-border-subtle: #0f172a;
+    --color-border-strong: #334155;
+
+    /* Primary: soft periwinkle glow — calm precision */
+    --color-primary: #818cf8;
+    --color-primary-hover: #a5b4fc;
+    --color-primary-subtle: rgba(129, 140, 248, 0.12);
+    --color-success: #4ade80;
+    --color-success-subtle: rgba(74, 222, 128, 0.12);
+    --color-warning: #fbbf24;
+    --color-warning-subtle: rgba(251, 191, 36, 0.12);
+    --color-danger: #f87171;
+    --color-danger-subtle: rgba(248, 113, 113, 0.12);
+
+    /* Atmosphere: deep ambient with indigo undertone */
+    --color-accent-glow: rgba(129, 140, 248, 0.12);
+    --color-ambient-light: rgba(255, 255, 255, 0.03);
+    --color-depth-shadow: rgba(0, 0, 0, 0.4);
+
+    --shadow-card:
+      0 0 0 1px rgba(255, 255, 255, 0.04),
+      0 1px 2px rgba(0, 0, 0, 0.25),
+      0 4px 8px rgba(0, 0, 0, 0.18);
+    --shadow-elevated:
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 4px 12px rgba(0, 0, 0, 0.30),
+      0 16px 32px rgba(0, 0, 0, 0.35);
+    --shadow-glow: 0 0 0 3px rgba(129, 140, 248, 0.18);
+    --shadow-depth: 0 24px 48px -12px rgba(0, 0, 0, 0.55);
+    --shadow-ambient: 0 0 60px -20px rgba(129, 140, 248, 0.10);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--color-surface-secondary);
+    color: var(--color-text);
+  }
+}
+
+@layer utilities {
+  /* ================================================================
+     Enterprise Visual Language 2.0 — Material System
+     ================================================================ */
+
+  /* Premium frosted glass with micro inner light */
+  .glass {
+    background-color: var(--color-surface-glass);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 4px 16px rgba(17, 24, 39, 0.05);
+  }
+
+  .dark .glass {
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      0 4px 16px rgba(0, 0, 0, 0.35);
+  }
+
+  /* Premium glass panel — thicker, layered acrylic feel */
+  .glass-panel {
+    background: linear-gradient(
+      180deg,
+      var(--color-surface-glass) 0%,
+      rgba(255, 255, 255, 0.62) 100%
+    );
+    backdrop-filter: blur(32px) saturate(180%);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.14),
+      0 8px 32px rgba(17, 24, 39, 0.06);
+  }
+
+  .dark .glass-panel {
+    background: linear-gradient(
+      180deg,
+      var(--color-surface-glass) 0%,
+      rgba(10, 14, 23, 0.55) 100%
+    );
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.03),
+      0 8px 32px rgba(0, 0, 0, 0.40);
+  }
+
+  /* Surface elevated with layered depth */
+  .surface-elevated {
+    background-color: var(--color-surface-elevated);
+    box-shadow: var(--shadow-elevated);
+  }
+
+  /* Premium card surface — soft pearl with micro depth */
+  .surface-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Premium hero / overview surface with ambient glow */
+  .surface-hero {
+    background: linear-gradient(
+      135deg,
+      var(--color-surface) 0%,
+      var(--color-surface-secondary) 100%
+    );
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-elevated);
+  }
+
+  /* Ambient atmospheric background with soft radial illumination */
+  .bg-atmosphere {
+    background:
+      radial-gradient(ellipse 80% 60% at 10% 10%, var(--color-accent-glow) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 90% 80%, var(--color-ambient-light) 0%, transparent 50%),
+      var(--color-surface-secondary);
+  }
+
+  /* Focus ring with depth */
+  .focus-ring {
+    outline: none;
+    box-shadow: var(--shadow-glow);
+  }
+
+  /* Transition utilities */
+  .transition-micro {
+    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .transition-smooth {
+    transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .transition-premium {
+    transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Press feedback */
+  .press-feedback:active {
+    transform: scale(0.97);
+    transition-duration: 80ms;
+  }
+
+  /* Text balance */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Executive typography */
+  .heading-executive {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .heading-section {
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+
+  /* Skeleton with refined shimmer */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--color-surface-tertiary) 25%,
+      var(--color-surface-secondary) 50%,
+      var(--color-surface-tertiary) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.6s ease-in-out infinite;
+    border-radius: var(--radius-button);
+  }
+
+  @keyframes skeleton-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Card hover lift with premium shadow */
+  .card-hover-lift {
+    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .card-hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-elevated);
+  }
+
+  /* Ambient glow for important elements */
+  .ambient-glow {
+    box-shadow: var(--shadow-ambient);
+  }
+
+  /* Depth shadow for floating elements */
+  .depth-shadow {
+    box-shadow: var(--shadow-depth);
+  }
+
+  /* Page entrance animation */
+  @keyframes page-enter {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .page-enter {
+    animation: page-enter 450ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Toast entrance */
+  @keyframes toast-enter {
+    from { opacity: 0; transform: translateX(100%) scale(0.95); }
+    to { opacity: 1; transform: translateX(0) scale(1); }
+  }
+
+  .toast-enter {
+    animation: toast-enter 350ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Focus ring with depth */
+  .focus-ring-strong {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-primary);
+  }
+
+  /* Premium glass button with micro inner light */
+  .btn-glass {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.14) 0%,
+      rgba(255, 255, 255, 0.02) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.10),
+      0 1px 2px rgba(17, 24, 39, 0.04);
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .btn-glass:hover {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.20) 0%,
+      rgba(255, 255, 255, 0.04) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.14),
+      0 2px 8px rgba(17, 24, 39, 0.06);
+    transform: translateY(-1px);
+  }
+
+  .btn-glass:active {
+    transform: translateY(0);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+
+  .dark .btn-glass {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.01) 100%
+    );
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .dark .btn-glass:hover {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.10) 0%,
+      rgba(255, 255, 255, 0.02) 100%
+    );
+  }
+
+  /* Premium divider / separator */
+  .divider-premium {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--color-border) 20%,
+      var(--color-border) 80%,
+      transparent 100%
+    );
+  }
+
+  /* Subtle ambient dot pattern (if supported) */
+  .texture-subtle {
+    background-image: radial-gradient(circle, var(--color-text-muted) 0.5px, transparent 0.5px);
+    background-size: 24px 24px;
+    opacity: 0.03;
+  }
+
+  /* ================================================================
+     Enterprise Visual Language 2.0 — New Premium Utilities
+     ================================================================ */
+
+  /* Titanium surface — subtle metallic warmth */
+  .surface-titanium {
+    background: linear-gradient(
+      180deg,
+      var(--color-surface) 0%,
+      var(--color-surface-secondary) 100%
+    );
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Soft acrylic panel — layered translucency */
+  .surface-acrylic {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.7) 0%,
+      rgba(255, 255, 255, 0.4) 100%
+    );
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 16px rgba(17, 24, 39, 0.04);
+  }
+
+  .dark .surface-acrylic {
+    background: linear-gradient(
+      180deg,
+      rgba(15, 21, 37, 0.7) 0%,
+      rgba(10, 14, 23, 0.4) 100%
+    );
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Edge highlight for active navigation */
+  .nav-glow-edge {
+    box-shadow: inset 3px 0 0 var(--color-primary), 0 0 12px var(--color-accent-glow);
+  }
+
+  /* Premium input surface — soft depth */
+  .input-surface {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    box-shadow: inset 0 1px 2px rgba(17, 24, 39, 0.03);
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+  }
+
+  .input-surface:focus-within {
+    border-color: var(--color-primary);
+    box-shadow:
+      inset 0 1px 2px rgba(17, 24, 39, 0.03),
+      0 0 0 3px var(--color-primary-subtle);
+  }
+
+  .dark .input-surface {
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Status dot with ambient glow */
+  .status-glow {
+    box-shadow: 0 0 6px currentColor;
+  }
+
+  /* ================================================================
+     EAIP Motion Design System v1.0 — Animation Utilities
+     ================================================================ */
+
+  /* Subtle animated mesh gradient for login / hero backgrounds */
+  @keyframes atmosphere-shift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .bg-atmosphere-animated {
+    background:
+      radial-gradient(ellipse 70% 60% at 20% 30%, var(--color-accent-glow) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 80% 70%, var(--color-ambient-light) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 40% at 50% 90%, var(--color-primary-subtle) 0%, transparent 50%),
+      var(--color-surface-secondary);
+    background-size: 200% 200%;
+    animation: atmosphere-shift 12s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bg-atmosphere-animated {
+      animation: none;
+      background-size: 100% 100%;
+    }
+  }
+
+  /* Soft orb glow for ambient environment */
+  .orb-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  /* Login card ambient glow */
+  .login-card-glow {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.12),
+      0 4px 24px rgba(17, 24, 39, 0.06),
+      0 0 80px -20px rgba(67, 56, 202, 0.08);
+  }
+
+  .dark .login-card-glow {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 4px 24px rgba(0, 0, 0, 0.35),
+      0 0 80px -20px rgba(129, 140, 248, 0.10);
+  }
+
+  /* Dialog entrance animation */
+  @keyframes dialog-enter {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .dialog-enter {
+    animation: dialog-enter 350ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Reduced motion support for all animations */
+  @media (prefers-reduced-motion: reduce) {
+    .page-enter,
+    .toast-enter,
+    .dialog-enter,
+    .card-hover-lift,
+    .skeleton {
+      animation: none !important;
+      transition-duration: 0.01ms !important;
+      transition-delay: 0ms !important;
+    }
+  }
+}

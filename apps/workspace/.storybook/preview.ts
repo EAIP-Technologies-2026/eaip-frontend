@@ -1,7 +1,15 @@
-import type { Preview } from "@storybook/react";
+import type { Preview, Decorator } from "@storybook/react";
 import "../src/app/globals.css";
+import { ThemeProvider } from "@eaip/theme";
+
+const themeDecorator: Decorator = (Story) => (
+  <ThemeProvider defaultMode="light" defaultVariant="enterprise-light">
+    <Story />
+  </ThemeProvider>
+);
 
 const preview: Preview = {
+  decorators: [themeDecorator],
   parameters: {
     controls: {
       matchers: {

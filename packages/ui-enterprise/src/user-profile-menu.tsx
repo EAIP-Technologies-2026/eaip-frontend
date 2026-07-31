@@ -3,6 +3,8 @@
 import { useAuth } from "@eaip/auth";
 import { useState } from "react";
 import { useOnClickOutside } from "@eaip/hooks";
+import { Avatar } from "@eaip/ui-primitives";
+import { EnterpriseIcon } from "@eaip/icons";
 
 export function UserProfileMenu() {
   const { user, logout } = useAuth();
@@ -25,27 +27,29 @@ export function UserProfileMenu() {
         onClick={() => {
           setOpen((prev) => !prev);
         }}
-        className="flex items-center gap-2 rounded-lg p-2 hover:bg-gray-100"
+        className="flex items-center gap-2 rounded-button p-2 text-text-secondary transition-smooth hover:bg-surface-tertiary hover:text-text"
+        aria-label={`${user.name} profile menu`}
+        aria-haspopup="true"
+        aria-expanded={open}
       >
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-sm font-medium text-white">
-          {user.name.charAt(0).toUpperCase()}
-        </div>
-        <span className="hidden text-sm font-medium text-gray-700 md:block">{user.name}</span>
+        <Avatar name={user.name} size="sm" />
+        <span className="hidden text-sm font-medium text-text md:block">{user.name}</span>
       </button>
 
       {open ? (
-        <div className="absolute right-0 z-50 mt-2 w-56 rounded-lg border bg-white p-2 shadow-lg">
-          <div className="border-b px-3 py-2">
-            <p className="text-sm font-medium text-gray-900">{user.name}</p>
-            <p className="text-xs text-gray-500">{user.email}</p>
+        <div className="absolute right-0 z-50 mt-2 w-56 rounded-card border border-border bg-surface p-2 shadow-elevated" role="menu">
+          <div className="border-b border-border px-3 py-2">
+            <p className="text-sm font-medium text-text">{user.name}</p>
+            <p className="text-xs text-text-muted">{user.email}</p>
           </div>
           <button
             type="button"
             onClick={() => {
               void handleLogout();
             }}
-            className="mt-1 w-full rounded-md px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+            className="mt-1 flex w-full items-center gap-2 rounded-button px-3 py-2 text-left text-sm text-danger transition-smooth hover:bg-danger-subtle"
           >
+            <EnterpriseIcon name="logout" size={16} />
             Sign out
           </button>
         </div>
