@@ -29,7 +29,7 @@
     "@types/react": "^19.1.2",
     "@types/node": "^22.14.1",
     "@storybook/addon-controls": "^8.6.12",
-    "postcss": "^8.5.3",
+    "postcss": "^8.5.18",
     "@testing-library/react": "^16.3.0",
     "@storybook/addon-a11y": "^8.6.12",
     "@storybook/addon-actions": "^8.6.12",
