@@ -14,10 +14,12 @@ export {
   DATA_ATTRIBUTE_THEME,
   DATA_ATTRIBUTE_MOTION,
 } from "./types";
-export type {
-  Theme,
-  ThemeMode,
-  ThemeVariant,
-  ThemeDefinition,
-  ColorScheme,
-} from "./types";
+export type { Theme, ThemeMode, ThemeVariant, ThemeDefinition, ColorScheme } from "./types";
+export {
+  durationTokens,
+  easingTokens,
+  springTokens,
+  createFadeTransition,
+  createSlideTransition,
+  createScaleTransition,
+} from "@eaip/motion";

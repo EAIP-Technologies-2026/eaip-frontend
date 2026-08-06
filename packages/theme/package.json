@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@eaip/design-tokens": "workspace:*",
+    "@eaip/motion": "workspace:*",
     "react": "^19.1.0"
   },
   "types": "./src/index.tsx",
@@ -16,11 +17,11 @@
     "clean": "rimraf dist .turbo"
   },
   "devDependencies": {
-    "typescript": "^5.8.3",
+    "typescript": "^5.9.0",
     "@types/react-dom": "^19.1.2",
     "jsdom": "^26.0.0",
     "@types/react": "^19.1.2",
-    "vitest": "^3.1.2",
+    "vitest": "^4.0.0",
     "@testing-library/react": "^16.3.0",
     "@testing-library/jest-dom": "^6.6.3"
   },

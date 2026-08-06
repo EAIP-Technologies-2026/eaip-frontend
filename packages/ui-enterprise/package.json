@@ -10,6 +10,7 @@
     "@eaip/auth": "workspace:*",
     "@eaip/hooks": "workspace:*",
     "@eaip/icons": "workspace:*",
+    "@eaip/motion": "workspace:*",
     "@eaip/state": "workspace:*",
     "@eaip/theme": "workspace:*",
     "@eaip/ui-foundation": "workspace:*",
@@ -30,11 +31,13 @@
     "clean": "rimraf dist .turbo"
   },
   "devDependencies": {
-    "typescript": "^5.8.3",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "jsdom": "^26.0.0",
-    "@types/react": "^19.1.2",
-    "vitest": "^3.1.2"
+    "typescript": "^5.9.0",
+    "vitest": "^4.0.0"
   },
   "name": "@eaip/ui-enterprise",
   "main": "./src/index.tsx",

@@ -13,8 +13,8 @@
     "clean": "rimraf dist .turbo"
   },
   "devDependencies": {
-    "vitest": "^3.1.2",
-    "typescript": "^5.8.3"
+    "vitest": "^4.0.0",
+    "typescript": "^5.9.0"
   },
   "name": "@eaip/design-tokens",
   "main": "./src/index.ts",

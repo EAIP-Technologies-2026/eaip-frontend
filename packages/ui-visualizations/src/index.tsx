@@ -13,6 +13,17 @@ import {
   Pie,
 } from "recharts";
 
+export {
+  ChartContainer,
+  ChartLegend as ChartLegendInfrastructure,
+  ChartTooltip,
+} from "./chart-infrastructure";
+export type {
+  ChartContainerProps,
+  ChartLegendProps as ChartLegendInfrastructureProps,
+  ChartTooltipProps,
+} from "./chart-infrastructure";
+
 export interface ProgressBarProps extends HTMLAttributes<HTMLDivElement> {
   value: number;
   max?: number;
@@ -45,20 +56,24 @@ export function ProgressBar({
   return (
     <div className={["w-full", className].filter(Boolean).join(" ")} {...props}>
       {label != null && (
-        <div className="mb-1.5 flex items-center justify-between text-xs text-text-secondary">
+        <div className="text-text-secondary mb-1.5 flex items-center justify-between text-xs">
           <span>{label}</span>
           <span>{Math.round(percentage)}%</span>
         </div>
       )}
       <div
-        className={["w-full overflow-hidden rounded-full bg-surface-tertiary", sizes[size]].join(" ")}
+        className={["bg-surface-tertiary w-full overflow-hidden rounded-full", sizes[size]].join(
+          " ",
+        )}
         role="progressbar"
         aria-valuenow={value}
         aria-valuemin={0}
         aria-valuemax={max}
       >
         <div
-          className={["h-full rounded-full transition-all duration-500", variants[variant]].join(" ")}
+          className={["h-full rounded-full transition-all duration-500", variants[variant]].join(
+            " ",
+          )}
           style={{ width: `${String(percentage)}%` }}
         />
       </div>
@@ -109,7 +124,12 @@ export interface SparklineProps {
   className?: string;
 }
 
-export function Sparkline({ data, color = "var(--color-primary)", height = 80, className }: SparklineProps) {
+export function Sparkline({
+  data,
+  color = "var(--color-primary)",
+  height = 80,
+  className,
+}: SparklineProps) {
   return (
     <div className={["w-full", className].filter(Boolean).join(" ")} style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
@@ -141,14 +161,32 @@ export interface BarChartProps {
   className?: string;
 }
 
-export function BarChartWidget({ data, color = "var(--color-primary)", height = 200, className }: BarChartProps) {
+export function BarChartWidget({
+  data,
+  color = "var(--color-primary)",
+  height = 200,
+  className,
+}: BarChartProps) {
   return (
     <div className={["w-full", className].filter(Boolean).join(" ")} style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-subtle)" vertical={false} />
-          <XAxis dataKey="name" tick={{ fill: "var(--color-text-muted)", fontSize: 12 }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fill: "var(--color-text-muted)", fontSize: 12 }} axisLine={false} tickLine={false} />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="var(--color-border-subtle)"
+            vertical={false}
+          />
+          <XAxis
+            dataKey="name"
+            tick={{ fill: "var(--color-text-muted)", fontSize: 12 }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis
+            tick={{ fill: "var(--color-text-muted)", fontSize: 12 }}
+            axisLine={false}
+            tickLine={false}
+          />
           <Tooltip
             cursor={{ fill: "var(--color-surface-tertiary)", radius: 4 }}
             contentStyle={{
@@ -239,27 +277,28 @@ export function MetricCard({
   }[changeDirection];
   return (
     <div
-      className={[
-        "surface-card card-hover-lift flex flex-col justify-between p-5",
-        className,
-      ]
+      className={["surface-card card-hover-lift flex flex-col justify-between p-5", className]
         .filter(Boolean)
         .join(" ")}
       {...props}
     >
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-medium text-text-secondary">{label}</p>
-          <div className="mt-1 text-2xl font-semibold tracking-tight text-text">{value}</div>
+          <p className="text-text-secondary text-sm font-medium">{label}</p>
+          <div className="text-text mt-1 text-2xl font-semibold tracking-tight">{value}</div>
           {change && (
-            <div className={["mt-1 flex items-center gap-1 text-xs font-medium", changeColor].join(" ")}>
+            <div
+              className={["mt-1 flex items-center gap-1 text-xs font-medium", changeColor].join(
+                " ",
+              )}
+            >
               <span>{changeDirection === "up" ? "↑" : changeDirection === "down" ? "↓" : "—"}</span>
               {change}
             </div>
           )}
         </div>
         {icon && (
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-subtle/80 text-primary shadow-sm">
+          <div className="bg-primary-subtle/80 text-primary flex h-10 w-10 items-center justify-center rounded-xl shadow-sm">
             {typeof icon === "string" ? <span className="text-lg">{icon}</span> : icon}
           </div>
         )}
@@ -291,17 +330,20 @@ export function Timeline({ items, className, ...props }: TimelineProps) {
       {items.map((item, index) => (
         <li key={item.id} className="relative pl-6">
           {index < items.length - 1 && (
-            <span className="absolute left-[0.4rem] top-6 h-full w-px bg-border" aria-hidden="true" />
+            <span
+              className="bg-border absolute top-6 left-[0.4rem] h-full w-px"
+              aria-hidden="true"
+            />
           )}
-          <div className="absolute left-0 top-1">
+          <div className="absolute top-1 left-0">
             <StatusRing status={item.status ?? "idle"} size="sm" />
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-medium text-text">{item.title}</span>
+            <span className="text-text text-sm font-medium">{item.title}</span>
             {item.description && (
-              <span className="text-sm text-text-secondary">{item.description}</span>
+              <span className="text-text-secondary text-sm">{item.description}</span>
             )}
-            <span className="mt-0.5 text-xs text-text-muted">{item.timestamp}</span>
+            <span className="text-text-muted mt-0.5 text-xs">{item.timestamp}</span>
           </div>
         </li>
       ))}
@@ -316,7 +358,14 @@ export interface StatusWidgetProps extends HTMLAttributes<HTMLDivElement> {
   value?: string;
 }
 
-export function StatusWidget({ title, subtitle, status, value, className, ...props }: StatusWidgetProps) {
+export function StatusWidget({
+  title,
+  subtitle,
+  status,
+  value,
+  className,
+  ...props
+}: StatusWidgetProps) {
   const statusLabels = {
     idle: "Idle",
     running: "Running",
@@ -325,14 +374,17 @@ export function StatusWidget({ title, subtitle, status, value, className, ...pro
     error: "Error",
   };
   return (
-    <div className={["surface-card card-hover-lift p-5", className].filter(Boolean).join(" ")} {...props}>
+    <div
+      className={["surface-card card-hover-lift p-5", className].filter(Boolean).join(" ")}
+      {...props}
+    >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-text-secondary">{title}</p>
-          <p className="mt-0.5 text-lg font-semibold text-text">{value ?? statusLabels[status]}</p>
-          {subtitle && <p className="mt-0.5 text-xs text-text-muted">{subtitle}</p>}
+          <p className="text-text-secondary text-sm font-medium">{title}</p>
+          <p className="text-text mt-0.5 text-lg font-semibold">{value ?? statusLabels[status]}</p>
+          {subtitle && <p className="text-text-muted mt-0.5 text-xs">{subtitle}</p>}
         </div>
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-tertiary">
+        <div className="bg-surface-tertiary flex h-12 w-12 items-center justify-center rounded-full">
           <StatusRing status={status} pulse={status === "running"} size="lg" />
         </div>
       </div>
@@ -340,6 +392,19 @@ export function StatusWidget({ title, subtitle, status, value, className, ...pro
   );
 }
 
-// EP-UI-0020 – Visualization
-export { LineChartWidget, AreaChartWidget, HorizontalBarChartWidget, GaugeWidget, DonutChartWidget, ChartLegend } from "./visualization";
-export type { LineChartWidgetProps, AreaChartWidgetProps, HorizontalBarChartWidgetProps, GaugeWidgetProps, DonutChartWidgetProps, ChartLegendProps } from "./visualization";
+export {
+  LineChartWidget,
+  AreaChartWidget,
+  HorizontalBarChartWidget,
+  GaugeWidget,
+  DonutChartWidget,
+  ChartLegend,
+} from "./visualization";
+export type {
+  LineChartWidgetProps,
+  AreaChartWidgetProps,
+  HorizontalBarChartWidgetProps,
+  GaugeWidgetProps,
+  DonutChartWidgetProps,
+  ChartLegendProps,
+} from "./visualization";

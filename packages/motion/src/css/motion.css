@@ -1,0 +1,38 @@
+/* EAIP Motion CSS Tokens & Utilities */
+:root {
+  /* Duration Tokens */
+  --motion-duration-instant: 0ms;
+  --motion-duration-micro: 100ms;
+  --motion-duration-fast: 150ms;
+  --motion-duration-normal: 250ms;
+  --motion-duration-medium: 350ms;
+  --motion-duration-slow: 450ms;
+  --motion-duration-deliberate: 600ms;
+
+  /* Easing Tokens */
+  --motion-ease-linear: linear;
+  --motion-ease-default: ease;
+  --motion-ease-in: ease-in;
+  --motion-ease-out: ease-out;
+  --motion-ease-in-out: ease-in-out;
+  --motion-ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-ease-snappy: cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Spring Physics Parameters */
+  --motion-spring-stiffness: 300;
+  --motion-spring-damping: 30;
+  --motion-spring-mass: 1;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -98,6 +98,32 @@ export const tokens = {
     xl: "0.75rem",
     full: "9999px",
   },
+  motion: {
+    duration: {
+      instant: "0ms",
+      micro: "100ms",
+      fast: "150ms",
+      normal: "250ms",
+      medium: "350ms",
+      slow: "450ms",
+      deliberate: "600ms",
+    },
+    easing: {
+      linear: "linear",
+      ease: "ease",
+      "ease-in": "ease-in",
+      "ease-out": "ease-out",
+      "ease-in-out": "ease-in-out",
+      premium: "cubic-bezier(0.16, 1, 0.3, 1)",
+      snappy: "cubic-bezier(0.4, 0, 0.2, 1)",
+      bounce: "cubic-bezier(0.34, 1.56, 0.64, 1)",
+    },
+    spring: {
+      stiffness: 300,
+      damping: 30,
+      mass: 1,
+    },
+  },
 } as const;
 
 export type TokenColor = typeof tokens.color;
@@ -105,5 +131,6 @@ export type TokenSpacing = typeof tokens.spacing;
 export type TokenTypography = typeof tokens.typography;
 export type TokenShadow = typeof tokens.shadow;
 export type TokenRadius = typeof tokens.radius;
+export type TokenMotion = typeof tokens.motion;
 
 export type DesignTokens = typeof tokens;

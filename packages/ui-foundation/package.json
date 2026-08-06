@@ -3,6 +3,7 @@
     "@eaip/core": "workspace:*",
     "@eaip/hooks": "workspace:*",
     "@eaip/icons": "workspace:*",
+    "@eaip/motion": "workspace:*",
     "@eaip/ui-primitives": "workspace:*",
     "clsx": "^2.1.1",
     "react": "^19.1.0",
@@ -24,8 +25,8 @@
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "jsdom": "^26.0.0",
-    "typescript": "^5.8.3",
-    "vitest": "^3.1.2"
+    "typescript": "^5.9.0",
+    "vitest": "^4.0.0"
   },
   "name": "@eaip/ui-foundation",
   "main": "./src/index.tsx",

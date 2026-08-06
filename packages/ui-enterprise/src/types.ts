@@ -27,6 +27,12 @@ export interface Breadcrumb {
   href?: string;
 }
 
+export interface Workspace {
+  id: string;
+  name: string;
+  slug?: string;
+}
+
 export interface ShellProps {
   appId: string;
   children: React.ReactNode;
