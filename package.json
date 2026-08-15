@@ -11,15 +11,16 @@
   "packageManager": "pnpm@11.9.0",
   "scripts": {
     "dev": "turbo dev",
+    "dev:enterprise": "turbo dev --filter=enterprise-console",
     "build": "turbo build",
     "build:packages": "turbo build --filter=./packages/*",
     "lint": "turbo lint",
     "lint:fix": "turbo lint -- --fix",
     "format": "prettier --check \"**/*.{ts,tsx,js,jsx,mjs,cjs,json,md,css,scss,yaml,yml}\"",
     "format:fix": "prettier --write \"**/*.{ts,tsx,js,jsx,mjs,cjs,json,md,css,scss,yaml,yml}\"",
-    "test": "turbo test",
-    "test:watch": "turbo test:watch",
-    "test:coverage": "turbo test:coverage",
+    "test": "cross-env NODE_ENV=test turbo test",
+    "test:watch": "cross-env NODE_ENV=test turbo test:watch",
+    "test:coverage": "cross-env NODE_ENV=test turbo test:coverage",
     "typecheck": "turbo typecheck",
     "clean": "turbo clean && rimraf node_modules",
     "storybook": "turbo storybook",
@@ -105,6 +106,7 @@
     ]
   },
   "dependencies": {
+    "three": "^0.170.0",
     "@hookform/resolvers": "^5.4.0",
     "react-hook-form": "^7.82.0",
     "zod": "^4.4.3"

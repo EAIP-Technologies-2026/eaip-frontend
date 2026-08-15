@@ -1,6 +1,12 @@
 @import "tailwindcss";
 @import "@eaip/design-tokens/theme.css";
 
+/* Scan workspace UI packages for utility classes */
+@source "../../../../packages/ui-enterprise/src/**/*.{ts,tsx}";
+@source "../../../../packages/ui-foundation/src/**/*.{ts,tsx}";
+@source "../../../../packages/ui-primitives/src/**/*.{ts,tsx}";
+@source "../../../../packages/ui-visualizations/src/**/*.{ts,tsx}";
+
 /* Premium ambient background for Mission Control */
 @layer base {
   body {

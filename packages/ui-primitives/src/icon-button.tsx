@@ -17,12 +17,12 @@ export interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>
 
 const variantStyles: Record<IconButtonVariant, string> = {
   primary:
-    "bg-primary text-white hover:bg-primary-hover active:bg-primary-active border border-transparent shadow-button",
+    "bg-primary text-text-inverse hover:bg-primary-hover border border-transparent",
   secondary: "bg-surface-tertiary text-text hover:bg-surface-secondary border border-border/50",
   ghost:
     "bg-transparent text-text-secondary hover:bg-surface-tertiary hover:text-text border border-transparent",
   outline: "bg-transparent text-text border border-border hover:bg-surface-tertiary",
-  destructive: "bg-danger text-white hover:bg-danger/90 border border-transparent",
+  destructive: "bg-danger text-text-inverse hover:bg-danger/90 border border-transparent",
 };
 
 const sizeStyles: Record<IconButtonSize, string> = {

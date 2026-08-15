@@ -1,11 +1,19 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+
+import { useEffect, useState, useCallback } from "react";
+import { Dialog } from "@eaip/ui-foundation";
+import { Input } from "@eaip/ui-primitives";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { RequireAuth, useAuth, RequireRole } from "@eaip/auth";
 import { usePlatformStore } from "@eaip/state";
-import { getDefaultClient } from "@eaip/api";
 import {
   EnterpriseShell,
   DataGrid,
@@ -14,10 +22,16 @@ import {
   SectionHeader,
 } from "@eaip/ui-enterprise";
 import { Button, Badge } from "@eaip/ui-primitives";
-import {
-  MetricCard,
-  StatusWidget,
-} from "@eaip/ui-visualizations";
+import dynamic from "next/dynamic";
+
+const MetricCard = dynamic(
+  () => import("@eaip/ui-visualizations").then((mod) => mod.MetricCard),
+  { ssr: false, loading: () => <div className="h-24 skeleton rounded-lg" /> }
+);
+const StatusWidget = dynamic(
+  () => import("@eaip/ui-visualizations").then((mod) => mod.StatusWidget),
+  { ssr: false, loading: () => <div className="h-24 skeleton rounded-lg" /> }
+);
 import { EnterpriseIcon } from "@eaip/icons";
 import { logger } from "@eaip/logging";
 
@@ -54,24 +68,23 @@ const defaultMonitoringMetrics: MonitoringMetrics = {
   activeAlerts: 0,
 };
 
-function parseAdminStats(data: unknown): AdminStats {
-  if (!data || typeof data !== "object") return defaultAdminStats;
-  const obj = data as Record<string, unknown>;
-  const num = (value: unknown): number =>
-    typeof value === "number" ? value : Number(value) || 0;
-  return {
-    totalUsers: num(obj.totalUsers ?? obj.users ?? obj.userCount ?? 0),
-    totalRoles: num(obj.totalRoles ?? obj.roles ?? obj.roleCount ?? 0),
-    totalPermissions: num(
-      obj.totalPermissions ?? obj.permissions ?? obj.permissionCount ?? 0,
-    ),
-    activeSessions: num(
-      obj.activeSessions ?? obj.sessions ?? obj.activeUserCount ?? 0,
-    ),
-  };
-}
+import {
+  fetchAdminUsers,
+  fetchAdminStats,
+  createAdminUser,
+} from "../../services/admin-service";
+import { fetchMonitoringMetrics } from "../../services/monitoring-service";
 
 function parseMonitoringMetrics(data: unknown): MonitoringMetrics {
+  if (Array.isArray(data)) {
+    // If it's a metric list from /monitoring/metrics
+    const activeAlertsMetric = data.find((m: any) => m.label?.toLowerCase().includes("alert"));
+    const uptimeMetric = data.find((m: any) => m.label?.toLowerCase().includes("uptime"));
+    return {
+      systemHealth: uptimeMetric ? "Active" : "unknown",
+      activeAlerts: activeAlertsMetric ? Number(activeAlertsMetric.value) || 0 : 0,
+    };
+  }
   if (!data || typeof data !== "object") return defaultMonitoringMetrics;
   const obj = data as Record<string, unknown>;
   const num = (value: unknown): number =>
@@ -116,52 +129,47 @@ function DashboardContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const apiClient = useMemo(() => getDefaultClient(), []);
+  const loadDashboard = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [usersResponse, statsResponse, metricsResponse] =
+        await Promise.all([
+          fetchAdminUsers(),
+          fetchAdminStats(),
+          fetchMonitoringMetrics(),
+        ]);
+      setUsers(parseUsers(usersResponse.data));
+      setStats(statsResponse.data);
+      setMetrics(parseMonitoringMetrics(metricsResponse.data));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      logger.error("Failed to load dashboard", { error: message });
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function loadDashboard() {
-      setLoading(true);
-      setError(null);
-      try {
-        const [usersResponse, statsResponse, metricsResponse] =
-          await Promise.all([
-            apiClient.get<unknown>("/admin/users"),
-            apiClient.get<unknown>("/admin/stats"),
-            apiClient.get<unknown>("/monitoring/metrics"),
-          ]);
-        if (cancelled) return;
-        setUsers(parseUsers(usersResponse.data));
-        setStats(parseAdminStats(statsResponse.data));
-        setMetrics(parseMonitoringMetrics(metricsResponse.data));
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        logger.error("Failed to load dashboard", { error: message });
-        setError(message);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
     void loadDashboard();
-    return () => {
-      cancelled = true;
-    };
-  }, [apiClient]);
+  }, [loadDashboard]);
+
+  const [addUserOpen, setAddUserOpen] = useState(false);
+  const [newUserName, setNewUserName] = useState("");
+  const [newUserEmail, setNewUserEmail] = useState("");
 
   async function handleAddUser() {
+    if (!newUserName.trim() || !newUserEmail.trim()) return;
     try {
-      const name = `User ${new Date().toLocaleTimeString()}`;
-      const response = await apiClient.post<AdminUser>("/admin/users", {
-        name,
-        email: `${name.toLowerCase().replace(/\s+/g, "-")}@example.com`,
-        roles: ["user"],
-      });
+      const response = await createAdminUser(newUserName.trim(), newUserEmail.trim(), ["user"]);
       const newUser = response.data;
       if (newUser) {
-        setUsers((prev) => [newUser, ...prev]);
+        setUsers((prev) => [newUser as unknown as AdminUser, ...prev]);
         addToast({ type: "success", title: "User added" });
+        setAddUserOpen(false);
+        setNewUserName("");
+        setNewUserEmail("");
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -228,7 +236,7 @@ function DashboardContent() {
               <ErrorState
                 message={error}
                 onRetry={() => {
-                  window.location.reload();
+                  void loadDashboard();
                 }}
               />
             ) : (
@@ -297,11 +305,56 @@ function DashboardContent() {
             <Button
               iconLeft={<EnterpriseIcon name="plus" size={18} />}
               onClick={() => {
-                void handleAddUser();
+                setAddUserOpen(true);
               }}
             >
               Add User
             </Button>
+
+            <Dialog
+              open={addUserOpen}
+              onClose={() => {
+                setAddUserOpen(false);
+              }}
+              title="Add User"
+            >
+              <div className="space-y-4">
+                <Input
+                  label="Name"
+                  value={newUserName}
+                  onChange={(e) => {
+                    setNewUserName(e.target.value);
+                  }}
+                  placeholder="Full name"
+                />
+                <Input
+                  label="Email"
+                  type="email"
+                  value={newUserEmail}
+                  onChange={(e) => {
+                    setNewUserEmail(e.target.value);
+                  }}
+                  placeholder="name@company.com"
+                />
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setAddUserOpen(false);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      void handleAddUser();
+                    }}
+                  >
+                    Add User
+                  </Button>
+                </div>
+              </div>
+            </Dialog>
             <Button
               variant="secondary"
               iconLeft={<EnterpriseIcon name="users" size={18} />}
@@ -337,22 +390,22 @@ function DashboardContent() {
           <SectionHeader icon="shield" title="Governance Health" />
           <div className="grid gap-4 md:grid-cols-3">
             <StatusWidget
-              title="Recent Logins"
+              title="Total Users"
               status="success"
-              value="12"
-              subtitle="In the last 24 hours"
+              value={String(stats.totalUsers)}
+              subtitle="Registered in platform"
             />
             <StatusWidget
-              title="Pending Approvals"
-              status="warning"
-              value="0"
-              subtitle="Awaiting administrator review"
+              title="Active Roles"
+              status="success"
+              value={String(stats.totalRoles)}
+              subtitle="Defined in system"
             />
             <StatusWidget
-              title="Policy Violations"
+              title="Permission Sets"
               status="success"
-              value="0"
-              subtitle="No violations detected"
+              value={String(stats.totalPermissions)}
+              subtitle="Configured"
             />
           </div>
         </section>

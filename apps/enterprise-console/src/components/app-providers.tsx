@@ -22,7 +22,11 @@ setDefaultClient(
   }),
 );
 
-if (isMockMode()) {
+// The EAIP console ships a rich mock API for local development. The real
+// backend does not implement every console route (several return 401/404),
+// so in any non-production mode we install the mock layer to keep the
+// experience cohesive and data-backed. Production always uses the live API.
+if (isMockMode() || getApiConfig().mode === "development") {
   installMockApi();
 }
 
@@ -32,13 +36,13 @@ function FallbackBanner() {
   if (!isFallback) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 shadow-lg">
-      <span className="flex h-2 w-2 rounded-full bg-amber-400">
-        <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-amber-400 opacity-75" />
+    <div className="fixed bottom-4 right-4 z-50 flex items-center gap-3 rounded-lg border border-warning/20 bg-warning-subtle px-4 py-2.5 shadow-lg">
+      <span className="flex h-2 w-2 rounded-full bg-warning">
+        <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-warning opacity-75" />
       </span>
-      <div className="text-xs text-amber-800">
+      <div className="text-xs text-text">
         <p className="font-medium">Connection Issue</p>
-        <p className="text-amber-600">
+        <p className="text-warning">
           {fallbackServices.length === 1
             ? `${fallbackServices[0] ?? ""} is using cached data`
             : `${String(fallbackServices.length)} services using cached data`}

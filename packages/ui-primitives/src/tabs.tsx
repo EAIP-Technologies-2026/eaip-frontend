@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode, HTMLAttributes, ButtonHTMLAttributes } from "react";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
 import { useReducedMotion, durationTokens, easingTokens } from "@eaip/motion";
 
 export type TabsOrientation = "horizontal" | "vertical";
@@ -10,6 +10,9 @@ interface TabsContextValue {
   value: string;
   onValueChange: (value: string) => void;
   orientation: TabsOrientation;
+  registerTab: (value: string) => void;
+  unregisterTab: (value: string) => void;
+  tabValues: string[];
 }
 
 const TabsContext = createContext<TabsContextValue | null>(null);
@@ -40,6 +43,7 @@ export function TabsRoot({
   ...props
 }: TabsRootProps) {
   const [internalValue, setInternalValue] = useState(defaultValue ?? "");
+  const [tabValues, setTabValues] = useState<string[]>([]);
   const value = controlledValue ?? internalValue;
 
   function handleValueChange(val: string) {
@@ -47,8 +51,19 @@ export function TabsRoot({
     else setInternalValue(val);
   }
 
+  const registerTab = useCallback((val: string) => {
+    setTabValues((prev) => {
+      if (prev.includes(val)) return prev;
+      return [...prev, val];
+    });
+  }, []);
+
+  const unregisterTab = useCallback((val: string) => {
+    setTabValues((prev) => prev.filter((v) => v !== val));
+  }, []);
+
   return (
-    <TabsContext.Provider value={{ value, onValueChange: handleValueChange, orientation }}>
+    <TabsContext.Provider value={{ value, onValueChange: handleValueChange, orientation, registerTab, unregisterTab, tabValues }}>
       <div
         data-slot="tabs"
         data-orientation={orientation}
@@ -105,9 +120,16 @@ export function TabsTrigger({
   className = "",
   ...props
 }: TabsTriggerProps) {
-  const { value: activeValue, onValueChange, orientation } = useTabsContext();
+  const { value: activeValue, onValueChange, orientation, registerTab, unregisterTab, tabValues } = useTabsContext();
   const isSelected = activeValue === value;
   const prefersReducedMotion = useReducedMotion();
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // Register/unregister tab value
+  useEffect(() => {
+    registerTab(value);
+    return () => { unregisterTab(value); };
+  }, [value, registerTab, unregisterTab]);
 
   const motionStyle = prefersReducedMotion
     ? { transitionDuration: "0.01ms" }
@@ -117,8 +139,55 @@ export function TabsTrigger({
         transitionTimingFunction: easingTokens.snappy,
       };
 
+  function handleKeyDown(e: React.KeyboardEvent) {
+    const isHorizontal = orientation === "horizontal";
+    const currentIndex = tabValues.indexOf(value);
+    let nextIndex = currentIndex;
+
+    if (isHorizontal) {
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        nextIndex = (currentIndex + 1) % tabValues.length;
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        nextIndex = (currentIndex - 1 + tabValues.length) % tabValues.length;
+      }
+    } else {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        nextIndex = (currentIndex + 1) % tabValues.length;
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        nextIndex = (currentIndex - 1 + tabValues.length) % tabValues.length;
+      }
+    }
+
+    if (e.key === "Home") {
+      e.preventDefault();
+      nextIndex = 0;
+    } else if (e.key === "End") {
+      e.preventDefault();
+      nextIndex = tabValues.length - 1;
+    }
+
+    if (nextIndex !== currentIndex) {
+      const nextValue = tabValues[nextIndex];
+      if (nextValue) {
+        onValueChange(nextValue);
+        // Focus the next tab button
+        const parent = buttonRef.current?.closest('[role="tablist"]');
+        if (parent) {
+          const tabs = parent.querySelectorAll('[role="tab"]');
+          const nextTab = tabs.item(nextIndex);
+          if (nextTab instanceof HTMLElement) nextTab.focus();
+        }
+      }
+    }
+  }
+
   return (
     <button
+      ref={buttonRef}
       type="button"
       role="tab"
       aria-selected={isSelected}
@@ -129,6 +198,7 @@ export function TabsTrigger({
       onClick={() => {
         if (!disabled) onValueChange(value);
       }}
+      onKeyDown={handleKeyDown}
       data-slot="tabs-trigger"
       data-state={isSelected ? "active" : "inactive"}
       style={motionStyle}

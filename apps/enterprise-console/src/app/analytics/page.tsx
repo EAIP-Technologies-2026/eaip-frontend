@@ -7,14 +7,23 @@ import { EnterpriseShell, LoadingState, ErrorState } from "@eaip/ui-enterprise";
 import { Card, CardHeader, CardContent, Tabs } from "@eaip/ui-foundation";
 import { SectionTitle, EmptyState, Button } from "@eaip/ui-primitives";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import {
   MetricCard,
   StatusWidget,
-  BarChartWidget,
-  PieChartWidget,
   Sparkline,
   type TimelineItem,
 } from "@eaip/ui-visualizations";
+
+const BarChartWidget = dynamic(
+  () => import("@eaip/ui-visualizations").then((mod) => mod.BarChartWidget),
+  { ssr: false, loading: () => <div className="h-48 skeleton rounded-lg" /> }
+);
+const PieChartWidget = dynamic(
+  () => import("@eaip/ui-visualizations").then((mod) => mod.PieChartWidget),
+  { ssr: false, loading: () => <div className="h-48 skeleton rounded-lg" /> }
+);
+
 import { logger } from "@eaip/logging";
 import { EnterpriseIcon } from "@eaip/icons";
 import { fetchAgentStats } from "../../services/analytics-service";
@@ -158,14 +167,14 @@ function AnalyticsContent() {
                   <StatusWidget
                     title="Agent Health"
                     status={healthStatus}
-                    value={formatPercent(stats.successRate)}
-                    subtitle="Average execution success rate"
+                    description="Average execution success rate"
+                    metrics={[{ label: "Success Rate", value: formatPercent(stats.successRate) }]}
                   />
                   <StatusWidget
                     title="Average Latency"
                     status={stats.avgLatencyMs < 500 ? "success" : "warning"}
-                    value={formatMs(stats.avgLatencyMs)}
-                    subtitle="Average agent response time"
+                    description="Average agent response time"
+                    metrics={[{ label: "Latency", value: formatMs(stats.avgLatencyMs) }]}
                   />
                 </div>
 

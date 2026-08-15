@@ -12,6 +12,6 @@ services:
       - /app/.next
     environment:
       - NODE_ENV=development
-    command: pnpm dev
+    command: pnpm --filter enterprise-console dev
     stdin_open: true
     tty: true

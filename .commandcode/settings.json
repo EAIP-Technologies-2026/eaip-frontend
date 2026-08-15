@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(pnpm:*)",
+      "Shell(kill:*)",
+      "Shell(npx next dev --turbopack 2 >& 1)",
+      "powershell",
+      "Shell(netstat:*)",
+      "Shell(findstr:*)",
+      "Shell(taskkill /F /PID 24720 /PID 36772 /PID 29588 /PID 35084 /PID 20736 2>nul; netstat -ano | findstr \":300\" | findstr \"LISTENING\")",
+      "Shell(taskkill /F /PID 24720 /PID 36772 /PID 29588 /PID 35084 /PID 20736 2>nul; taskkill /F /PID 15180 2>nul; taskkill /F /PID 32408 2>nul; taskkill /F /PID 14808 2>nul; taskkill /F /PID 7628 2>nul; echo done)",
+      "Shell(for:*)",
+      "Shell(netstat -ano ^| findstr \":300\" ^| findstr \"LISTENING\":*)",
+      "Shell(do:*)",
+      "Shell(taskkill /F /PID 24720 2>nul; taskkill /F /PID 36772 2>nul; taskkill /F /PID 29588 2>nul; taskkill /F /PID 35084 2>nul; taskkill /F /PID 20736 2>nul; netstat -ano | findstr \"LISTENING\" | findstr \":300\" | findstr \"LISTENING\" 2>nul; echo cleared)",
+      "Shell(cd \"C:\\GitHub\\EAIP Technologies\\eaip-platform\"; .\\venv\\Scripts\\python.exe -m eaip --version 2>&1; ls .venv\\Scripts\\python.exe 2>&1)",
+      "Shell(cd \"C:\\GitHub\\EAIP Technologies\\eaip-platform\"; ls .venv 2>&1; which python; python --version 2>&1)",
+      "Shell(npx playwright test e2e/auth-debug.spec.ts --reporter=line 2 >& 1)",
+      "Shell(Select-Object:*)",
+      "Shell(cd \"C:\\GitHub\\EAIP Technologies\\eaip-frontend\\apps\\enterprise-console\"; npx playwright test e2e/auth-debug.spec.ts --reporter=line 2>&1 > \"$env:TEMP\\pw.log\"; Get-Content \"$env:TEMP\\pw.log\")",
+      "Shell(Remove-Item:*)",
+      "Shell(mkdir \"C:\\GitHub\\EAIP Technologies\\eaip-frontend\\apps\\enterprise-console\\test-results\" 2>nul; echo ok)",
+      "Shell(taskkill /F /PID 5796 2>nul; taskkill /F /PID 12072 2>nul; taskkill /F /PID 38744 2>nul; taskkill /F /PID 37600 2>nul; taskkill /F /PID 9192 2>nul; netstat -ano | findstr \"LISTENING\" | findstr \":300\" | sort)",
+      "Shell(taskkill /F /PID 5796 /PID 9192 /PID 38744 /PID 37600 /PID 12072 2>nul; netstat -ano | findstr \"LISTENING\" | findstr \":300\" | sort)",
+      "Shell(taskkill /F /PID 9192 /PID 37600 /PID 38744 /PID 5796 /PID 12072 /PID 8096 /PID 22728 2>nul; echo servers stopped)",
+      "Shell(Out-Null:*)",
+      "Shell(taskkill /F /PID 10264 2>nul; netstat -ano | findstr \"LISTENING\" | findstr \":3000\" | sort)",
+      "Shell(taskkill /F /PID 7320 2>nul; netstat -ano | findstr \"LISTENING\" | findstr \":3000\" | sort)"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}

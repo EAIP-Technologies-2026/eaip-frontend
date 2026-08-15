@@ -1,0 +1,30 @@
+{
+  "dependencies": {
+    "@eaip/api": "workspace:*",
+    "react": "^19.1.0"
+  },
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint . --max-warnings 0",
+    "test:watch": "vitest",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist .turbo"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "@types/react-dom": "^19.1.2",
+    "jsdom": "^26.0.0",
+    "@types/react": "^19.1.2",
+    "vitest": "^3.1.2"
+  },
+  "name": "@eaip/monitoring",
+  "main": "./src/index.ts",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0"
+}

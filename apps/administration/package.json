@@ -29,11 +29,21 @@
     "@eaip/ui-primitives": "workspace:*",
     "@eaip/ui-visualizations": "workspace:*",
     "@eaip/utilities": "workspace:*",
-    "@eaip/workflow": "workspace:*"
+    "@eaip/workflow": "workspace:*",
+    "@eaip/missions": "workspace:*",
+    "@eaip/monitoring": "workspace:*",
+    "@eaip/notifications": "workspace:*",
+    "@eaip/global-search": "workspace:*",
+    "@eaip/marketplace": "workspace:*",
+    "@eaip/runtime": "workspace:*",
+    "@eaip/workforce": "workspace:*",
+    "@eaip/organizations": "workspace:*",
+    "@eaip/workspaces": "workspace:*",
+    "@eaip/deployments": "workspace:*"
   },
   "scripts": {
     "build": "next build",
-    "dev": "next dev --turbopack",
+    "dev": "next dev --turbopack --port 3002",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf .next .turbo",
     "storybook": "storybook dev -p 6006",

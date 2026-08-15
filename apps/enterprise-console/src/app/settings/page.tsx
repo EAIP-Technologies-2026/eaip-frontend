@@ -1,12 +1,10 @@
 "use client";
 
-/* eslint-disable jsx-a11y/label-has-associated-control */
-
 import { useState } from "react";
 import { RequireAuth } from "@eaip/auth";
 import { EnterpriseShell } from "@eaip/ui-enterprise";
 import { Card, CardHeader, CardContent } from "@eaip/ui-foundation";
-import { Badge, SectionTitle, Button, Input } from "@eaip/ui-primitives";
+import { Badge, SectionTitle, Button, Input, Switch } from "@eaip/ui-primitives";
 import { EnterpriseIcon } from "@eaip/icons";
 import { usePlatformStore } from "@eaip/state";
 import { getConfig } from "@eaip/config";
@@ -101,20 +99,14 @@ function SettingsContent() {
                     <p className="text-sm font-medium text-text">Dark Mode</p>
                     <p className="text-xs text-text-secondary">Toggle dark/light theme</p>
                   </div>
-                  <label className="relative inline-flex cursor-pointer items-center">
-                    <input type="checkbox" className="peer sr-only" defaultChecked />
-                    <div className="h-5 w-9 rounded-full bg-surface-tertiary after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-full" />
-                  </label>
+                  <Switch defaultChecked />
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-text">Reduced Motion</p>
                     <p className="text-xs text-text-secondary">Minimize animations</p>
                   </div>
-                  <label className="relative inline-flex cursor-pointer items-center">
-                    <input type="checkbox" className="peer sr-only" />
-                    <div className="h-5 w-9 rounded-full bg-surface-tertiary after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-full" />
-                  </label>
+                  <Switch />
                 </div>
               </CardContent>
             </Card>
@@ -153,10 +145,7 @@ function SettingsContent() {
                         <p className="text-sm font-medium text-text">{policy.label}</p>
                         <p className="text-xs text-text-secondary">{policy.desc}</p>
                       </div>
-                      <label className="relative inline-flex cursor-pointer items-center">
-                        <input type="checkbox" className="peer sr-only" />
-                        <div className="h-5 w-9 rounded-full bg-surface-tertiary after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-full" />
-                      </label>
+                      <Switch />
                     </div>
                   ))}
                 </div>
@@ -183,10 +172,7 @@ function SettingsContent() {
                       <p className="text-sm font-medium text-text">{channel.label}</p>
                       <p className="text-xs text-text-secondary">{channel.desc}</p>
                     </div>
-                    <label className="relative inline-flex cursor-pointer items-center">
-                      <input type="checkbox" className="peer sr-only" defaultChecked />
-                      <div className="h-5 w-9 rounded-full bg-surface-tertiary after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-full" />
-                    </label>
+                    <Switch defaultChecked />
                   </div>
                 ))}
               </div>

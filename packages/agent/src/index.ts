@@ -63,6 +63,7 @@ export interface AgentClient {
   stopExecution(id: string, executionId: string): Promise<void>;
   retryExecution(id: string, executionId: string): Promise<AgentExecution>;
   getAgentEvents(id: string, limit?: number): Promise<AgentEvent[]>;
+  getAgentStats(): Promise<unknown>;
 }
 
 export class ApiAgentClient implements AgentClient {
@@ -70,6 +71,12 @@ export class ApiAgentClient implements AgentClient {
 
   constructor(client?: ApiClient) {
     this.client = client ?? getDefaultClient();
+  }
+
+  async getAgentStats(): Promise<unknown> {
+    const response = await this.client.get<unknown>("/agents/stats");
+    if (response.error) throw response.error;
+    return response.data;
   }
 
   async listAgents(): Promise<Agent[]> {

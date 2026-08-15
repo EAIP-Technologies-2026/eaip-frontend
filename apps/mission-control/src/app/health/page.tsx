@@ -121,7 +121,11 @@ function HealthContent() {
               </CardContent>
             </Card>
           </div>
-        ) : null}
+        ) : (
+          <div className="text-center py-12 text-text-secondary">
+            <p>No health data available.</p>
+          </div>
+        )}
       </div>
     </EnterpriseShell>
   );

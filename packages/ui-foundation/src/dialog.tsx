@@ -135,7 +135,7 @@ export function DialogContent({
       <button
         type="button"
         aria-label="Close backdrop"
-        className="fixed inset-0 cursor-default border-0 bg-black/40 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 cursor-default border-0 bg-scrim backdrop-blur-sm transition-opacity"
         onClick={
           closeOnOutsideClick
             ? () => {
@@ -147,7 +147,7 @@ export function DialogContent({
       <div
         ref={contentRef}
         style={motionStyle}
-        className={`rounded-card border-border bg-surface shadow-elevated relative z-10 w-full border p-6 focus:outline-none ${sizeClasses[size]} ${className}`}
+        className={`liquid-glass rounded-card border-border relative z-10 w-full border p-6 focus:outline-none ${sizeClasses[size]} ${className}`}
         {...props}
       >
         {children}

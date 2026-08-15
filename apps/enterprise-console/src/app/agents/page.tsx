@@ -162,7 +162,7 @@ function AgentsPageContent() {
       breadcrumbs={[{ label: "Dashboard", href: "/dashboard" }, { label: "Agents" }]}
     >
       <div className="space-y-8">
-        <section className="surface-hero relative overflow-hidden p-8 lg:p-10">
+        <section data-tour="agents" className="surface-hero relative overflow-hidden p-8 lg:p-10">
           <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-gradient-to-br from-primary-subtle/50 to-transparent blur-3xl" aria-hidden="true" />
           <div className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-gradient-to-tr from-accent-glow/30 to-transparent blur-2xl" aria-hidden="true" />
           <div className="relative">

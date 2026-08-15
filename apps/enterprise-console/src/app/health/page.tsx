@@ -64,8 +64,8 @@ function HealthContent() {
           <StatusWidget
             title="Overall System Status"
             status={health.overall === "healthy" ? "success" : health.overall === "degraded" ? "warning" : "error"}
-            value={health.overall === "healthy" ? "All Systems Operational" : health.overall === "degraded" ? "Degraded Performance" : "Service Disruption"}
-            subtitle={`Uptime: ${health.uptime}`}
+            description={`Uptime: ${health.uptime}`}
+            metrics={[{ label: "Status", value: health.overall === "healthy" ? "All Systems Operational" : health.overall === "degraded" ? "Degraded Performance" : "Service Disruption" }]}
           />
 
           <Card>

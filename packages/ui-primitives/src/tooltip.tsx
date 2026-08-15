@@ -126,7 +126,7 @@ export function TooltipContent({ children, className = "", ...props }: TooltipCo
       data-slot="tooltip-content"
       data-state="open"
       style={{ ...posStyle, ...motionStyle }}
-      className={`rounded-card z-50 border border-neutral-700/50 bg-neutral-900 px-2.5 py-1 text-xs font-medium text-white shadow-md ${className}`}
+      className={`rounded-card z-50 border border-border bg-surface-elevated px-2.5 py-1 text-xs font-medium text-text shadow-elevated ${className}`}
       {...props}
     >
       {children}

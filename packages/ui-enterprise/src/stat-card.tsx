@@ -33,7 +33,7 @@ export function StatCard({ label, value, trend, icon, loading = false, className
       <div className="relative flex items-start justify-between">
         <div className="space-y-2">
           <p className="text-xs font-medium tracking-wide text-text-muted uppercase">{label}</p>
-          <p className="text-2xl font-semibold tracking-tight text-text">{value}</p>
+          <p className="text-2xl font-semibold tracking-tight font-tabular tabular-nums text-text">{value}</p>
           {trend && (
             <p className={cn("flex items-center gap-1 text-xs font-medium", trendColors[trend.direction])}>
               <span>{trendIcons[trend.direction]}</span>
@@ -88,7 +88,7 @@ export function KPIBlock({ title, value, subtitle, trend, progress, variant = "d
   return (
     <div className={cn("rounded-card border p-5 space-y-2", variantStyles[variant], className)} {...props}>
       <p className="text-sm font-medium text-text-secondary">{title}</p>
-      <p className="text-3xl font-bold tracking-tight text-text">{value}</p>
+      <p className="text-3xl font-bold tracking-tight font-tabular tabular-nums text-text">{value}</p>
       {subtitle && <p className="text-sm text-text-muted">{subtitle}</p>}
       {trend && (
         <p className={cn("flex items-center gap-1 text-sm font-medium", trendColors[trend.direction])}>

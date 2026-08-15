@@ -54,10 +54,10 @@ const DemoContent = () => {
         </button>
         <button
           type="button"
-          onClick={() => { theme.setMode("system"); }}
+          onClick={() => { theme.setMode("vibe"); }}
           style={{
-            background: theme.mode === "system" ? "var(--color-primary)" : "var(--color-surface)",
-            color: theme.mode === "system" ? "var(--color-text-inverse)" : "var(--color-text)",
+            background: theme.mode === "vibe" ? "var(--color-primary)" : "var(--color-surface)",
+            color: theme.mode === "vibe" ? "var(--color-text-inverse)" : "var(--color-text)",
             border: "1px solid var(--color-border)",
             borderRadius: "var(--radius-button)",
             padding: "0.5rem 1rem",
@@ -65,7 +65,7 @@ const DemoContent = () => {
             fontWeight: 500,
           }}
         >
-          System
+          Vibe (V)
         </button>
       </div>
 

@@ -51,12 +51,12 @@ function IncidentsContent() {
 
   function handleAcknowledge(incident: Incident) {
     setIncidents((prev) => prev.map((i) => i.id === incident.id ? { ...i, status: "acknowledged" } : i));
-    addToast({ type: "success", title: "Incident acknowledged" });
+    addToast({ type: "info", title: "Incident acknowledged (local only)", message: "Change will not persist on refresh — no backend endpoint available." });
   }
 
   function handleResolve(incident: Incident) {
-    setIncidents((prev) => prev.map((i) => i.id === incident.id ? { ...i, status: "resolved", timeline: [...i.timeline, { action: "Resolved", timestamp: new Date().toISOString(), actor: "current_user" }] } : i));
-    addToast({ type: "success", title: "Incident resolved" });
+    setIncidents((prev) => prev.map((i) => i.id === incident.id ? { ...i, status: "resolved", timeline: [...i.timeline, { action: "Resolved", timestamp: new Date().toISOString(), actor: "local" }] } : i));
+    addToast({ type: "info", title: "Incident resolved (local only)", message: "Change will not persist on refresh — no backend endpoint available." });
   }
 
   function severityVariant(s: string): "danger" | "warning" | "default" {

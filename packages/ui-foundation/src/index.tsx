@@ -122,3 +122,5 @@ export type { SidebarProps, SidebarItem } from "./sidebar";
 
 export { LoginShell } from "./login-shell";
 export type { LoginShellProps } from "./login-shell";
+export { EAIPAtmosphere } from "./eaip-atmosphere";
+export type { EAIPAtmosphereProps } from "./eaip-atmosphere";

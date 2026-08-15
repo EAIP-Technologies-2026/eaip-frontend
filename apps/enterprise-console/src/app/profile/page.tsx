@@ -1,12 +1,12 @@
 "use client";
 
-/* eslint-disable @typescript-eslint/no-unnecessary-condition, jsx-a11y/label-has-associated-control */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 
 import { useState } from "react";
 import { RequireAuth, useAuth } from "@eaip/auth";
 import { EnterpriseShell } from "@eaip/ui-enterprise";
 import { Card, CardHeader, CardContent } from "@eaip/ui-foundation";
-import { Badge, SectionTitle, Button, Input } from "@eaip/ui-primitives";
+import { Badge, SectionTitle, Button, Input, Switch } from "@eaip/ui-primitives";
 import { EnterpriseIcon } from "@eaip/icons";
 import { usePlatformStore } from "@eaip/state";
 
@@ -133,20 +133,14 @@ function ProfileContent() {
                       <p className="text-sm font-medium text-text">Dark Mode</p>
                       <p className="text-xs text-text-secondary">Toggle dark/light theme</p>
                     </div>
-                    <label className="relative inline-flex cursor-pointer items-center">
-                      <input type="checkbox" className="peer sr-only" defaultChecked />
-                      <div className="h-5 w-9 rounded-full bg-surface-tertiary after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-full" />
-                    </label>
+                    <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-text">Compact Mode</p>
                       <p className="text-xs text-text-secondary">Reduce spacing and font sizes</p>
                     </div>
-                    <label className="relative inline-flex cursor-pointer items-center">
-                      <input type="checkbox" className="peer sr-only" />
-                      <div className="h-5 w-9 rounded-full bg-surface-tertiary after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-full" />
-                    </label>
+                    <Switch />
                   </div>
                 </div>
               </CardContent>
@@ -160,10 +154,7 @@ function ProfileContent() {
                   {["Email notifications", "Push notifications", "Agent execution alerts", "System health alerts", "Weekly digest"].map((pref) => (
                     <div key={pref} className="flex items-center justify-between">
                       <p className="text-sm text-text">{pref}</p>
-                      <label className="relative inline-flex cursor-pointer items-center">
-                        <input type="checkbox" className="peer sr-only" defaultChecked />
-                        <div className="h-5 w-9 rounded-full bg-surface-tertiary after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-full" />
-                      </label>
+                      <Switch defaultChecked />
                     </div>
                   ))}
                 </div>
@@ -199,13 +190,7 @@ function ProfileContent() {
                       {twoFactor ? "Two-factor authentication is enabled" : "Add an extra layer of security"}
                     </p>
                   </div>
-                  <Button
-                    variant={twoFactor ? "secondary" : "primary"}
-                    size="sm"
-                    onClick={() => { setTwoFactor(!twoFactor); addToast({ type: "success", title: twoFactor ? "2FA disabled" : "2FA enabled" }); }}
-                  >
-                    {twoFactor ? "Disable" : "Enable"}
-                  </Button>
+                  <Switch checked={twoFactor} onChange={(event) => { setTwoFactor(event.target.checked); }} />
                 </div>
               </CardContent>
             </Card>

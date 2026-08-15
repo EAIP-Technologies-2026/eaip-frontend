@@ -243,8 +243,16 @@ export function DataGrid<T>({
             ) : (
               paginatedData.map((item) => {
                 const id = keyExtractor(item);
+                const isSelected = selectedIds.includes(id);
                 return (
-                  <tr key={id} className="transition-smooth hover:bg-surface-secondary">
+                  <tr
+                    key={id}
+                    className={`transition-smooth ${
+                      isSelected
+                        ? "bg-primary-subtle/60 dark:bg-primary-subtle/30"
+                        : "hover:bg-surface-secondary/80 focus-within:bg-surface-secondary/80"
+                    }`}
+                  >
                     {selectable ? (
                       <td className="px-4 py-4">
                         <input

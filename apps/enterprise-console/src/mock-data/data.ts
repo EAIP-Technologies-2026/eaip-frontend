@@ -194,18 +194,36 @@ export function createMockSearchResults(query?: string) {
 }
 
 export function createMockNotifications(count = 100): PlatformNotification[] {
-  return Array.from({ length: count }, (_, i) => ({
-    id: `n${String(i + 1)}`,
-    title: [
+  const severities: PlatformNotification["severity"][] = ["info", "warning", "error", "critical"];
+  const categories: PlatformNotification["category"][] = ["system", "operations", "workflow", "security", "automation"];
+
+  return Array.from({ length: count }, (_, i) => {
+    const title = [
       "Agent execution completed", "System health alert", "Deployment successful",
       "Security scan complete", "Knowledge sync completed", "Workflow failed",
       "New agent registered", "Memory threshold warning", "Certificate expiring",
       "User permission updated",
-    ][i % 10]!,
-    message: `${agentTasks[i % agentTasks.length]!} operation ${i % 3 === 0 ? "completed successfully" : i % 3 === 1 ? "encountered an issue" : "requires attention"}. ${sources()[i % sources().length]!} ${i % 2 === 0 ? "is operational" : "reported an anomaly"}.`,
-    read: i > 30 ? Math.random() > 0.3 : false,
-    timestamp: new Date(Date.now() - i * 3600000).toISOString(),
-  }));
+    ][i % 10]!;
+    const message = `${agentTasks[i % agentTasks.length]!} operation ${i % 3 === 0 ? "completed successfully" : i % 3 === 1 ? "encountered an issue" : "requires attention"}. ${sources()[i % sources().length]!} ${i % 2 === 0 ? "is operational" : "reported an anomaly"}.`;
+
+    return {
+      id: `n${String(i + 1)}`,
+      title,
+      message,
+      summary: message.substring(0, 80),
+      severity: severities[i % severities.length]!,
+      category: categories[i % categories.length]!,
+      read: i > 30 ? Math.random() > 0.3 : false,
+      acknowledged: false,
+      dismissed: false,
+      timestamp: new Date(Date.now() - i * 3600000).toISOString(),
+      source: sources()[i % sources().length]!,
+      deepLink: null,
+      relatedEntityId: null,
+      relatedEntityType: null,
+      groupKey: null,
+    };
+  });
 
   function sources() { return ["API Gateway", "Agent Runtime", "Database Cluster", "Message Queue", "Search Index", "Memory Cache"]; }
 }
@@ -283,6 +301,101 @@ export function createMockSearchHistory(): string[] {
   return [
     "Data Analyst", "Security scan", "Workflow deployment", "API Gateway",
     "Memory usage", "User permissions", "Knowledge base", "Agent logs",
+  ];
+}
+
+export interface MockCopilotApproval {
+  id: string;
+  tool_name: string;
+  arguments: Record<string, unknown>;
+  requester_id: string;
+  risk: "informational" | "action" | "destructive";
+  status: "pending" | "approved" | "rejected" | "expired";
+  created_at: string;
+  decided_at?: string | null;
+  decided_by?: string | null;
+  result?: string | null;
+}
+
+export interface MockCopilotTurn {
+  id: string;
+  reply: string;
+  tool_events: {
+    tool_name: string;
+    status: string;
+    summary?: string;
+    arguments?: Record<string, unknown>;
+    audit_entry_id?: string | null;
+  }[];
+  pending_approval?: MockCopilotApproval | null;
+  conversation_id?: string | null;
+  correlation_id?: string | null;
+  created_at: string;
+}
+
+export function createMockCopilotTurn(message: string): MockCopilotTurn {
+  const lower = message.toLowerCase();
+  const now = new Date().toISOString();
+  const id = `turn-mock-${Date.now()}`;
+
+  if (lower.includes("create") && /agent|bot/.test(lower)) {
+    const named = /(?:named|called)\s+([a-zA-Z0-9_-]+)/i.exec(message);
+    const name = named?.[1] ?? "DataBot";
+    const approval: MockCopilotApproval = {
+      id: `appr-mock-${Date.now()}`,
+      tool_name: "create_agent",
+      arguments: { name, description: "Agent requested through Conductor" },
+      requester_id: "local-user",
+      risk: "action",
+      status: "pending",
+      created_at: now,
+    };
+    return {
+      id,
+      reply: `Approval required before I create the agent "${name}". Review the pending action below.`,
+      tool_events: [],
+      pending_approval: approval,
+      created_at: now,
+    };
+  }
+
+  if (/health|status|system/.test(lower)) {
+    return {
+      id,
+      reply: "All systems operational. 2 agents active with a 100% success rate over the last 24 hours.",
+      tool_events: [{ tool_name: "system_health", status: "ok", summary: "All systems operational" }],
+      created_at: now,
+    };
+  }
+
+  if (lower.includes("agent")) {
+    return {
+      id,
+      reply: "You have 5 registered agents. Recent ones: Data Analysis Agent, Security Scanning Agent, and Report Generation Agent.",
+      tool_events: [{ tool_name: "list_agents", status: "ok", summary: "5 agents found" }],
+      created_at: now,
+    };
+  }
+
+  return {
+    id,
+    reply: "I'm EAIP Conductor. Ask me about system health, your agents, workflows, or knowledge. Try \"What is the system status?\" or \"Create an agent named DataBot\".",
+    tool_events: [],
+    created_at: now,
+  };
+}
+
+export function createMockPendingApprovals(): MockCopilotApproval[] {
+  return [
+    {
+      id: "appr-mock-pending-1",
+      tool_name: "create_agent",
+      arguments: { name: "DataBot", description: "Mock agent creation awaiting approval" },
+      requester_id: "local-user",
+      risk: "action",
+      status: "pending",
+      created_at: new Date().toISOString(),
+    },
   ];
 }
 

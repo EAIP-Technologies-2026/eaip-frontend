@@ -5,21 +5,28 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
   padding?: "none" | "sm" | "md" | "lg";
   shadow?: "none" | "card" | "elevated";
+  liquid?: boolean;
 }
 
 export function Card({
   children,
   padding = "md",
   shadow = "card",
+  liquid = false,
   className,
   ...props
 }: CardProps) {
+  const liquidStyles = liquid
+    ? "bg-surface-glass backdrop-blur-xl saturate-150 border-white/[0.18] dark:border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_4px_16px_rgba(17,24,39,0.05)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_4px_16px_rgba(0,0,0,0.3)] hover:translate-y-[-2px] hover:shadow-elevated hover:border-primary/20"
+    : "";
+
   return (
     <div
       className={cn(
-        "rounded-card border border-border bg-surface transition-smooth",
-        shadow === "card" && "shadow-card hover:shadow-elevated",
-        shadow === "elevated" && "shadow-elevated",
+        "rounded-card border transition-all duration-280",
+        liquid ? liquidStyles : "border-border bg-surface",
+        !liquid && shadow === "card" && "shadow-card hover:shadow-elevated",
+        !liquid && shadow === "elevated" && "shadow-elevated",
         padding === "sm" && "p-3",
         padding === "md" && "p-4",
         padding === "lg" && "p-6",

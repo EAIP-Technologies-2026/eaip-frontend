@@ -21,6 +21,8 @@
   --color-primary: var(--color-primary);
   --color-primary-hover: var(--color-primary-hover);
   --color-primary-subtle: var(--color-primary-subtle);
+  --color-accent: var(--color-accent);
+  --color-accent-subtle: var(--color-accent-subtle);
   --color-success: var(--color-success);
   --color-success-subtle: var(--color-success-subtle);
   --color-warning: var(--color-warning);
@@ -49,6 +51,22 @@
   --shadow-glow: var(--shadow-glow);
   --shadow-depth: var(--shadow-depth);
   --shadow-ambient: var(--shadow-ambient);
+
+  /* Liquid Glass tokens */
+  --glass-surface: var(--glass-surface);
+  --glass-surface-hover: var(--glass-surface-hover);
+  --glass-border: var(--glass-border);
+  --glass-border-bright: var(--glass-border-bright);
+  --glass-highlight: var(--glass-highlight);
+  --glass-shadow: var(--glass-shadow);
+  --glass-blur-sm: var(--glass-blur-sm);
+  --glass-blur-md: var(--glass-blur-md);
+  --glass-blur-lg: var(--glass-blur-lg);
+  --glass-blur-xl: var(--glass-blur-xl);
+
+  /* Atmospheric engine tokens */
+  --atmo-hue: var(--atmo-hue);
+  --atmo-intensity: var(--atmo-intensity);
 }
 
 @layer base {
@@ -86,10 +104,15 @@
     --color-danger: #b91c1c;
     --color-danger-subtle: rgba(185, 28, 28, 0.08);
 
-    /* Atmosphere: soft ambient glow with titanium tint */
-    --color-accent-glow: rgba(67, 56, 202, 0.10);
-    --color-ambient-light: rgba(255, 255, 255, 0.7);
+    /* Accent: subtle teal accent for variety */
+    --color-accent: #0d9488;
+    --color-accent-subtle: rgba(13, 148, 136, 0.08);
+
+    /* Atmosphere: soft ambient glow with indigo/blue/violet fields */
+    --color-accent-glow: rgba(99, 102, 241, 0.10);
+    --color-ambient-light: rgba(139, 92, 246, 0.06);
     --color-depth-shadow: rgba(17, 24, 39, 0.04);
+    --color-scrim: rgba(0, 0, 0, 0.4);
 
     --radius-card: 1rem;
     --radius-button: 0.625rem;
@@ -107,6 +130,22 @@
     --shadow-glow: 0 0 0 3px rgba(67, 56, 202, 0.12);
     --shadow-depth: 0 24px 48px -12px rgba(17, 24, 39, 0.10);
     --shadow-ambient: 0 0 60px -20px rgba(67, 56, 202, 0.08);
+
+    /* Liquid Glass tokens */
+    --glass-surface: rgba(255, 255, 255, 0.06);
+    --glass-surface-hover: rgba(255, 255, 255, 0.10);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-border-bright: rgba(255, 255, 255, 0.20);
+    --glass-highlight: rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 4px 16px rgba(17, 24, 39, 0.04);
+    --glass-blur-sm: 8px;
+    --glass-blur-md: 16px;
+    --glass-blur-lg: 32px;
+    --glass-blur-xl: 48px;
+
+    /* Atmospheric engine — Cyber vibe (default) */
+    --atmo-hue: 250;
+    --atmo-intensity: 0.65;
   }
 
   .dark {
@@ -134,6 +173,8 @@
     --color-primary: #818cf8;
     --color-primary-hover: #a5b4fc;
     --color-primary-subtle: rgba(129, 140, 248, 0.12);
+    --color-accent: #2dd4bf;
+    --color-accent-subtle: rgba(45, 212, 191, 0.12);
     --color-success: #4ade80;
     --color-success-subtle: rgba(74, 222, 128, 0.12);
     --color-warning: #fbbf24;
@@ -141,10 +182,11 @@
     --color-danger: #f87171;
     --color-danger-subtle: rgba(248, 113, 113, 0.12);
 
-    /* Atmosphere: deep ambient with indigo undertone */
-    --color-accent-glow: rgba(129, 140, 248, 0.12);
-    --color-ambient-light: rgba(255, 255, 255, 0.03);
+    /* Atmosphere: deep graphite with indigo undertones */
+    --color-accent-glow: rgba(99, 102, 241, 0.08);
+    --color-ambient-light: rgba(100, 116, 139, 0.05);
     --color-depth-shadow: rgba(0, 0, 0, 0.4);
+    --color-scrim: rgba(0, 0, 0, 0.5);
 
     --shadow-card:
       0 0 0 1px rgba(255, 255, 255, 0.04),
@@ -157,6 +199,22 @@
     --shadow-glow: 0 0 0 3px rgba(129, 140, 248, 0.18);
     --shadow-depth: 0 24px 48px -12px rgba(0, 0, 0, 0.55);
     --shadow-ambient: 0 0 60px -20px rgba(129, 140, 248, 0.10);
+
+    /* Liquid Glass tokens — dark */
+    --glass-surface: rgba(255, 255, 255, 0.03);
+    --glass-surface-hover: rgba(255, 255, 255, 0.06);
+    --glass-border: rgba(255, 255, 255, 0.06);
+    --glass-border-bright: rgba(255, 255, 255, 0.12);
+    --glass-highlight: rgba(255, 255, 255, 0.04);
+    --glass-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    --glass-blur-sm: 8px;
+    --glass-blur-md: 16px;
+    --glass-blur-lg: 32px;
+    --glass-blur-xl: 48px;
+
+    /* Atmospheric engine — dark Cyber vibe */
+    --atmo-hue: 250;
+    --atmo-intensity: 0.50;
   }
 
   html {
@@ -179,18 +237,18 @@
   /* Premium frosted glass with micro inner light */
   .glass {
     background-color: var(--color-surface-glass);
-    backdrop-filter: blur(24px) saturate(160%);
-    -webkit-backdrop-filter: blur(24px) saturate(160%);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(var(--glass-blur-lg)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--glass-blur-lg)) saturate(160%);
+    border: 1px solid var(--glass-border);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.12),
-      0 4px 16px rgba(17, 24, 39, 0.05);
+      inset 0 1px 0 var(--glass-highlight),
+      var(--glass-shadow);
   }
 
   .dark .glass {
-    border-color: rgba(255, 255, 255, 0.06);
+    border-color: var(--glass-border);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      inset 0 1px 0 var(--glass-highlight),
       0 4px 16px rgba(0, 0, 0, 0.35);
   }
 
@@ -201,11 +259,11 @@
       var(--color-surface-glass) 0%,
       rgba(255, 255, 255, 0.62) 100%
     );
-    backdrop-filter: blur(32px) saturate(180%);
-    -webkit-backdrop-filter: blur(32px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(var(--glass-blur-xl)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--glass-blur-xl)) saturate(180%);
+    border: 1px solid var(--glass-border-bright);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.14),
+      inset 0 1px 0 var(--glass-highlight),
       0 8px 32px rgba(17, 24, 39, 0.06);
   }
 
@@ -215,9 +273,9 @@
       var(--color-surface-glass) 0%,
       rgba(10, 14, 23, 0.55) 100%
     );
-    border-color: rgba(255, 255, 255, 0.06);
+    border-color: var(--glass-border);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.03),
+      inset 0 1px 0 var(--glass-highlight),
       0 8px 32px rgba(0, 0, 0, 0.40);
   }
 
@@ -229,10 +287,15 @@
 
   /* Premium card surface — soft pearl with micro depth */
   .surface-card {
-    background-color: var(--color-surface);
+    background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-card);
     box-shadow: var(--shadow-card);
+    transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+  }
+
+  .surface-card:hover {
+    border-color: var(--color-border-strong);
   }
 
   /* Premium hero / overview surface with ambient glow */
@@ -245,6 +308,32 @@
     border: 1px solid var(--color-border-subtle);
     border-radius: var(--radius-card);
     box-shadow: var(--shadow-elevated);
+  }
+
+  /* Glass card — translucent surface above atmosphere */
+  .glass-card {
+    background: var(--color-surface-glass);
+    backdrop-filter: blur(var(--glass-blur-md)) saturate(150%);
+    -webkit-backdrop-filter: blur(var(--glass-blur-md)) saturate(150%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-card);
+    box-shadow:
+      inset 0 1px 0 var(--glass-highlight),
+      var(--glass-shadow);
+    transition: all 280ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .glass-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--glass-border-bright);
+    box-shadow: var(--shadow-glow);
+  }
+
+  .dark .glass-card {
+    border-color: var(--glass-border);
+    box-shadow:
+      inset 0 1px 0 var(--glass-highlight),
+      0 4px 16px rgba(0, 0, 0, 0.3);
   }
 
   /* Ambient atmospheric background with soft radial illumination */
@@ -286,6 +375,20 @@
   }
 
   /* Executive typography */
+  .heading-display {
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    font-size: 2.25rem;
+  }
+
+  .heading-hero {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    font-size: 1.875rem;
+  }
+
   .heading-executive {
     font-weight: 600;
     letter-spacing: -0.02em;
@@ -298,58 +401,93 @@
     line-height: 1.3;
   }
 
-  /* Skeleton with refined shimmer */
-  .skeleton {
-    background: linear-gradient(
-      90deg,
-      var(--color-surface-tertiary) 25%,
-      var(--color-surface-secondary) 50%,
-      var(--color-surface-tertiary) 75%
-    );
-    background-size: 200% 100%;
-    animation: skeleton-shimmer 1.6s ease-in-out infinite;
-    border-radius: var(--radius-button);
+  .heading-card {
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.35;
   }
 
-  @keyframes skeleton-shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+  .text-overline {
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1;
   }
 
-  /* Card hover lift with premium shadow */
+  .badge-glow {
+    box-shadow: 0 0 12px var(--color-accent-glow);
+  }
+
+  /* Subtle card hover lift with shadow bloom */
   .card-hover-lift {
-    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 300ms cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 250ms cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 250ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .card-hover-lift:hover {
-    transform: translateY(-3px);
+    transform: translateY(-2px);
     box-shadow: var(--shadow-elevated);
+    border-color: var(--color-border-strong);
   }
 
-  /* Ambient glow for important elements */
-  .ambient-glow {
-    box-shadow: var(--shadow-ambient);
+  /* Status indicator pulse ring */
+  .pulse-ring {
+    position: relative;
   }
 
-  /* Depth shadow for floating elements */
-  .depth-shadow {
-    box-shadow: var(--shadow-depth);
+  .pulse-ring::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: currentColor;
+    opacity: 0.3;
+    animation: pulse-ring-anim 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
   }
 
-  /* Page entrance animation */
+  @keyframes pulse-ring-anim {
+    0% {
+      transform: scale(0.95);
+      opacity: 0.5;
+    }
+    50% {
+      transform: scale(1.3);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+  }
+
+  /* Page container enter animation */
   @keyframes page-enter {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .page-enter {
-    animation: page-enter 450ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: page-enter 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
-  /* Toast entrance */
+  /* Toast entrance animation */
   @keyframes toast-enter {
-    from { opacity: 0; transform: translateX(100%) scale(0.95); }
-    to { opacity: 1; transform: translateX(0) scale(1); }
+    from {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
 
   .toast-enter {
@@ -422,16 +560,12 @@
     );
   }
 
-  /* Subtle ambient dot pattern (if supported) */
+  /* Subtle ambient dot pattern */
   .texture-subtle {
     background-image: radial-gradient(circle, var(--color-text-muted) 0.5px, transparent 0.5px);
     background-size: 24px 24px;
     opacity: 0.03;
   }
-
-  /* ================================================================
-     Enterprise Visual Language 2.0 — New Premium Utilities
-     ================================================================ */
 
   /* Titanium surface — subtle metallic warmth */
   .surface-titanium {
@@ -472,6 +606,26 @@
     box-shadow: inset 3px 0 0 var(--color-primary), 0 0 12px var(--color-accent-glow);
   }
 
+  /* Enterprise typography & numerical alignment */
+  .font-tabular,
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tracking-tight-enterprise {
+    letter-spacing: -0.025em;
+  }
+
+  /* Enterprise standard focus ring */
+  .focus-ring-enterprise {
+    outline: none !important;
+  }
+
+  .focus-ring-enterprise:focus-visible {
+    outline: none !important;
+    box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-primary);
+  }
+
   /* Premium input surface — soft depth */
   .input-surface {
     background-color: var(--color-surface);
@@ -496,11 +650,7 @@
     box-shadow: 0 0 6px currentColor;
   }
 
-  /* ================================================================
-     EAIP Motion Design System v1.0 — Animation Utilities
-     ================================================================ */
-
-  /* Subtle animated mesh gradient for login / hero backgrounds */
+  /* Subtle animated mesh gradient */
   @keyframes atmosphere-shift {
     0% {
       background-position: 0% 50%;
@@ -570,13 +720,174 @@
     animation: dialog-enter 350ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
+  /* ================================================================
+     EAIP RING LOGIN SYSTEM
+     ================================================================ */
+
+  .eaip-ring-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .eaip-ring-container {
+    position: absolute;
+    inset: -32px;
+    pointer-events: none;
+    z-index: 1;
+    overflow: visible;
+  }
+
+  @media (max-width: 640px) {
+    .eaip-ring-container {
+      inset: -18px;
+    }
+  }
+
+  .eaip-ring-layer {
+    position: absolute;
+    inset: 0;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    pointer-events: none;
+    transition: 0.5s ease-in-out;
+  }
+
+  .dark .eaip-ring-layer {
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .eaip-ring-layer--1 {
+    border-radius: 38% 62% 63% 37% / 41% 44% 56% 59%;
+    animation: animate 6s linear infinite;
+    border-color: var(--eaip-ring-clr-1, rgba(59, 130, 246, 0.45));
+  }
+
+  .dark .eaip-ring-layer--1 {
+    border-color: var(--eaip-ring-clr-1, rgba(6, 182, 212, 0.55));
+  }
+
+  .eaip-ring-layer--2 {
+    border-radius: 41% 44% 56% 59% / 38% 62% 63% 37%;
+    animation: animate 4s linear infinite;
+    border-color: var(--eaip-ring-clr-2, rgba(99, 102, 241, 0.40));
+  }
+
+  .dark .eaip-ring-layer--2 {
+    border-color: var(--eaip-ring-clr-2, rgba(129, 140, 248, 0.50));
+  }
+
+  .eaip-ring-layer--3 {
+    border-radius: 41% 44% 56% 59% / 38% 62% 63% 37%;
+    animation: animate2 10s linear infinite;
+    border-color: var(--eaip-ring-clr-3, rgba(14, 165, 233, 0.35));
+  }
+
+  .dark .eaip-ring-layer--3 {
+    border-color: var(--eaip-ring-clr-3, rgba(168, 85, 247, 0.45));
+  }
+
+  /* Hover & Focus intensification */
+  .eaip-ring-wrapper:hover .eaip-ring-layer,
+  .eaip-ring-wrapper:focus-within .eaip-ring-layer {
+    border: 4px solid var(--clr);
+    filter: drop-shadow(0 0 20px var(--clr));
+  }
+
+  @keyframes animate {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes animate2 {
+    0% {
+      transform: rotate(360deg);
+    }
+    100% {
+      transform: rotate(0deg);
+    }
+  }
+
+  /* ================================================================
+     EAIP AUTHENTICATION CINEMATIC GOOEY LOADER
+     ================================================================ */
+
+  .loader {
+    background: rgba(255, 255, 255, 0.20);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    bottom: 0;
+    height: 100vh;
+    left: 0;
+    right: 0;
+    top: 0;
+    width: 100%;
+    z-index: 9999;
+  }
+
+  .dark .loader {
+    background: rgba(10, 15, 29, 0.75);
+  }
+
+  .loader--fullscreen {
+    position: fixed;
+  }
+
+  .loader__balls {
+    align-items: center;
+    display: flex;
+    filter: url(#gooey);
+    height: 80px;
+    width: 140px;
+    justify-content: center;
+    position: relative;
+  }
+
+  .loader__balls__dot {
+    border-radius: 50%;
+    background: linear-gradient(225deg, #adefff 0%, #3256a7 100%);
+    height: 48px;
+    width: 48px;
+    position: absolute;
+  }
+
+  .dark .loader__balls__dot {
+    background: linear-gradient(225deg, #67e8f9 0%, #4338ca 100%);
+    filter: drop-shadow(0 0 16px rgba(6, 182, 212, 0.45));
+  }
+
+  .loader__balls__dot:first-child {
+    animation: balls 0.7s ease-in-out infinite alternate;
+  }
+
+  .loader__balls__dot:last-child {
+    animation: balls 0.7s ease-in-out infinite alternate-reverse;
+  }
+
+  @keyframes balls {
+    from {
+      transform: translate3d(-36px, 0, 0);
+    }
+    to {
+      transform: translate3d(36px, 0, 0);
+    }
+  }
+
   /* Reduced motion support for all animations */
   @media (prefers-reduced-motion: reduce) {
     .page-enter,
     .toast-enter,
     .dialog-enter,
     .card-hover-lift,
-    .skeleton {
+    .skeleton,
+    .eaip-ring-layer,
+    .loader__balls__dot,
+    .loader {
       animation: none !important;
       transition-duration: 0.01ms !important;
       transition-delay: 0ms !important;

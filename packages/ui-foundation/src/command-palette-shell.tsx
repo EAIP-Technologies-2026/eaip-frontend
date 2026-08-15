@@ -84,7 +84,7 @@ export function CommandPaletteShell({
       <button
         type="button"
         aria-label="Close command palette"
-        className="fixed inset-0 cursor-default border-0 bg-black/40 backdrop-blur-sm"
+        className="fixed inset-0 cursor-default border-0 bg-scrim backdrop-blur-sm"
         onClick={onClose}
       />
       <div

@@ -10,7 +10,10 @@ import { logger } from "@eaip/logging";
 interface Role {
   id: string;
   name: string;
-  permissions: string[];
+  description?: string;
+  permissions?: string[];
+  permissionCount?: number;
+  memberCount?: number;
 }
 
 function RolesPageContent() {
@@ -24,7 +27,7 @@ function RolesPageContent() {
         const client = getDefaultClient();
         const response = await client.get<Role[]>("/admin/roles");
         if (response.error) throw response.error;
-        setRoles(response.data ?? []);
+        setRoles(Array.isArray(response.data) ? response.data : []);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         logger.error("Failed to load roles", { error: message });
@@ -36,9 +39,12 @@ function RolesPageContent() {
     void loadRoles();
   }, []);
 
+  const permissionCount = (role: Role): number =>
+    Array.isArray(role.permissions) ? role.permissions.length : (role.permissionCount ?? 0);
+
   const totalRoles = roles.length;
-  const withPermissions = roles.filter((r) => r.permissions.length > 0).length;
-  const withoutPermissions = roles.filter((r) => r.permissions.length === 0).length;
+  const withPermissions = roles.filter((r) => permissionCount(r) > 0).length;
+  const withoutPermissions = roles.filter((r) => permissionCount(r) === 0).length;
 
   return (
     <EnterpriseShell
@@ -98,11 +104,27 @@ function RolesPageContent() {
                 data={roles}
                 keyExtractor={(role) => role.id}
                 columns={[
-                  { key: "name", header: "Name" },
+                  {
+                    key: "name",
+                    header: "Name",
+                    render: (role) => (
+                      <div>
+                        <p className="font-medium text-text">{role.name}</p>
+                        {role.description ? (
+                          <p className="text-xs text-text-secondary">{role.description}</p>
+                        ) : null}
+                      </div>
+                    ),
+                  },
                   {
                     key: "permissions",
                     header: "Permissions",
-                    render: (role) => role.permissions.join(", ") || "—",
+                    render: (role) => permissionCount(role),
+                  },
+                  {
+                    key: "memberCount",
+                    header: "Members",
+                    render: (role) => role.memberCount ?? 0,
                   },
                 ]}
               />

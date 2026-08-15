@@ -4,7 +4,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { RequireAuth } from "@eaip/auth";
-import { EnterpriseShell } from "@eaip/ui-enterprise";
+import { EnterpriseShell, ErrorState } from "@eaip/ui-enterprise";
 import { Card, CardHeader, CardContent } from "@eaip/ui-foundation";
 import { Badge, SectionTitle, Button, EmptyState } from "@eaip/ui-primitives";
 import { EnterpriseIcon } from "@eaip/icons";
@@ -62,7 +62,7 @@ function MonitoringContent() {
   async function acknowledgeAll() {
     try {
       setEvents((prev) => prev.map((e) => ({ ...e, acknowledged: true })));
-      addToast({ type: "success", title: "All events acknowledged" });
+      addToast({ type: "info", title: "All events acknowledged (local only)", message: "Changes will not persist on refresh — no backend endpoint available." });
     } catch {
       addToast({ type: "error", title: "Failed to acknowledge events" });
     }
@@ -86,9 +86,7 @@ function MonitoringContent() {
       breadcrumbs={[{ label: "Dashboard", href: "/dashboard" }, { label: "Monitoring" }]}
     >
       <div className="space-y-8">
-        <section className="surface-hero relative overflow-hidden p-8 lg:p-10">
-          <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-gradient-to-br from-primary-subtle/50 to-transparent blur-3xl" aria-hidden="true" />
-          <div className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-gradient-to-tr from-accent-glow/30 to-transparent blur-2xl" aria-hidden="true" />
+        <section data-tour="monitoring" className="surface-hero relative overflow-hidden p-8 lg:p-10">
           <div className="relative">
             <div className="flex items-center gap-2 text-xs font-semibold tracking-widest text-primary uppercase mb-4">
               <EnterpriseIcon name="activity" size={14} />
@@ -100,10 +98,10 @@ function MonitoringContent() {
         </section>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <MetricCard label="Total Events" value={events.length} icon="activity" />
-          <MetricCard label="Unacknowledged" value={unacknowledged} icon="alert" />
-          <MetricCard label="Critical" value={severityCounts.critical} icon="alert" />
-          <MetricCard label="Warnings" value={severityCounts.warning} icon="alert" />
+          <MetricCard label="Total Events" value={loading ? "—" : events.length} icon="activity" />
+          <MetricCard label="Unacknowledged" value={loading ? "—" : unacknowledged} icon="alert" />
+          <MetricCard label="Critical" value={loading ? "—" : severityCounts.critical} icon="alert" />
+          <MetricCard label="Warnings" value={loading ? "—" : severityCounts.warning} icon="alert" />
         </div>
 
         <div className="grid gap-4 lg:grid-cols-3">
@@ -114,8 +112,8 @@ function MonitoringContent() {
             <CardContent className="px-5 py-4">
               {loading ? (
               <div className="space-y-3">
-                {Array.from({ length: 5 }, (_, i) => (
-                  <div key={i} className="skeleton h-10" />
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="skeleton-card h-10" style={{ animationDelay: String(i * 80) + "ms" }} />
                 ))}
               </div>
               ) : timelineData.length === 0 ? (
@@ -189,12 +187,12 @@ function MonitoringContent() {
           <CardContent className="px-5 py-4">
             {loading ? (
               <div className="space-y-3">
-                {Array.from({ length: 8 }, (_, i) => (
-                  <div key={i} className="skeleton h-12" />
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                  <div key={i} className="skeleton-card h-12" style={{ animationDelay: String(i * 60) + "ms" }} />
                 ))}
               </div>
             ) : error ? (
-              <div className="rounded-md bg-danger/10 p-4 text-sm text-danger">{error}</div>
+              <ErrorState title="Could not load events" message={error} onRetry={() => { window.location.reload(); }} />
             ) : filtered.length === 0 ? (
               <EmptyState
                 icon="activity"
@@ -211,8 +209,8 @@ function MonitoringContent() {
                     <div className="flex items-center gap-3">
                       <div className={`h-2 w-2 rounded-full ${
                         event.severity === "critical" ? "bg-danger" :
-                        event.severity === "error" ? "bg-error" :
-                        event.severity === "warning" ? "bg-warning" : "bg-info"
+                        event.severity === "error" ? "bg-danger" :
+                        event.severity === "warning" ? "bg-warning" : "bg-primary"
                       }`} />
                       <div>
                         <div className="flex items-center gap-2">

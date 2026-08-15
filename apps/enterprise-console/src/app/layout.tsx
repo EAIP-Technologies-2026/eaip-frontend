@@ -14,8 +14,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
+        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
         <ThemeScript />
       </head>
       <body>

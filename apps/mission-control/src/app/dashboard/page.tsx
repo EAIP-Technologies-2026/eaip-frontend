@@ -162,32 +162,19 @@ function DashboardContent() {
   }, [missionStatus]);
 
   const fleetHealth = useMemo(() => {
-    const penalty = (overview.failedToday * 5) + (overview.criticalAlerts * 15) + (overview.warnings * 5);
-    return Math.max(0, Math.min(100, 100 - penalty));
-  }, [overview.failedToday, overview.criticalAlerts, overview.warnings]);
+    const total = overview.completedToday + overview.failedToday;
+    if (total === 0) return 100;
+    return Math.round((overview.completedToday / total) * 100);
+  }, [overview.completedToday, overview.failedToday]);
 
   const executionVolumeData = useMemo(() => [
-    { name: "Mon", value: overview.completedToday },
-    { name: "Tue", value: Math.round(overview.completedToday * 0.9) },
-    { name: "Wed", value: Math.round(overview.completedToday * 1.1) },
-    { name: "Thu", value: Math.round(overview.completedToday * 0.8) },
-    { name: "Fri", value: Math.round(overview.completedToday * 1.2) },
-    { name: "Sat", value: Math.round(overview.completedToday * 0.5) },
-    { name: "Sun", value: Math.round(overview.completedToday * 0.4) },
+    { name: "Today", value: overview.completedToday },
   ], [overview.completedToday]);
 
   const successRateData = useMemo(() => {
     const total = overview.completedToday + overview.failedToday;
     const rate = total > 0 ? Math.round((overview.completedToday / total) * 100) : 100;
-    return [
-      { name: "Mon", value: rate },
-      { name: "Tue", value: Math.max(80, rate - 5) },
-      { name: "Wed", value: Math.max(80, rate + 2) },
-      { name: "Thu", value: Math.max(80, rate - 3) },
-      { name: "Fri", value: Math.max(80, rate + 5) },
-      { name: "Sat", value: Math.max(80, rate - 2) },
-      { name: "Sun", value: Math.max(80, rate - 1) },
-    ];
+    return [{ name: "Today", value: rate }];
   }, [overview.completedToday, overview.failedToday]);
 
   return (

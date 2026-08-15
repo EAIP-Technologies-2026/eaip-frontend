@@ -5,7 +5,7 @@ describe("design-tokens", () => {
   it("exports color tokens", () => {
     expect(tokens.color).toBeDefined();
     expect(tokens.color.neutral[50]).toBe("#fafafa");
-    expect(tokens.color.primary[500]).toBe("#3b82f6");
+    expect(tokens.color.primary[500]).toBe("#4338ca");
   });
 
   it("exports spacing tokens", () => {

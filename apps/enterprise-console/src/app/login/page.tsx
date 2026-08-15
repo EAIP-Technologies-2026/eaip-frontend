@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@eaip/auth";
 import { LoginShell } from "@eaip/ui-foundation";
+import StableSingularityBackground from "../../components/StableSingularityBackground";
 
 export default function LoginPage() {
   const { login, error, clearError } = useAuth();
@@ -23,12 +24,15 @@ export default function LoginPage() {
   }
 
   return (
-    <LoginShell
-      appName="Enterprise Console"
-      onSubmit={handleSubmit}
-      loading={submitting}
-      error={error}
-      onClearError={clearError}
-    />
+    <>
+      <StableSingularityBackground />
+      <LoginShell
+        appName="Enterprise Console"
+        onSubmit={handleSubmit}
+        loading={submitting}
+        error={error}
+        onClearError={clearError}
+      />
+    </>
   );
 }

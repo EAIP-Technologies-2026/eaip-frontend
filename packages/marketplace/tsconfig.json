@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "noEmit": false,
+    "emitDeclarationOnly": false,
+    "rootDir": "../..",
+    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
+  },
+  "include": ["src", "../../packages/api/src"],
+  "exclude": ["node_modules", "dist"]
+}

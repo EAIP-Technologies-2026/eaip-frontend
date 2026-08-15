@@ -50,18 +50,47 @@ const placeholderHealth: SystemHealthData = {
 
 export async function fetchSystemHealth(): Promise<ServiceResult<SystemHealthData>> {
   try {
-    const { getDefaultClient } = await import("@eaip/api");
-    const client = getDefaultClient();
-    const [healthRes, metricsRes] = await Promise.all([
-      client.get<SystemHealthData>("/system/health"),
-      client.get<SystemMetric[]>("/system/metrics"),
+    const { createMonitoringClient } = await import("@eaip/monitoring");
+    const { createRuntimeClient } = await import("@eaip/runtime");
+
+    const monitoringClient = createMonitoringClient();
+    const runtimeClient = createRuntimeClient();
+
+    const [healthList, rawMetrics, runtimeMetrics] = await Promise.all([
+      monitoringClient.getHealth(),
+      monitoringClient.getMetrics(),
+      runtimeClient.getMetrics(),
     ]);
-    if (healthRes.error) throw healthRes.error;
-    if (metricsRes.error) throw metricsRes.error;
+
+    const services: SystemService[] = healthList.map((svc) => ({
+      name: svc.name,
+      status: mapStatus(svc.status),
+      uptime: svc.uptime || "0s",
+      latency: svc.responseTime ? `${String(svc.responseTime)}ms` : "N/A",
+    }));
+
+    const metrics: SystemMetric[] = rawMetrics.map((met) => {
+      const val = parseFloat(met.value) || 0;
+      return {
+        label: met.label,
+        value: val,
+        unit: met.unit || "",
+        threshold: 80,
+        status: val > 80 ? "critical" : val > 60 ? "warning" : "healthy",
+      };
+    });
+
+    const overall = services.some((s) => s.status === "down")
+      ? "down"
+      : services.some((s) => s.status === "degraded")
+      ? "degraded"
+      : "healthy";
+
     return liveResult({
-      ...placeholderHealth,
-      ...healthRes.data,
-      metrics: metricsRes.data ?? healthRes.data?.metrics ?? [],
+      overall,
+      uptime: runtimeMetrics.uptime || "0s",
+      services,
+      metrics,
     });
   } catch (err) {
     if (isNetworkError(err)) {
@@ -69,4 +98,11 @@ export async function fetchSystemHealth(): Promise<ServiceResult<SystemHealthDat
     }
     throw err;
   }
+}
+
+function mapStatus(status: string): SystemService["status"] {
+  const s = status.toLowerCase();
+  if (s === "healthy" || s === "passed" || s === "ok" || s === "active") return "healthy";
+  if (s === "degraded" || s === "warning") return "degraded";
+  return "down";
 }

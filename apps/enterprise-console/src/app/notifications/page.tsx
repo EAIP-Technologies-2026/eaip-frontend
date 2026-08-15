@@ -1,83 +1,128 @@
 "use client";
 
-/* eslint-disable @typescript-eslint/no-unnecessary-condition, @typescript-eslint/no-non-null-assertion, @typescript-eslint/require-await, @typescript-eslint/no-misused-promises */
-
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { RequireAuth } from "@eaip/auth";
 import { usePlatformStore } from "@eaip/state";
-import { EnterpriseShell } from "@eaip/ui-enterprise";
-import { Card, CardHeader, CardContent } from "@eaip/ui-foundation";
-import { Badge, Button, EmptyState, SectionTitle } from "@eaip/ui-primitives";
-import { EnterpriseIcon } from "@eaip/icons";
+import { EnterpriseShell, NotificationCenter } from "@eaip/ui-enterprise";
+import type { CenterNotificationItem, NotificationFilter as NFilter, NotificationSeverity, NotificationCategory } from "@eaip/ui-enterprise";
 import { useRouter } from "next/navigation";
 import {
   fetchNotifications,
   markNotificationRead,
   markAllNotificationsRead,
+  acknowledgeNotification,
+  dismissNotification,
 } from "../../services/notifications-service";
-import type { NotificationItem } from "../../services/notifications-service";
+import type { NotificationItem, NotificationCounts } from "../../services/notifications-service";
 import { useFallback } from "../../services/fallback-context";
 
 function NotificationsContent() {
   const router = useRouter();
   const storeNotifications = usePlatformStore((state) => state.notifications);
-  const [apiNotifications, setApiNotifications] = useState<NotificationItem[]>([]);
+  const [apiResult, setApiResult] = useState<{
+    notifications: NotificationItem[];
+    counts: NotificationCounts;
+    categoryCounts: Record<string, number>;
+    severityCounts: Record<string, number>;
+  }>({
+    notifications: [],
+    counts: { total: 0, unread: 0, acknowledged: 0, dismissed: 0 },
+    categoryCounts: {},
+    severityCounts: {},
+  });
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<"all" | "unread">("all");
+  const [filter, setFilter] = useState<NFilter>("all");
+  const [selectedCategory, setSelectedCategory] = useState<NotificationCategory | null>(null);
+  const [selectedSeverity, setSelectedSeverity] = useState<NotificationSeverity | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const { setFallback } = useFallback();
 
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      try {
-        const result = await fetchNotifications();
-        if (!cancelled) {
-          setFallback("notifications", result.source === "fallback");
-          setApiNotifications(result.data);
-        }
-      } catch {
-        if (!cancelled) setApiNotifications([]);
-      } finally {
-        if (!cancelled) setLoading(false);
+  const loadData = useCallback(async (options?: {
+    unread?: boolean;
+    severity?: NotificationSeverity;
+    category?: NotificationCategory;
+    search?: string;
+  }) => {
+    try {
+      const result = await fetchNotifications(options);
+      if (result.source === "fallback") {
+        setFallback("notifications", true);
       }
+      setApiResult({
+        notifications: result.data.notifications,
+        counts: result.data.counts,
+        categoryCounts: result.data.categoryCounts,
+        severityCounts: result.data.severityCounts,
+      });
+    } catch {
+      setApiResult({
+        notifications: [],
+        counts: { total: 0, unread: 0, acknowledged: 0, dismissed: 0 },
+        categoryCounts: {},
+        severityCounts: {},
+      });
+    } finally {
+      setLoading(false);
     }
-    void load();
-    return () => { cancelled = true; };
   }, [setFallback]);
 
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
+
   const allNotifications = useMemo(() => {
-    const combined = [...apiNotifications];
+    const combined: CenterNotificationItem[] = apiResult.notifications.map((n) => ({
+      id: n.id,
+      type: n.type,
+      title: n.title,
+      message: n.message,
+      summary: n.summary,
+      severity: n.severity,
+      category: n.category,
+      timestamp: n.timestamp,
+      read: n.read,
+      acknowledged: n.acknowledged,
+      dismissed: n.dismissed,
+      source: n.source,
+      deepLink: n.deepLink,
+      relatedEntityId: n.relatedEntityId,
+      relatedEntityType: n.relatedEntityType,
+      groupKey: n.groupKey,
+    }));
+
     for (const n of storeNotifications) {
       if (!combined.some((c) => c.id === n.id)) {
-        combined.push({ id: n.id, title: n.title, message: n.message ?? "", timestamp: n.timestamp, read: n.read });
+        combined.push({
+          id: n.id,
+          type: "system",
+          title: n.title,
+          message: n.message,
+          summary: n.summary ?? n.message,
+          severity: n.severity ?? "info",
+          category: n.category ?? "system",
+          timestamp: n.timestamp,
+          read: n.read,
+          acknowledged: n.acknowledged ?? false,
+          dismissed: n.dismissed ?? false,
+          source: n.source ?? "store",
+          deepLink: n.deepLink ?? null,
+          relatedEntityId: n.relatedEntityId ?? null,
+          relatedEntityType: n.relatedEntityType ?? null,
+          groupKey: n.groupKey ?? null,
+        });
       }
     }
+
     return combined.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-  }, [apiNotifications, storeNotifications]);
+  }, [apiResult.notifications, storeNotifications]);
 
-  const displayed = filter === "all" ? allNotifications : allNotifications.filter((n) => !n.read);
-  const unreadCount = allNotifications.filter((n) => !n.read).length;
-
-  const grouped = useMemo(() => {
-    const groups: Record<string, NotificationItem[]> = {};
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const thisWeek = new Date(today);
-    thisWeek.setDate(thisWeek.getDate() - 7);
-
-    for (const n of displayed) {
-      const date = new Date(n.timestamp);
-      let key = "Earlier";
-      if (date.toDateString() === today.toDateString()) key = "Today";
-      else if (date.toDateString() === yesterday.toDateString()) key = "Yesterday";
-      else if (date >= thisWeek) key = "This Week";
-      else if (date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear()) key = "This Month";
-      groups[key] ??= [];
-      groups[key]!.push(n);
-    }
-    return groups;
-  }, [displayed]);
+  const counts: NotificationCounts = useMemo(() => {
+    const total = allNotifications.length;
+    const unread = allNotifications.filter((n) => !n.read && !n.dismissed).length;
+    const acknowledged = allNotifications.filter((n) => n.acknowledged).length;
+    const dismissed = allNotifications.filter((n) => n.dismissed).length;
+    return { total, unread, acknowledged, dismissed };
+  }, [allNotifications]);
 
   async function handleMarkAllRead() {
     try {
@@ -89,7 +134,10 @@ function NotificationsContent() {
     for (const n of allNotifications.filter((x) => !x.read)) {
       store.markNotificationRead(n.id);
     }
-    setApiNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    setApiResult((prev) => ({
+      ...prev,
+      notifications: prev.notifications.map((n) => ({ ...n, read: true })),
+    }));
   }
 
   async function handleMarkRead(id: string) {
@@ -100,13 +148,95 @@ function NotificationsContent() {
     }
     const store = usePlatformStore.getState();
     if (store) store.markNotificationRead(id);
-    setApiNotifications((prev) => prev.map((n) => n.id === id ? { ...n, read: true } : n));
+    setApiResult((prev) => ({
+      ...prev,
+      notifications: prev.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
+    }));
   }
 
-  async function removeNotification(id: string) {
+  async function handleAcknowledge(id: string) {
+    try {
+      await acknowledgeNotification(id);
+    } catch {
+      // still update locally
+    }
+    const store = usePlatformStore.getState();
+    if (store) store.acknowledgeNotification(id);
+    setApiResult((prev) => ({
+      ...prev,
+      notifications: prev.notifications.map((n) =>
+        n.id === id ? { ...n, acknowledged: true, read: true } : n
+      ),
+    }));
+  }
+
+  async function handleDismiss(id: string) {
+    try {
+      await dismissNotification(id);
+    } catch {
+      // still update locally
+    }
+    const store = usePlatformStore.getState();
+    if (store) store.dismissNotification(id);
+    setApiResult((prev) => ({
+      ...prev,
+      notifications: prev.notifications.map((n) =>
+        n.id === id ? { ...n, dismissed: true } : n
+      ),
+    }));
+  }
+
+  async function handleRemove(id: string) {
     const store = usePlatformStore.getState();
     store.removeNotification(id);
-    setApiNotifications((prev) => prev.filter((n) => n.id !== id));
+    setApiResult((prev) => ({
+      ...prev,
+      notifications: prev.notifications.filter((n) => n.id !== id),
+    }));
+  }
+
+  function handleNavigate(deepLink: string) {
+    router.push(deepLink);
+  }
+
+  function handleFilterChange(newFilter: NFilter) {
+    setFilter(newFilter);
+    const options: Parameters<typeof loadData>[0] = {};
+    if (newFilter === "unread") options.unread = true;
+    if (selectedSeverity) options.severity = selectedSeverity;
+    if (selectedCategory) options.category = selectedCategory;
+    if (searchQuery) options.search = searchQuery;
+    void loadData(options);
+  }
+
+  function handleCategoryChange(category: NotificationCategory | null) {
+    setSelectedCategory(category);
+    const options: Parameters<typeof loadData>[0] = {};
+    if (filter === "unread") options.unread = true;
+    if (selectedSeverity) options.severity = selectedSeverity;
+    if (category) options.category = category;
+    if (searchQuery) options.search = searchQuery;
+    void loadData(options);
+  }
+
+  function handleSeverityChange(severity: NotificationSeverity | null) {
+    setSelectedSeverity(severity);
+    const options: Parameters<typeof loadData>[0] = {};
+    if (filter === "unread") options.unread = true;
+    if (severity) options.severity = severity;
+    if (selectedCategory) options.category = selectedCategory;
+    if (searchQuery) options.search = searchQuery;
+    void loadData(options);
+  }
+
+  function handleSearchChange(query: string) {
+    setSearchQuery(query);
+    const options: Parameters<typeof loadData>[0] = {};
+    if (filter === "unread") options.unread = true;
+    if (selectedSeverity) options.severity = selectedSeverity;
+    if (selectedCategory) options.category = selectedCategory;
+    if (query) options.search = query;
+    void loadData(options);
   }
 
   return (
@@ -115,122 +245,24 @@ function NotificationsContent() {
       pageTitle="Notifications"
       breadcrumbs={[{ label: "Dashboard", href: "/dashboard" }, { label: "Notifications" }]}
     >
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 rounded-lg border border-border bg-surface p-0.5">
-            <button
-              type="button"
-              onClick={() => { setFilter("all"); }}
-              className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                filter === "all" ? "bg-primary text-text-inverse" : "text-text-secondary hover:bg-surface-tertiary"
-              }`}
-            >
-              All ({allNotifications.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => { setFilter("unread"); }}
-              className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                filter === "unread" ? "bg-primary text-text-inverse" : "text-text-secondary hover:bg-surface-tertiary"
-              }`}
-            >
-              Unread ({unreadCount})
-            </button>
-          </div>
-          <div className="flex items-center gap-2">
-            {unreadCount > 0 ? (
-              <span className="text-xs text-text-secondary">{unreadCount} unread</span>
-            ) : null}
-            <Button variant="secondary" size="sm" onClick={handleMarkAllRead}>
-              Mark All Read
-            </Button>
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 5 }, (_, i) => (
-              <div key={i} className="skeleton h-20 rounded-card" />
-            ))}
-          </div>
-        ) : Object.keys(grouped).length === 0 ? (
-          <Card>
-            <CardContent>
-              <EmptyState
-                icon="bell"
-                title="All caught up!"
-                description={filter === "unread" ? "No unread notifications." : "No notifications yet."}
-                action={
-                  filter === "unread" ? (
-                    <Button variant="secondary" size="sm" onClick={() => { setFilter("all"); }}>Show All</Button>
-                  ) : (
-                    <Button variant="secondary" iconLeft="robot" size="sm" onClick={() => { router.push("/agents"); }}>Browse Agents</Button>
-                  )
-                }
-              />
-            </CardContent>
-          </Card>
-        ) : (
-          Object.entries(grouped).map(([groupLabel, items]) => (
-            <Card key={groupLabel}>
-              <CardHeader>
-                <SectionTitle>{groupLabel}</SectionTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="divide-y divide-border">
-                  {items.map((n) => (
-                    <div
-                      key={n.id}
-                      className={`flex items-start gap-3 py-3 first:pt-0 last:pb-0 ${
-                        !n.read ? "bg-primary/[0.02]" : ""
-                      }`}
-                    >
-                      <div className={`mt-1 h-2 w-2 shrink-0 rounded-full ${
-                        n.read ? "bg-transparent" : "bg-primary"
-                      }`} />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className={`text-sm ${n.read ? "text-text-secondary" : "font-medium text-text"}`}>
-                            {n.title}
-                          </p>
-                          {!n.read && (
-                            <Badge variant="primary">New</Badge>
-                          )}
-                        </div>
-                        {n.message ? (
-                          <p className="mt-0.5 text-xs text-text-secondary line-clamp-2">{n.message}</p>
-                        ) : null}
-                        <p className="mt-1 text-[10px] text-text-muted">
-                          {new Date(n.timestamp).toLocaleString()}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        {!n.read ? (
-                          <button
-                            type="button"
-                            onClick={() => handleMarkRead(n.id)}
-                            className="rounded p-1 text-text-secondary hover:bg-surface-tertiary"
-                            title="Mark as read"
-                          >
-                            <EnterpriseIcon name="check" size={14} />
-                          </button>
-                        ) : null}
-                        <button
-                          type="button"
-                          onClick={() => removeNotification(n.id)}
-                          className="rounded p-1 text-text-secondary hover:bg-surface-tertiary hover:text-danger"
-                          title="Remove"
-                        >
-                          <EnterpriseIcon name="x" size={14} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
+      <div className="rounded-card border border-border bg-surface shadow-elevated overflow-hidden" style={{ minHeight: "70vh" }}>
+        <NotificationCenter
+          items={allNotifications}
+          counts={counts}
+          categoryCounts={apiResult.categoryCounts}
+          severityCounts={apiResult.severityCounts}
+          loading={loading}
+          onMarkRead={handleMarkRead}
+          onMarkAllRead={handleMarkAllRead}
+          onAcknowledge={handleAcknowledge}
+          onDismiss={handleDismiss}
+          onRemove={handleRemove}
+          onNavigate={handleNavigate}
+          onFilterChange={handleFilterChange}
+          onCategoryChange={handleCategoryChange}
+          onSeverityChange={handleSeverityChange}
+          onSearchChange={handleSearchChange}
+        />
       </div>
     </EnterpriseShell>
   );

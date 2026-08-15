@@ -27,25 +27,25 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<NewVariant, string> = {
   primary:
-    "bg-primary text-text-inverse shadow-sm border border-primary/20 hover:shadow-md hover:-translate-y-[1px] hover:shadow-primary/10 active:translate-y-0 active:scale-[0.97] active:shadow-sm active:bg-primary-hover focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface transition-all duration-200",
+    "btn-liquid-glass btn-liquid-glass-primary font-semibold focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:pointer-events-none disabled:opacity-50",
   secondary:
-    "bg-surface text-text border border-border/80 shadow-sm hover:bg-surface-secondary hover:border-border hover:shadow-md hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.97] active:shadow-sm active:bg-surface-tertiary focus-visible:ring-2 focus-visible:ring-border-strong focus-visible:ring-offset-2 focus-visible:ring-offset-surface transition-all duration-200",
+    "btn-liquid-glass font-medium text-text focus-visible:ring-2 focus-visible:ring-border-strong focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:pointer-events-none disabled:opacity-50",
   tertiary:
-    "bg-surface-secondary/80 text-text-secondary border border-transparent hover:bg-surface-tertiary hover:text-text hover:border-border/60 active:translate-y-0 active:scale-[0.97] active:bg-surface-tertiary focus-visible:ring-2 focus-visible:ring-border-strong focus-visible:ring-offset-2 focus-visible:ring-offset-surface transition-all duration-200",
+    "bg-surface-secondary/80 text-text-secondary border border-transparent hover:bg-surface-tertiary hover:text-text hover:border-border/60 active:scale-[0.98] active:bg-surface-tertiary focus-visible:ring-2 focus-visible:ring-border-strong focus-visible:ring-offset-2 focus-visible:ring-offset-surface transition-all duration-200",
   ghost:
-    "bg-transparent text-text-secondary border border-transparent hover:bg-surface-tertiary/60 hover:text-text active:translate-y-0 active:scale-[0.97] active:bg-surface-tertiary focus-visible:ring-2 focus-visible:ring-border-strong focus-visible:ring-offset-2 focus-visible:ring-offset-surface transition-all duration-200",
+    "btn-liquid-glass btn-liquid-glass-ghost font-medium text-text-secondary focus-visible:ring-2 focus-visible:ring-border-strong focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:pointer-events-none disabled:opacity-50",
   destructive:
-    "bg-danger text-text-inverse shadow-sm border border-danger/20 hover:shadow-md hover:-translate-y-[1px] hover:shadow-danger/10 active:translate-y-0 active:scale-[0.97] active:shadow-sm active:opacity-90 focus-visible:ring-2 focus-visible:ring-danger focus-visible:ring-offset-2 focus-visible:ring-offset-surface transition-all duration-200",
+    "btn-liquid-glass btn-liquid-glass-danger font-semibold focus-visible:ring-2 focus-visible:ring-danger focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:pointer-events-none disabled:opacity-50",
   glass:
-    "btn-glass text-text shadow-sm hover:shadow-md hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.97] active:shadow-sm active:bg-surface-tertiary/80 focus-visible:ring-2 focus-visible:ring-border-strong focus-visible:ring-offset-2 focus-visible:ring-offset-surface transition-all duration-200",
+    "btn-liquid-glass font-medium text-text focus-visible:ring-2 focus-visible:ring-border-strong focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:pointer-events-none disabled:opacity-50",
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-  xs: "px-2.5 py-1.5 text-xs gap-1.5 rounded-button",
-  sm: "px-3.5 py-2 text-sm gap-1.5 rounded-button",
-  md: "px-4 py-2.5 text-sm gap-2 rounded-button",
-  lg: "px-5 py-3 text-base gap-2.5 rounded-button",
-  xl: "px-6 py-3.5 text-lg gap-3 rounded-button",
+  xs: "px-2.5 py-1.5 text-xs gap-1.5 rounded-lg",
+  sm: "px-3.5 py-2 text-sm gap-1.5 rounded-lg",
+  md: "px-4 py-2.5 text-sm gap-2 rounded-lg",
+  lg: "px-5 py-3 text-base gap-2.5 rounded-lg",
+  xl: "px-6 py-3.5 text-lg gap-3 rounded-lg",
 };
 
 const iconOnlySizeStyles: Record<ButtonSize, string> = {
@@ -181,7 +181,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const isDisabled = disabled ?? loading;
 
     const base = [
-      "inline-flex items-center justify-center font-medium",
+      "inline-flex items-center justify-center",
       "focus:outline-none",
       "disabled:opacity-50 disabled:pointer-events-none disabled:translate-y-0 disabled:shadow-none",
       "select-none",
@@ -211,17 +211,17 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         }
         {...props}
       >
-        {loading && <Spinner size={iconSize} />}
-        {!loading && displayState === "success" && <SuccessIcon size={iconSize} />}
-        {!loading && displayState === "error" && <ErrorIcon size={iconSize} />}
+        {loading && <span className="relative z-10"><Spinner size={iconSize} /></span>}
+        {!loading && displayState === "success" && <span className="relative z-10"><SuccessIcon size={iconSize} /></span>}
+        {!loading && displayState === "error" && <span className="relative z-10"><ErrorIcon size={iconSize} /></span>}
         {!loading && !displayState && iconLeft && (
-          <span className="shrink-0">{iconLeft}</span>
+          <span className="shrink-0 relative z-10">{iconLeft}</span>
         )}
         {!loading && !displayState && !iconOnly && (
-          <span className="truncate">{children}</span>
+          <span className="truncate relative z-10">{children}</span>
         )}
         {!loading && !displayState && iconRight && (
-          <span className="shrink-0">{iconRight}</span>
+          <span className="shrink-0 relative z-10">{iconRight}</span>
         )}
       </button>
     );

@@ -6,14 +6,23 @@ import { usePlatformStore } from "@eaip/state";
 import { EnterpriseShell, LoadingState, ErrorState } from "@eaip/ui-enterprise";
 import { Card, CardHeader, CardContent, Tabs } from "@eaip/ui-foundation";
 import { SectionTitle } from "@eaip/ui-primitives";
+import dynamic from "next/dynamic";
 import {
   MetricCard,
   StatusWidget,
-  BarChartWidget,
-  PieChartWidget,
   Sparkline,
   type TimelineItem,
 } from "@eaip/ui-visualizations";
+
+const BarChartWidget = dynamic(
+  () => import("@eaip/ui-visualizations").then((mod) => mod.BarChartWidget),
+  { ssr: false, loading: () => <div className="h-48 skeleton rounded-lg" /> }
+);
+const PieChartWidget = dynamic(
+  () => import("@eaip/ui-visualizations").then((mod) => mod.PieChartWidget),
+  { ssr: false, loading: () => <div className="h-48 skeleton rounded-lg" /> }
+);
+
 import { logger } from "@eaip/logging";
 import { EnterpriseIcon } from "@eaip/icons";
 import { fetchWorkflowStats, fetchMissionStats, fetchRuntimeMetrics } from "../../services/analytics-service";

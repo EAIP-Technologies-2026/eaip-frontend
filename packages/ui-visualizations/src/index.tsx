@@ -1,4 +1,5 @@
 import type { HTMLAttributes, ReactNode } from "react";
+import { EnterpriseIcon, type IconName } from "@eaip/icons";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -219,7 +220,8 @@ export function PieChartWidget({ data, height = 200, className }: PieChartProps)
     "var(--color-danger)",
     "var(--color-text-muted)",
   ];
-  const coloredData = data.map((entry, index) => ({
+  const nonzero = data.filter((entry) => entry.value > 0);
+  const coloredData = nonzero.map((entry, index) => ({
     ...entry,
     fill: entry.color ?? defaultColors[index % defaultColors.length],
   }));
@@ -233,7 +235,7 @@ export function PieChartWidget({ data, height = 200, className }: PieChartProps)
             nameKey="name"
             innerRadius="60%"
             outerRadius="90%"
-            paddingAngle={2}
+            paddingAngle={coloredData.length > 1 ? 2 : 0}
           />
           <Tooltip
             contentStyle={{
@@ -277,6 +279,7 @@ export function MetricCard({
   }[changeDirection];
   return (
     <div
+      data-slot="metric-card"
       className={["surface-card card-hover-lift flex flex-col justify-between p-5", className]
         .filter(Boolean)
         .join(" ")}
@@ -285,7 +288,7 @@ export function MetricCard({
       <div className="flex items-start justify-between">
         <div>
           <p className="text-text-secondary text-sm font-medium">{label}</p>
-          <div className="text-text mt-1 text-2xl font-semibold tracking-tight">{value}</div>
+          <div className="text-text mt-1 text-2xl font-semibold tracking-tight font-tabular tabular-nums">{value}</div>
           {change && (
             <div
               className={["mt-1 flex items-center gap-1 text-xs font-medium", changeColor].join(
@@ -299,7 +302,7 @@ export function MetricCard({
         </div>
         {icon && (
           <div className="bg-primary-subtle/80 text-primary flex h-10 w-10 items-center justify-center rounded-xl shadow-sm">
-            {typeof icon === "string" ? <span className="text-lg">{icon}</span> : icon}
+            {typeof icon === "string" ? <EnterpriseIcon name={icon as IconName} size={18} aria-hidden="true" /> : icon}
           </div>
         )}
       </div>
@@ -326,24 +329,23 @@ export interface TimelineProps extends HTMLAttributes<HTMLOListElement> {
 
 export function Timeline({ items, className, ...props }: TimelineProps) {
   return (
-    <ol className={["relative space-y-6", className].filter(Boolean).join(" ")} {...props}>
-      {items.map((item, index) => (
-        <li key={item.id} className="relative pl-6">
-          {index < items.length - 1 && (
-            <span
-              className="bg-border absolute top-6 left-[0.4rem] h-full w-px"
-              aria-hidden="true"
-            />
-          )}
-          <div className="absolute top-1 left-0">
+    <ol
+      className={["relative border-l border-border pl-6 space-y-6", className]
+        .filter(Boolean)
+        .join(" ")}
+      {...props}
+    >
+      {items.map((item) => (
+        <li key={item.id} className="relative">
+          <span className="absolute -left-[31px] top-1.5 flex h-3 w-3 items-center justify-center rounded-full bg-surface ring-4 ring-surface-secondary">
             <StatusRing status={item.status ?? "idle"} size="sm" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-text text-sm font-medium">{item.title}</span>
+          </span>
+          <div>
+            <h4 className="text-sm font-semibold text-text">{item.title}</h4>
             {item.description && (
-              <span className="text-text-secondary text-sm">{item.description}</span>
+              <p className="text-xs text-text-secondary mt-0.5">{item.description}</p>
             )}
-            <span className="text-text-muted mt-0.5 text-xs">{item.timestamp}</span>
+            <time className="text-[11px] text-text-muted mt-1 block font-mono">{item.timestamp}</time>
           </div>
         </li>
       ))}
@@ -353,58 +355,41 @@ export function Timeline({ items, className, ...props }: TimelineProps) {
 
 export interface StatusWidgetProps extends HTMLAttributes<HTMLDivElement> {
   title: string;
-  subtitle?: string;
   status: "idle" | "running" | "success" | "warning" | "error";
-  value?: string;
+  description?: string;
+  metrics?: { label: string; value: string | number }[];
 }
 
 export function StatusWidget({
   title,
-  subtitle,
   status,
-  value,
+  description,
+  metrics,
   className,
   ...props
 }: StatusWidgetProps) {
-  const statusLabels = {
-    idle: "Idle",
-    running: "Running",
-    success: "Healthy",
-    warning: "Warning",
-    error: "Error",
-  };
   return (
     <div
-      className={["surface-card card-hover-lift p-5", className].filter(Boolean).join(" ")}
+      className={["surface-card p-5 space-y-4", className].filter(Boolean).join(" ")}
       {...props}
     >
       <div className="flex items-center justify-between">
-        <div>
-          <p className="text-text-secondary text-sm font-medium">{title}</p>
-          <p className="text-text mt-0.5 text-lg font-semibold">{value ?? statusLabels[status]}</p>
-          {subtitle && <p className="text-text-muted mt-0.5 text-xs">{subtitle}</p>}
-        </div>
-        <div className="bg-surface-tertiary flex h-12 w-12 items-center justify-center rounded-full">
-          <StatusRing status={status} pulse={status === "running"} size="lg" />
+        <div className="flex items-center gap-2.5">
+          <StatusRing status={status} pulse={status === "running"} size="md" />
+          <h3 className="font-semibold text-text text-sm">{title}</h3>
         </div>
       </div>
+      {description && <p className="text-xs text-text-secondary">{description}</p>}
+      {metrics && metrics.length > 0 && (
+        <div className="grid grid-cols-2 gap-3 pt-2 border-t border-border/50">
+          {metrics.map((m) => (
+            <div key={m.label}>
+              <div className="text-[11px] text-text-muted uppercase tracking-wider">{m.label}</div>
+              <div className="text-sm font-semibold text-text font-tabular tabular-nums">{m.value}</div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
-
-export {
-  LineChartWidget,
-  AreaChartWidget,
-  HorizontalBarChartWidget,
-  GaugeWidget,
-  DonutChartWidget,
-  ChartLegend,
-} from "./visualization";
-export type {
-  LineChartWidgetProps,
-  AreaChartWidgetProps,
-  HorizontalBarChartWidgetProps,
-  GaugeWidgetProps,
-  DonutChartWidgetProps,
-  ChartLegendProps,
-} from "./visualization";

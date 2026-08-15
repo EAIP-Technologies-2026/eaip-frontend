@@ -74,7 +74,7 @@ export function MetricCard({
       </div>
 
       <div className="mt-3 flex items-baseline justify-between gap-2">
-        <span className="text-text text-2xl font-bold tracking-tight md:text-3xl">{value}</span>
+        <span className="text-text text-2xl font-bold tracking-tight font-tabular tabular-nums md:text-3xl">{value}</span>
         {change ? (
           <div className={`flex items-center gap-1 text-xs font-semibold ${trendColors[trend]}`}>
             <EnterpriseIcon name={trendIcons[trend] as never} size={14} />

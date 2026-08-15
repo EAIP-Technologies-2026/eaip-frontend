@@ -1,0 +1,80 @@
+/* StableSingularityBackground V2 CSS Layers */
+
+.backgroundCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  pointer-events: none;
+  display: block;
+}
+
+/* Enhancement 04 - Ambient atmospheric light */
+.ambientLight {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 55% 40% at 50% 58%, rgba(55, 115, 255, 0.06) 0%, rgba(30, 80, 255, 0.03) 40%, transparent 75%),
+    radial-gradient(ellipse 40% 30% at 50% 58%, rgba(200, 180, 255, 0.04) 0%, transparent 70%);
+  animation: ambient-breathe 12s ease-in-out infinite;
+}
+
+@keyframes ambient-breathe {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1.0; }
+}
+
+/* Enhancement 09 - Edge illumination + vignette */
+.vignetteOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 80% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
+    radial-gradient(circle 30% at 0% 0%, rgba(60, 90, 180, 0.04) 0%, transparent 80%),
+    radial-gradient(circle 30% at 100% 100%, rgba(180, 80, 20, 0.03) 0%, transparent 80%);
+}
+
+/* Enhancement 11 - Subtle technical grid */
+.techGrid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(120, 150, 255, 0.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 85% 85% at 50% 50%, transparent 35%, rgba(0,0,0,0.5) 60%, black 100%);
+  -webkit-mask-image: radial-gradient(ellipse 85% 85% at 50% 50%, transparent 35%, rgba(0,0,0,0.5) 60%, black 100%);
+  opacity: 0.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambientLight { animation: none !important; }
+  .backgroundCanvas { opacity: 0.4; }
+}
+
+@media (max-width: 640px) {
+  .techGrid { background-size: 36px 36px; opacity: 0.3; }
+  .ambientLight { opacity: 0.7; }
+
+/* Light mode overrides */
+.dark .ambientLight {
+  background:
+    radial-gradient(ellipse 55% 40% at 50% 58%, rgba(255, 115, 30, 0.06) 0%, rgba(255, 80, 20, 0.03) 40%, transparent 75%),
+    radial-gradient(ellipse 40% 30% at 50% 58%, rgba(100, 140, 255, 0.04) 0%, transparent 70%);
+}
+.dark .vignetteOverlay {
+  background:
+    radial-gradient(ellipse 80% 80% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
+    radial-gradient(circle 30% at 0% 0%, rgba(60, 90, 180, 0.04) 0%, transparent 80%),
+    radial-gradient(circle 30% at 100% 100%, rgba(180, 80, 20, 0.03) 0%, transparent 80%);
+}
+.dark .techGrid {
+  background-image: radial-gradient(circle, rgba(120, 150, 255, 0.06) 1px, transparent 1px);
+  opacity: 0.55;
+}
+}

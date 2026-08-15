@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 
-test("home page loads", async ({ page }) => {
+test("home page redirects to login", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator("h1")).toBeVisible();
+  await page.waitForURL(/\/login/, { timeout: 10000 });
+  await expect(page.getByText("Enterprise Console").first()).toBeVisible();
 });

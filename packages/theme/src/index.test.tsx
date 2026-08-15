@@ -74,6 +74,13 @@ function TestConsumer() {
         dark
       </button>
       <button
+        data-testid="set-vibe"
+        onClick={() => { theme.setMode("vibe"); }}
+        type="button"
+      >
+        vibe
+      </button>
+      <button
         data-testid="set-variant"
         onClick={() => { theme.setVariant("midnight"); }}
         type="button"
@@ -100,7 +107,7 @@ describe("ThemeProvider", () => {
         <TestConsumer />
       </ThemeProvider>,
     );
-    expect(screen.getByTestId("mode").textContent).toBe("system");
+    expect(screen.getByTestId("mode").textContent).toBe("light");
     expect(screen.getByTestId("variant").textContent).toBe("enterprise-light");
     expect(screen.getByTestId("reduced-motion").textContent).toBe("false");
   });
@@ -113,6 +120,17 @@ describe("ThemeProvider", () => {
     );
     expect(screen.getByTestId("mode").textContent).toBe("dark");
     expect(screen.getByTestId("resolved").textContent).toBe("dark");
+  });
+
+  it("accepts vibe mode prop", () => {
+    render(
+      <ThemeProvider defaultMode="vibe">
+        <TestConsumer />
+      </ThemeProvider>,
+    );
+    expect(screen.getByTestId("mode").textContent).toBe("vibe");
+    expect(screen.getByTestId("resolved").textContent).toBe("vibe");
+    expect(document.documentElement.classList.contains("vibe-mode")).toBe(true);
   });
 
   it("accepts defaultVariant prop", () => {
@@ -168,9 +186,15 @@ describe("ThemeProvider", () => {
     });
     expect(screen.getByTestId("mode").textContent).toBe("dark");
     expect(screen.getByTestId("resolved").textContent).toBe("dark");
+
+    act(() => {
+      fireEvent.click(screen.getByTestId("set-vibe"));
+    });
+    expect(screen.getByTestId("mode").textContent).toBe("vibe");
+    expect(screen.getByTestId("resolved").textContent).toBe("vibe");
   });
 
-  it("toggles between light and dark", () => {
+  it("toggles in cycle: light -> dark -> vibe -> light", () => {
     render(
       <ThemeProvider defaultMode="light">
         <TestConsumer />
@@ -184,8 +208,13 @@ describe("ThemeProvider", () => {
     act(() => {
       fireEvent.click(screen.getByTestId("toggle"));
     });
+    expect(screen.getByTestId("resolved").textContent).toBe("vibe");
+    act(() => {
+      fireEvent.click(screen.getByTestId("toggle"));
+    });
     expect(screen.getByTestId("resolved").textContent).toBe("light");
   });
+
 
   it("persists mode to localStorage", () => {
     render(
@@ -252,11 +281,11 @@ describe("themes", () => {
   });
 
   it("enterprise-light has expected surface color", () => {
-    expect(themes["enterprise-light"].variables["--color-surface"]).toBe("#ffffff");
+    expect(themes["enterprise-light"].variables["--color-surface"]).toBe("#fafbfc");
   });
 
   it("enterprise-dark has expected surface color", () => {
-    expect(themes["enterprise-dark"].variables["--color-surface"]).toBe("#0b0f19");
+    expect(themes["enterprise-dark"].variables["--color-surface"]).toBe("#0a0e17");
   });
 
   it("midnight has deep navy surface", () => {

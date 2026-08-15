@@ -7,9 +7,9 @@ export type ThemeVariant =
   | "midnight"
   | "high-contrast";
 
-export type ThemeMode = "light" | "dark" | "system";
+export type ThemeMode = "light" | "dark" | "vibe";
 
-export type ColorScheme = "light" | "dark";
+export type ColorScheme = "light" | "dark" | "vibe";
 
 export interface ThemeDefinition {
   name: string;
@@ -44,5 +44,7 @@ export const THEME_VARIANTS: ThemeVariant[] = [
 export const STORAGE_KEY_MODE = "eaip-theme";
 export const STORAGE_KEY_VARIANT = "eaip-theme-variant";
 export const DATA_ATTRIBUTE_THEME = "data-theme";
+export const DATA_ATTRIBUTE_MODE = "data-theme-mode";
 export const DATA_ATTRIBUTE_MOTION = "data-reduced-motion";
 export const STYLE_ELEMENT_ID = "eaip-theme-variables";
+

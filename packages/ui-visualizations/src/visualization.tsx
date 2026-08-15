@@ -23,10 +23,12 @@ import {
 const tooltipStyle = {
   backgroundColor: "var(--color-surface-elevated)",
   border: "1px solid var(--color-border)",
-  borderRadius: "var(--radius-button)",
+  borderRadius: "0.75rem",
+  boxShadow: "0 4px 16px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.02)",
+  padding: "8px 12px",
 };
-const labelStyle = { color: "var(--color-text-muted)", fontSize: 12 };
-const itemStyle = { color: "var(--color-text)", fontSize: 13 };
+const labelStyle = { color: "var(--color-text-muted)", fontSize: 11, fontWeight: 500, letterSpacing: "0.02em" };
+const itemStyle = { color: "var(--color-text)", fontSize: 12, fontWeight: 600 };
 
 export interface LineChartWidgetProps {
   data: { name: string; value: number; value2?: number }[];
@@ -41,12 +43,20 @@ export function LineChartWidget({ data, lines, height = 200, className }: LineCh
     <div className={cn("w-full", className)} style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
         <RechartsLineChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} strokeOpacity={0.5} />
           <XAxis dataKey="name" tick={labelStyle} axisLine={false} tickLine={false} />
           <YAxis tick={labelStyle} axisLine={false} tickLine={false} />
           <RechartsTooltip contentStyle={tooltipStyle} itemStyle={itemStyle} labelStyle={labelStyle} />
           {lines.map((line, i) => (
-            <Line key={line.dataKey} type="monotone" dataKey={line.dataKey} stroke={line.color ?? colors[i % colors.length]} strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
+            <Line
+              key={line.dataKey}
+              type="monotone"
+              dataKey={line.dataKey}
+              stroke={line.color ?? colors[i % colors.length]}
+              strokeWidth={2}
+              dot={false}
+              activeDot={{ r: 4, strokeWidth: 2, fill: "var(--color-surface-elevated)" }}
+            />
           ))}
         </RechartsLineChart>
       </ResponsiveContainer>
@@ -69,11 +79,11 @@ export function AreaChartWidget({ data, color = "var(--color-primary)", height =
         <RechartsAreaChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
           <defs>
             <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={color} stopOpacity={0.25} />
+              <stop offset="5%" stopColor={color} stopOpacity={0.20} />
               <stop offset="95%" stopColor={color} stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} strokeOpacity={0.5} />
           <XAxis dataKey="name" tick={labelStyle} axisLine={false} tickLine={false} />
           <YAxis tick={labelStyle} axisLine={false} tickLine={false} />
           <RechartsTooltip contentStyle={tooltipStyle} itemStyle={itemStyle} labelStyle={labelStyle} />
@@ -96,7 +106,7 @@ export function HorizontalBarChartWidget({ data, color = "var(--color-primary)",
     <div className={cn("w-full", className)} style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
         <RechartsBarChart data={data} layout="vertical" margin={{ top: 4, right: 8, left: -16, bottom: 0 }} barCategoryGap="20%">
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false} strokeOpacity={0.5} />
           <XAxis type="number" tick={labelStyle} axisLine={false} tickLine={false} />
           <YAxis type="category" dataKey="name" tick={labelStyle} axisLine={false} tickLine={false} />
           <RechartsTooltip contentStyle={tooltipStyle} itemStyle={itemStyle} labelStyle={labelStyle} />
@@ -162,7 +172,15 @@ export function DonutChartWidget({ data, height = 200, innerRadius = 60, outerRa
     <div className={cn("w-full flex justify-center", className)} style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
         <RechartsPieChart>
-          <Pie data={data} dataKey="value" nameKey="name" innerRadius={innerRadius} outerRadius={outerRadius} paddingAngle={2}>
+          <Pie
+            data={data}
+            dataKey="value"
+            nameKey="name"
+            innerRadius={innerRadius}
+            outerRadius={outerRadius}
+            paddingAngle={3}
+            strokeWidth={0}
+          >
             {data.map((entry, index) => (
               <Cell key={entry.name} fill={entry.color ?? defaultColors[index % defaultColors.length]} />
             ))}
@@ -183,7 +201,7 @@ export function ChartLegend({ items, className, ...props }: ChartLegendProps) {
     <ul className={cn("flex flex-wrap items-center gap-4", className)} {...props}>
       {items.map((item) => (
         <li key={item.label} className="flex items-center gap-1.5 text-xs text-text-secondary">
-          <span className="h-2.5 w-2.5 rounded-sm shrink-0" style={{ backgroundColor: item.color }} />
+          <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
           {item.label}
         </li>
       ))}

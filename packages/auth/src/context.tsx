@@ -59,10 +59,22 @@ export function AuthProvider({ children, onSessionExpired }: AuthProviderProps) 
       }
 
       try {
-        const user = await authService.getCurrentUser();
+        let user = await authService.getCurrentUser();
+        if (!user && tokens.refreshToken) {
+          try {
+            const newTokens = await authService.refreshToken(tokens.refreshToken);
+            if (newTokens.accessToken) {
+              user = await authService.getCurrentUser();
+            }
+          } catch {
+            // Token refresh attempt failed
+          }
+        }
+
         if (mounted) {
           if (user) {
-            setState({ user, token: tokens.accessToken, loading: false, error: null });
+            const currentTokens = getStoredTokens();
+            setState({ user, token: currentTokens?.accessToken ?? tokens.accessToken, loading: false, error: null });
           } else {
             clearStoredTokens();
             setState({ user: null, token: null, loading: false, error: null });

@@ -5,12 +5,12 @@ import { ThemeProvider } from "./provider";
 import type { ThemeVariant } from "./types";
 
 export interface WithThemeOptions {
-  defaultMode?: "light" | "dark" | "system";
+  defaultMode?: "light" | "dark" | "vibe";
   defaultVariant?: ThemeVariant;
 }
 
 export function withTheme(options: WithThemeOptions = {}) {
-  const { defaultMode = "system", defaultVariant } = options;
+  const { defaultMode = "light", defaultVariant } = options;
   const Wrapper = (Story: ComponentType<Record<string, unknown>> | (() => ReactNode)) => (
     <ThemeProvider defaultMode={defaultMode} defaultVariant={defaultVariant}>
       {typeof Story === "function" && "prototype" in Story ? (

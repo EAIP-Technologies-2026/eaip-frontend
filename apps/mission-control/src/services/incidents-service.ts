@@ -1,3 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+
 import type { ServiceResult } from "./service-result";
 import { liveResult, fallbackResult, isNetworkError } from "./service-result";
 
@@ -32,21 +37,23 @@ const placeholderIncidents: Incident[] = [
 
 export async function fetchIncidents(): Promise<ServiceResult<Incident[]>> {
   try {
-    const { getDefaultClient } = await import("@eaip/api");
-    const client = getDefaultClient();
-    const res = await client.get<unknown[]>("/monitoring/events");
-    if (res.error) throw res.error;
-    const raw = Array.isArray(res.data) ? res.data as Record<string, unknown>[] : [];
-    const incidents: Incident[] = raw.map((item, idx) => ({
-      id: (item.id as string | undefined) ?? `inc-${String(idx)}`,
-      title: (item.title as string | undefined) ?? (item.message as string | undefined) ?? "Incident",
-      description: item.description as string | undefined,
-      severity: (item.severity as Incident["severity"] | undefined) ?? "information",
-      status: item.acknowledged ? "acknowledged" : "open",
-      source: (item.source as string | undefined) ?? "system",
-      timestamp: (item.timestamp as string | undefined) ?? new Date().toISOString(),
-      timeline: [{ action: "Incident created", timestamp: (item.timestamp as string | undefined) ?? new Date().toISOString(), actor: "system" }],
-    }));
+    const { createMonitoringClient } = await import("@eaip/monitoring");
+    const client = createMonitoringClient();
+    const data = await client.getEvents();
+    const raw = Array.isArray(data) ? (data as any[]) : [];
+    const incidents: Incident[] = raw.map((item, idx) => {
+      const payload = (item.payload as Record<string, unknown>) || {};
+      return {
+        id: item.id ?? `inc-${String(idx)}`,
+        title: (payload.title as string) ?? (payload.message as string) ?? item.eventType ?? "Incident",
+        description: (payload.description as string) || undefined,
+        severity: (payload.severity as Incident["severity"]) ?? "information",
+        status: payload.acknowledged ? "acknowledged" : "open",
+        source: item.eventSource ?? "system",
+        timestamp: item.timestamp ?? new Date().toISOString(),
+        timeline: [{ action: "Incident created", timestamp: item.timestamp ?? new Date().toISOString(), actor: "system" }],
+      };
+    });
     return liveResult(incidents);
   } catch (err) {
     if (isNetworkError(err)) {

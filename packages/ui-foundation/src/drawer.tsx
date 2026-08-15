@@ -76,7 +76,7 @@ export function Drawer({
       <button
         type="button"
         aria-label="Close backdrop"
-        className="fixed inset-0 cursor-default border-0 bg-black/40 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 cursor-default border-0 bg-scrim backdrop-blur-sm transition-opacity"
         onClick={closeOnOutsideClick ? onClose : undefined}
       />
       <div

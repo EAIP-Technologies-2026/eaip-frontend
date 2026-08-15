@@ -19,7 +19,7 @@ function detectMode(): ApiMode {
 }
 
 function getDefaultBaseUrl(mode: ApiMode): string {
-  if (mode === "mock") return "http://localhost:8080/api";
+  if (mode === "mock") return "/api";
   const envUrl = process.env.NEXT_PUBLIC_EAIP_API_URL;
   if (envUrl) return envUrl;
   if (mode === "production") return "/api";

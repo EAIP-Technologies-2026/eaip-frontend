@@ -190,10 +190,12 @@ export class ApiKnowledgeClient implements KnowledgeClient {
   async uploadDocument(file: File, collection?: string): Promise<KnowledgeDocument> {
     const formData = new FormData();
     formData.append("file", file);
-    if (collection) {
-      formData.append("collection", collection);
-    }
-    const response = await this.client.post<KnowledgeDocument>("/knowledge/documents/upload", formData);
+    // Backend expects `collection` as a query parameter (OpenAPI: "in": "query"),
+    // not as a multipart form field. Build the URL accordingly.
+    const uploadPath = collection
+      ? `/knowledge/documents/upload?collection=${encodeURIComponent(collection)}`
+      : "/knowledge/documents/upload";
+    const response = await this.client.post<KnowledgeDocument>(uploadPath, formData);
     if (response.error) throw response.error;
     if (!response.data) {
       throw new Error("Upload document returned empty response");

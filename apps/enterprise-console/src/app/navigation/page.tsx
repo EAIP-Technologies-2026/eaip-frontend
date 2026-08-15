@@ -71,7 +71,7 @@ function NavigationContent() {
                     <div className={`h-2 w-2 rounded-full ${statusColors[entry.status]}`} />
                     <div>
                       <div className="flex items-center gap-2">
-                        {entry.path !== "/" ? (
+                        {entry.path !== "/" && !entry.path.includes("[") ? (
                           <Link href={entry.path} className="text-sm font-medium text-text hover:text-primary">
                             {entry.label}
                           </Link>

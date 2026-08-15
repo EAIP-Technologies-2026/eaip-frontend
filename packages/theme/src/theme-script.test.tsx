@@ -65,11 +65,11 @@ describe("ThemeScript", () => {
     expect(content).toContain(DATA_ATTRIBUTE_MOTION);
   });
 
-  it("script checks prefers-color-scheme", () => {
-    const { container } = render(<ThemeScript defaultMode="system" />);
+  it("script handles vibe mode without failure", () => {
+    const { container } = render(<ThemeScript defaultMode="vibe" />);
     const script = container.querySelector("script");
     const content = script?.textContent ?? "";
-    expect(content).toContain("prefers-color-scheme: dark");
+    expect(content).toContain("vibe");
   });
 
   it("script checks prefers-reduced-motion", () => {
@@ -103,9 +103,10 @@ describe("generateThemeInlineScript", () => {
   });
 
   it("includes default variant when provided", () => {
-    const result = generateThemeInlineScript("system", "midnight");
+    const result = generateThemeInlineScript("vibe", "midnight");
     expect(result).toContain("midnight");
   });
+
 
   it("includes localStorage key references", () => {
     const result = generateThemeInlineScript();

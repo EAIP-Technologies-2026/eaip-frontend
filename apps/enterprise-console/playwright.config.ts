@@ -2,10 +2,10 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./e2e",
-  fullyParallel: true,
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: 1,
   reporter: "html",
   use: {
     baseURL: "http://localhost:3000",
@@ -20,9 +20,12 @@ export default defineConfig({
   webServer: {
     command: "pnpm dev",
     url: "http://localhost:3000",
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     env: {
+      NODE_ENV: "development",
       NEXT_PUBLIC_API_URL: "/api",
+      NEXT_PUBLIC_EAIP_API_MODE: "mock",
+      PORT: "3000",
     },
   },
 });

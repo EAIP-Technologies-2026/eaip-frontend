@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@eaip/config": "workspace:*",
+    "@eaip/api": "workspace:*",
     "react": "^19.1.0"
   },
   "types": "./src/index.ts",

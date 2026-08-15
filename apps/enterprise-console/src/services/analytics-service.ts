@@ -39,18 +39,15 @@ const defaultAgentStats: AgentStats = {
 
 export async function fetchAgentStats(): Promise<ServiceResult<AgentStats>> {
   try {
-    const { getDefaultClient } = await import("@eaip/api");
     const { createAgentClient } = await import("@eaip/agent");
-    const apiClient = getDefaultClient();
     const agentClient = createAgentClient();
 
-    const [agents, statsRes] = await Promise.all([
+    const [agents, rawStats] = await Promise.all([
       agentClient.listAgents(),
-      apiClient.get<unknown>("/agents/stats"),
+      agentClient.getAgentStats(),
     ]);
 
-    if (statsRes.error) throw statsRes.error;
-    const raw = statsRes.data as Record<string, unknown> | undefined;
+    const raw = rawStats as Record<string, unknown> | undefined;
 
     return liveResult({
       totalAgents: Number(raw?.totalAgents ?? raw?.total ?? agents.length),
