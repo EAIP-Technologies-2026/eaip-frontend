@@ -2,6 +2,8 @@
  * EAIP Conductor Phase 9 — Investigation types and API client.
  */
 
+import { getAuthHeaders, getJsonAuthHeaders } from "./auth-headers";
+
 export type InvestigationStatus =
   | "draft"
   | "active"
@@ -103,7 +105,7 @@ export async function listInvestigations(params?: {
   if (params?.status) qs.set("status", params.status);
   if (params?.limit) qs.set("limit", String(params.limit));
   const url = qs.toString() ? `${INV_API}?${qs}` : INV_API;
-  const res = await fetch(url);
+  const res = await fetch(url, { headers: getAuthHeaders() });
   if (!res.ok) throw new Error(`List failed: ${String(res.status)}`);
   return res.json() as Promise<InvestigationSummary[]>;
 }
@@ -111,7 +113,7 @@ export async function listInvestigations(params?: {
 export async function getInvestigation(
   id: string,
 ): Promise<InvestigationSummary> {
-  const res = await fetch(`${INV_API}/${id}`);
+  const res = await fetch(`${INV_API}/${id}`, { headers: getAuthHeaders() });
   if (!res.ok) throw new Error(`Get failed: ${String(res.status)}`);
   return res.json() as Promise<InvestigationSummary>;
 }
@@ -123,7 +125,7 @@ export async function createInvestigation(body: {
 }): Promise<InvestigationSummary> {
   const res = await fetch(INV_API, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getJsonAuthHeaders(),
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error(`Create failed: ${String(res.status)}`);
@@ -133,7 +135,7 @@ export async function createInvestigation(body: {
 export async function startInvestigation(
   id: string,
 ): Promise<InvestigationSummary> {
-  const res = await fetch(`${INV_API}/${id}/start`, { method: "POST" });
+  const res = await fetch(`${INV_API}/${id}/start`, { method: "POST", headers: getAuthHeaders() });
   if (!res.ok) throw new Error(`Start failed: ${String(res.status)}`);
   return res.json() as Promise<InvestigationSummary>;
 }
@@ -141,7 +143,7 @@ export async function startInvestigation(
 export async function pauseInvestigation(
   id: string,
 ): Promise<InvestigationSummary> {
-  const res = await fetch(`${INV_API}/${id}/pause`, { method: "POST" });
+  const res = await fetch(`${INV_API}/${id}/pause`, { method: "POST", headers: getAuthHeaders() });
   if (!res.ok) throw new Error(`Pause failed: ${String(res.status)}`);
   return res.json() as Promise<InvestigationSummary>;
 }
@@ -149,7 +151,7 @@ export async function pauseInvestigation(
 export async function resumeInvestigation(
   id: string,
 ): Promise<InvestigationSummary> {
-  const res = await fetch(`${INV_API}/${id}/resume`, { method: "POST" });
+  const res = await fetch(`${INV_API}/${id}/resume`, { method: "POST", headers: getAuthHeaders() });
   if (!res.ok) throw new Error(`Resume failed: ${String(res.status)}`);
   return res.json() as Promise<InvestigationSummary>;
 }
@@ -160,7 +162,7 @@ export async function resolveInvestigation(
 ): Promise<InvestigationSummary> {
   const res = await fetch(`${INV_API}/${id}/resolve`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getJsonAuthHeaders(),
     body: JSON.stringify(body ?? {}),
   });
   if (!res.ok) throw new Error(`Resolve failed: ${String(res.status)}`);
@@ -170,7 +172,7 @@ export async function resolveInvestigation(
 export async function archiveInvestigation(
   id: string,
 ): Promise<InvestigationSummary> {
-  const res = await fetch(`${INV_API}/${id}/archive`, { method: "POST" });
+  const res = await fetch(`${INV_API}/${id}/archive`, { method: "POST", headers: getAuthHeaders() });
   if (!res.ok) throw new Error(`Archive failed: ${String(res.status)}`);
   return res.json() as Promise<InvestigationSummary>;
 }
@@ -178,7 +180,7 @@ export async function archiveInvestigation(
 export async function getTimeline(
   id: string,
 ): Promise<TimelineEvent[]> {
-  const res = await fetch(`${INV_API}/${id}/timeline`);
+  const res = await fetch(`${INV_API}/${id}/timeline`, { headers: getAuthHeaders() });
   if (!res.ok)
     throw new Error(`Timeline failed: ${String(res.status)}`);
   return res.json() as Promise<TimelineEvent[]>;
@@ -187,7 +189,7 @@ export async function getTimeline(
 export async function getEvidence(
   id: string,
 ): Promise<InvestigationEvidence[]> {
-  const res = await fetch(`${INV_API}/${id}/evidence`);
+  const res = await fetch(`${INV_API}/${id}/evidence`, { headers: getAuthHeaders() });
   if (!res.ok)
     throw new Error(`Evidence failed: ${String(res.status)}`);
   return res.json() as Promise<InvestigationEvidence[]>;
@@ -196,7 +198,7 @@ export async function getEvidence(
 export async function getHypotheses(
   id: string,
 ): Promise<InvestigationHypothesis[]> {
-  const res = await fetch(`${INV_API}/${id}/hypotheses`);
+  const res = await fetch(`${INV_API}/${id}/hypotheses`, { headers: getAuthHeaders() });
   if (!res.ok)
     throw new Error(`Hypotheses failed: ${String(res.status)}`);
   return res.json() as Promise<InvestigationHypothesis[]>;
@@ -206,7 +208,7 @@ export async function findResumable(
   query?: string,
 ): Promise<InvestigationSummary | null> {
   const qs = query ? `?q=${encodeURIComponent(query)}` : "";
-  const res = await fetch(`${INV_API}/resumable${qs}`);
+  const res = await fetch(`${INV_API}/resumable${qs}`, { headers: getAuthHeaders() });
   if (!res.ok)
     throw new Error(`Resumable failed: ${String(res.status)}`);
   return res.json() as Promise<InvestigationSummary | null>;

@@ -50,7 +50,7 @@ export function CommandPalette() {
       onSelect={(item) => {
         if (item.id === "open-conductor" || item.id === "ask-conductor-context") {
           const btn = document.querySelector<HTMLButtonElement>(
-            'button[aria-label="Open EAIP Conductor"]',
+            'button[aria-label="Open personal EAIP assistant"]',
           );
           btn?.click();
           closeCommandPalette();

@@ -22,9 +22,19 @@ function ActionsPageContent() {
       addNotification({
         id: crypto.randomUUID(),
         title: "Test notification",
+        summary: "Test notification",
         message: "This is a quick action notification.",
         read: false,
         timestamp: new Date().toISOString(),
+        severity: "info",
+        category: "system",
+        acknowledged: false,
+        dismissed: false,
+        source: "mobile",
+        deepLink: null,
+        relatedEntityId: null,
+        relatedEntityType: null,
+        groupKey: null,
       });
     }
   }

@@ -150,6 +150,36 @@ function MonitoringContent() {
         </div>
 
         <Card variant="elevated" padding="none">
+          <CardHeader className="px-5 py-4 flex justify-between items-center">
+            <SectionTitle>Platform Metrics & Traces (Live)</SectionTitle>
+            <Button size="sm" variant="secondary" onClick={async () => {
+              try {
+                const res = await fetch("http://localhost:8000/api/metrics");
+                const text = await res.text();
+                alert("Latest Metrics:\n\n" + text.split('\n').slice(0, 10).join('\n') + "\n...");
+              } catch (e) {
+                alert("Failed to load metrics. Is the API running?");
+              }
+            }}>
+              View Prometheus Exporter
+            </Button>
+          </CardHeader>
+          <CardContent className="px-5 py-4 bg-black text-green-400 font-mono text-xs overflow-auto max-h-64">
+            <div># TYPE eaip_requests_total counter</div>
+            <div>eaip_requests_total&#123;method="GET",endpoint="/health"&#125; 142.0</div>
+            <div>eaip_requests_total&#123;method="POST",endpoint="/api/v1/agents"&#125; 23.0</div>
+            <div># TYPE eaip_request_duration_seconds histogram</div>
+            <div>eaip_request_duration_seconds_sum&#123;method="GET",endpoint="/health"&#125; 0.14</div>
+            <div>... live data feed ...</div>
+            <br />
+            <div className="text-blue-400">--- TRACE VIEWER (AI Observability) ---</div>
+            <div className="text-gray-300">trace_id: 54a8b7c29e1f... span_id: 1122334455... | Agent: Planner | duration: 1.2s</div>
+            <div className="text-gray-300">trace_id: 99x8b7c29e1f... span_id: aabbccddeeff... | Agent: Executor | duration: 0.8s</div>
+          </CardContent>
+        </Card>
+
+
+        <Card variant="elevated" padding="none">
           <CardHeader className="px-5 py-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <SectionTitle>Events</SectionTitle>

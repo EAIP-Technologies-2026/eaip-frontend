@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { usePlatformStore, useConductorStore } from "@eaip/state";
 import { EAIPAtmosphere } from "./eaip-atmosphere";
@@ -23,6 +23,7 @@ interface ConductorChatResponse {
   reply: string;
   tool_events?: ConductorToolActivity[];
   pending_approval?: ConductorApproval | null;
+  conversation_id?: string | null;
 }
 
 function getAuthHeaders(): Record<string, string> {
@@ -33,7 +34,7 @@ function getAuthHeaders(): Record<string, string> {
 
 const newId = (prefix: string) => prefix + "-" + String(Date.now());
 
-export function EnterpriseShell({ appId, children, breadcrumbs }: ShellProps) {
+export function EnterpriseShell({ appId, children, breadcrumbs, entityContext }: ShellProps) {
   const router = useRouter();
   const { setActiveRoute, setBreadcrumbs } = usePlatformStore();
   const {
@@ -49,6 +50,7 @@ export function EnterpriseShell({ appId, children, breadcrumbs }: ShellProps) {
 
   // Phase 8: Guided Tour integration
   const speechOutputRef = useState(() => new SpeechOutputService())[0];
+  const conversationIdRef = useRef<string | null>(null);
   const tour = useTour({
     theme: typeof document !== "undefined" && document.documentElement.classList.contains("dark") ? "dark" : "light",
     voiceEnabled: false,
@@ -128,9 +130,15 @@ export function EnterpriseShell({ appId, children, breadcrumbs }: ShellProps) {
         headers,
         body: JSON.stringify({
           message: messageText,
+          conversation_id: conversationIdRef.current,
           context: {
             current_route: typeof window !== "undefined" ? window.location.pathname : "/",
             application: "enterprise_console",
+            entity_id: entityContext?.entityId,
+            entity_type: entityContext?.entityType,
+            active_tab: entityContext?.activeTab,
+            selected_ids: entityContext?.selectedIds ?? [],
+            page_context: entityContext?.pageContext ?? {},
           },
         }),
       });
@@ -140,6 +148,9 @@ export function EnterpriseShell({ appId, children, breadcrumbs }: ShellProps) {
       }
 
       const data = (await res.json()) as ConductorChatResponse;
+      if (data.conversation_id) {
+        conversationIdRef.current = data.conversation_id;
+      }
       const assistantMsg: ConductorMessage = {
         id: data.id,
         role: "assistant",

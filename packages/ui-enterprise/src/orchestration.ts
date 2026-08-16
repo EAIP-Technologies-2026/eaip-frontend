@@ -2,6 +2,8 @@
  * EAIP Conductor Phase 10 — Orchestration types and API client.
  */
 
+import { getAuthHeaders, getJsonAuthHeaders } from "./auth-headers";
+
 export type PlanStatus =
   | "draft"
   | "ready"
@@ -108,7 +110,7 @@ export async function listPlans(params?: {
   if (params?.status) qs.set("status", params.status);
   if (params?.limit) qs.set("limit", String(params.limit));
   const url = qs.toString() ? `${ORCH_API}?${qs}` : ORCH_API;
-  const res = await fetch(url);
+  const res = await fetch(url, { headers: getAuthHeaders() });
   if (!res.ok) throw new Error(`List failed: ${String(res.status)}`);
   return res.json() as Promise<OrchestrationPlanSummary[]>;
 }
@@ -116,7 +118,7 @@ export async function listPlans(params?: {
 export async function getPlan(
   id: string,
 ): Promise<OrchestrationPlanSummary> {
-  const res = await fetch(`${ORCH_API}/${id}`);
+  const res = await fetch(`${ORCH_API}/${id}`, { headers: getAuthHeaders() });
   if (!res.ok) throw new Error(`Get failed: ${String(res.status)}`);
   return res.json() as Promise<OrchestrationPlanSummary>;
 }
@@ -129,7 +131,7 @@ export async function createPlan(body: {
 }): Promise<OrchestrationPlanSummary> {
   const res = await fetch(ORCH_API, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getJsonAuthHeaders(),
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error(`Create failed: ${String(res.status)}`);
@@ -139,7 +141,7 @@ export async function createPlan(body: {
 export async function readyPlan(
   id: string,
 ): Promise<OrchestrationPlanSummary> {
-  const res = await fetch(`${ORCH_API}/${id}/ready`, { method: "POST" });
+  const res = await fetch(`${ORCH_API}/${id}/ready`, { method: "POST", headers: getAuthHeaders() });
   if (!res.ok) throw new Error(`Ready failed: ${String(res.status)}`);
   return res.json() as Promise<OrchestrationPlanSummary>;
 }
@@ -149,6 +151,7 @@ export async function requestApproval(
 ): Promise<OrchestrationPlanSummary> {
   const res = await fetch(`${ORCH_API}/${id}/request-approval`, {
     method: "POST",
+    headers: getAuthHeaders(),
   });
   if (!res.ok)
     throw new Error(`Request approval failed: ${String(res.status)}`);
@@ -158,7 +161,7 @@ export async function requestApproval(
 export async function approvePlan(
   id: string,
 ): Promise<OrchestrationPlanSummary> {
-  const res = await fetch(`${ORCH_API}/${id}/approve`, { method: "POST" });
+  const res = await fetch(`${ORCH_API}/${id}/approve`, { method: "POST", headers: getAuthHeaders() });
   if (!res.ok)
     throw new Error(`Approve failed: ${String(res.status)}`);
   return res.json() as Promise<OrchestrationPlanSummary>;
@@ -167,7 +170,7 @@ export async function approvePlan(
 export async function executePlan(
   id: string,
 ): Promise<OrchestrationPlanSummary> {
-  const res = await fetch(`${ORCH_API}/${id}/execute`, { method: "POST" });
+  const res = await fetch(`${ORCH_API}/${id}/execute`, { method: "POST", headers: getAuthHeaders() });
   if (!res.ok)
     throw new Error(`Execute failed: ${String(res.status)}`);
   return res.json() as Promise<OrchestrationPlanSummary>;
@@ -178,6 +181,7 @@ export async function executeSteps(
 ): Promise<OrchestrationPlanSummary> {
   const res = await fetch(`${ORCH_API}/${id}/execute-steps`, {
     method: "POST",
+    headers: getAuthHeaders(),
   });
   if (!res.ok)
     throw new Error(`Execute steps failed: ${String(res.status)}`);
@@ -187,7 +191,7 @@ export async function executeSteps(
 export async function pausePlan(
   id: string,
 ): Promise<OrchestrationPlanSummary> {
-  const res = await fetch(`${ORCH_API}/${id}/pause`, { method: "POST" });
+  const res = await fetch(`${ORCH_API}/${id}/pause`, { method: "POST", headers: getAuthHeaders() });
   if (!res.ok)
     throw new Error(`Pause failed: ${String(res.status)}`);
   return res.json() as Promise<OrchestrationPlanSummary>;
@@ -196,7 +200,7 @@ export async function pausePlan(
 export async function resumePlan(
   id: string,
 ): Promise<OrchestrationPlanSummary> {
-  const res = await fetch(`${ORCH_API}/${id}/resume`, { method: "POST" });
+  const res = await fetch(`${ORCH_API}/${id}/resume`, { method: "POST", headers: getAuthHeaders() });
   if (!res.ok)
     throw new Error(`Resume failed: ${String(res.status)}`);
   return res.json() as Promise<OrchestrationPlanSummary>;
@@ -205,7 +209,7 @@ export async function resumePlan(
 export async function cancelPlan(
   id: string,
 ): Promise<OrchestrationPlanSummary> {
-  const res = await fetch(`${ORCH_API}/${id}/cancel`, { method: "POST" });
+  const res = await fetch(`${ORCH_API}/${id}/cancel`, { method: "POST", headers: getAuthHeaders() });
   if (!res.ok)
     throw new Error(`Cancel failed: ${String(res.status)}`);
   return res.json() as Promise<OrchestrationPlanSummary>;
@@ -216,6 +220,7 @@ export async function rollbackPlan(
 ): Promise<OrchestrationPlanSummary> {
   const res = await fetch(`${ORCH_API}/${id}/rollback`, {
     method: "POST",
+    headers: getAuthHeaders(),
   });
   if (!res.ok)
     throw new Error(`Rollback failed: ${String(res.status)}`);
@@ -225,7 +230,7 @@ export async function rollbackPlan(
 export async function getTimeline(
   id: string,
 ): Promise<TimelineEvent[]> {
-  const res = await fetch(`${ORCH_API}/${id}/timeline`);
+  const res = await fetch(`${ORCH_API}/${id}/timeline`, { headers: getAuthHeaders() });
   if (!res.ok)
     throw new Error(`Timeline failed: ${String(res.status)}`);
   return res.json() as Promise<TimelineEvent[]>;

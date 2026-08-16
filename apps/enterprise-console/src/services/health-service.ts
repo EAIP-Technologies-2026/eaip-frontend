@@ -45,3 +45,17 @@ export async function fetchSystemHealth(): Promise<ServiceResult<SystemHealth>> 
     throw err;
   }
 }
+
+export async function fetchAdminHealth(): Promise<ServiceResult<any>> {
+  try {
+    const client = getDefaultClient();
+    const res = await client.get<any>("/admin/health");
+    if (res.error) throw res.error;
+    return liveResult(res.data);
+  } catch (err) {
+    if (isNetworkError(err)) {
+      return fallbackResult({ status: "down", components: [], dependencies: [], operations_status: "unknown" }, "Backend unavailable");
+    }
+    throw err;
+  }
+}

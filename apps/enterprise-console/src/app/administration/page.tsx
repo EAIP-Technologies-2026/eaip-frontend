@@ -233,21 +233,44 @@ function AuditSection({ entries, loading }: { entries: AdminAuditEntry[]; loadin
     return <EmptyState icon="history" title="No audit entries" description="No audit events recorded." />;
   }
   return (
-    <div className="divide-y divide-border rounded-card border border-border bg-surface">
-      {entries.map((entry) => (
-        <div key={entry.id} className="flex items-start gap-3 px-4 py-3">
-          <div className={`mt-1 h-2 w-2 shrink-0 rounded-full ${entry.outcome === "success" ? "bg-success" : "bg-danger"}`} />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-text">{entry.action}</p>
-            <p className="text-xs text-text-muted">
-              {entry.actor} &middot; {entry.resource}
-              {entry.resourceId ? ` (${entry.resourceId})` : ""}
-            </p>
-            <p className="text-[10px] text-text-muted mt-0.5">{formatRelativeTime(entry.timestamp)}</p>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-sm font-medium text-text">Recent Events</h3>
+        <Button 
+          variant="secondary" 
+          size="sm" 
+          iconLeft="history"
+          onClick={async () => {
+            try {
+              const res = await fetch("http://localhost:8000/api/administration/audit/replay", { method: "POST" });
+              if (res.ok) {
+                const data = await res.json();
+                alert(`Successfully replayed ${data.count} events.`);
+              }
+            } catch (e) {
+              console.error(e);
+            }
+          }}
+        >
+          Replay Event Source
+        </Button>
+      </div>
+      <div className="divide-y divide-border rounded-card border border-border bg-surface">
+        {entries.map((entry) => (
+          <div key={entry.id} className="flex items-start gap-3 px-4 py-3">
+            <div className={`mt-1 h-2 w-2 shrink-0 rounded-full ${entry.outcome === "success" ? "bg-success" : "bg-danger"}`} />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-text">{entry.action}</p>
+              <p className="text-xs text-text-muted">
+                {entry.actor} &middot; {entry.resource}
+                {entry.resourceId ? ` (${entry.resourceId})` : ""}
+              </p>
+              <p className="text-[10px] text-text-muted mt-0.5">{formatRelativeTime(entry.timestamp)}</p>
+            </div>
+            <Badge variant={entry.outcome === "success" ? "success" : "danger"}>{entry.outcome}</Badge>
           </div>
-          <Badge variant={entry.outcome === "success" ? "success" : "danger"}>{entry.outcome}</Badge>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

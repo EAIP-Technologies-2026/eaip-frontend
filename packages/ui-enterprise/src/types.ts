@@ -33,9 +33,18 @@ export interface Workspace {
   slug?: string;
 }
 
+export interface ActiveEntityContext {
+  entityId?: string;
+  entityType?: string;
+  activeTab?: string;
+  selectedIds?: string[];
+  pageContext?: Record<string, unknown>;
+}
+
 export interface ShellProps {
   appId: string;
   children: React.ReactNode;
   breadcrumbs?: Breadcrumb[];
   pageTitle?: string;
+  entityContext?: ActiveEntityContext;
 }

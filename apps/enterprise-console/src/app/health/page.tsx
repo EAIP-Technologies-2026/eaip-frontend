@@ -7,9 +7,58 @@ import { Card, CardHeader, CardContent } from "@eaip/ui-foundation";
 import { Badge, SectionTitle, ProgressBar } from "@eaip/ui-primitives";
 import { StatusWidget, StatusRing } from "@eaip/ui-visualizations";
 import { EnterpriseIcon } from "@eaip/icons";
-import { fetchSystemHealth } from "../../services/health-service";
+import { fetchSystemHealth, fetchAdminHealth } from "../../services/health-service";
 import type { SystemHealth } from "../../services/health-service";
 import { useFallback } from "../../services/fallback-context";
+
+function AdminHealthPanel() {
+  const [adminData, setAdminData] = useState<any>(null);
+
+  useEffect(() => {
+    fetchAdminHealth().then(res => {
+      if (res.source === "live") setAdminData(res.data);
+    }).catch(console.error);
+  }, []);
+
+  if (!adminData) return null;
+
+  return (
+    <Card className="mt-8 border-primary/20">
+      <CardHeader>
+        <SectionTitle>Platform Operations & Diagnostics (Admin)</SectionTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="p-4 rounded-lg bg-surface-raised border border-border">
+            <div className="text-xs text-text-secondary uppercase tracking-wider mb-1">Operations Status</div>
+            <div className="text-xl font-bold text-primary">{adminData.operations_status || "unknown"}</div>
+          </div>
+          <div className="p-4 rounded-lg bg-surface-raised border border-border">
+            <div className="text-xs text-text-secondary uppercase tracking-wider mb-1">Dependency Nodes</div>
+            <div className="text-xl font-bold">{adminData.dependencies?.length || 0}</div>
+          </div>
+          <div className="p-4 rounded-lg bg-surface-raised border border-border">
+            <div className="text-xs text-text-secondary uppercase tracking-wider mb-1">Total Components</div>
+            <div className="text-xl font-bold">{adminData.components?.length || 0}</div>
+          </div>
+        </div>
+
+        <div>
+          <h4 className="text-sm font-semibold mb-3">Dependency Graph Visualization</h4>
+          <div className="h-48 bg-black/90 rounded-lg p-4 font-mono text-xs overflow-auto text-green-400">
+            {adminData.dependencies && adminData.dependencies.length > 0 ? (
+              adminData.dependencies.map((dep: any, i: number) => (
+                <div key={i}>[{dep.component}] {dep.type === "core" ? "(CORE)" : "(EXT)"} - status: {dep.status || "healthy"}</div>
+              ))
+            ) : (
+              <div className="text-gray-500">No dependencies registered in aggregator.</div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 function HealthContent() {
   const [health, setHealth] = useState<SystemHealth | null>(null);
@@ -123,6 +172,8 @@ function HealthContent() {
               </div>
             </CardContent>
           </Card>
+          
+          <AdminHealthPanel />
         </div>
       ) : null}
     </EnterpriseShell>

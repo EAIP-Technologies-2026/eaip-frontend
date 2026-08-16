@@ -353,10 +353,30 @@ export function Timeline({ items, className, ...props }: TimelineProps) {
   );
 }
 
+export interface LineChartProps {
+  data: { name?: string; label?: string; value: number }[];
+  lines?: { dataKey: string; label?: string; color?: string }[];
+  color?: string;
+  height?: number;
+  className?: string;
+}
+
+export function LineChartWidget({
+  data,
+  color = "var(--color-primary)",
+  height = 200,
+  className,
+}: LineChartProps) {
+  const normalized = data.map((d) => ({ label: d.name ?? d.label ?? "", value: d.value }));
+  return <Sparkline data={normalized} color={color} height={height} className={className} />;
+}
+
 export interface StatusWidgetProps extends HTMLAttributes<HTMLDivElement> {
   title: string;
   status: "idle" | "running" | "success" | "warning" | "error";
   description?: string;
+  subtitle?: string;
+  value?: string | number;
   metrics?: { label: string; value: string | number }[];
 }
 
@@ -364,10 +384,16 @@ export function StatusWidget({
   title,
   status,
   description,
+  subtitle,
+  value,
   metrics,
   className,
   ...props
 }: StatusWidgetProps) {
+  const desc = description ?? subtitle;
+  const computedMetrics =
+    metrics ?? (value !== undefined ? [{ label: "Status", value }] : undefined);
+
   return (
     <div
       className={["surface-card p-5 space-y-4", className].filter(Boolean).join(" ")}
@@ -378,14 +404,17 @@ export function StatusWidget({
           <StatusRing status={status} pulse={status === "running"} size="md" />
           <h3 className="font-semibold text-text text-sm">{title}</h3>
         </div>
+        <span className="text-xs uppercase tracking-wider font-mono text-text-muted px-2 py-0.5 rounded-full bg-surface-tertiary">
+          {status}
+        </span>
       </div>
-      {description && <p className="text-xs text-text-secondary">{description}</p>}
-      {metrics && metrics.length > 0 && (
-        <div className="grid grid-cols-2 gap-3 pt-2 border-t border-border/50">
-          {metrics.map((m) => (
-            <div key={m.label}>
-              <div className="text-[11px] text-text-muted uppercase tracking-wider">{m.label}</div>
-              <div className="text-sm font-semibold text-text font-tabular tabular-nums">{m.value}</div>
+      {desc && <p className="text-xs text-text-secondary leading-relaxed">{desc}</p>}
+      {computedMetrics && computedMetrics.length > 0 && (
+        <div className="grid grid-cols-2 gap-2 pt-1 border-t border-border/50">
+          {computedMetrics.map((m) => (
+            <div key={m.label} className="text-xs">
+              <span className="text-text-muted block text-[11px]">{m.label}</span>
+              <span className="font-semibold text-text font-tabular">{m.value}</span>
             </div>
           ))}
         </div>

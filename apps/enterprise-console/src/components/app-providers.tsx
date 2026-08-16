@@ -6,12 +6,23 @@ import { AuthProvider, useAuth, getStoredTokens } from "@eaip/auth";
 import { ThemeProvider } from "@eaip/theme";
 import { createDefaultClient, setDefaultClient } from "@eaip/api";
 import { usePlatformStore } from "@eaip/state";
-import { installMockApi } from "../mock-data/api-client";
 import { createMockNotifications } from "../mock-data/data";
-import { getApiConfig, isMockMode } from "../config/api";
+import { getApiConfig } from "../config/api";
 import { FallbackProvider, useFallback } from "../services/fallback-context";
+import { WebSocketRealtimeClient } from "@eaip/realtime";
 
 const config = getApiConfig();
+const wsUrl = config.baseUrl.replace(/^http/, "ws") + "/ws";
+
+const realtimeClient = new WebSocketRealtimeClient({
+  url: wsUrl,
+  tokenProvider: () => {
+    const tokens = getStoredTokens();
+    return tokens?.accessToken ?? null;
+  },
+});
+realtimeClient.connect();
+
 setDefaultClient(
   createDefaultClient({
     baseUrl: config.baseUrl,
@@ -21,14 +32,6 @@ setDefaultClient(
     },
   }),
 );
-
-// The EAIP console ships a rich mock API for local development. The real
-// backend does not implement every console route (several return 401/404),
-// so in any non-production mode we install the mock layer to keep the
-// experience cohesive and data-backed. Production always uses the live API.
-if (isMockMode() || getApiConfig().mode === "development") {
-  installMockApi();
-}
 
 function FallbackBanner() {
   const { isFallback, fallbackServices } = useFallback();

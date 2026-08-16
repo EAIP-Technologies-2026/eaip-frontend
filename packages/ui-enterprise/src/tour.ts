@@ -5,6 +5,8 @@
  * existing Conductor API pipeline and does not create a parallel voice runtime.
  */
 
+import { getAuthHeaders, getJsonAuthHeaders } from "./auth-headers";
+
 export type TourState =
   | "idle"
   | "intro"
@@ -72,7 +74,7 @@ export async function startTour(options?: {
 }): Promise<TourResponse> {
   const res = await fetch(`${TOUR_API}/start`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getJsonAuthHeaders(),
     body: JSON.stringify({
       theme: options?.theme ?? "light",
       voice_enabled: options?.voiceEnabled ?? false,
@@ -89,7 +91,7 @@ export async function sendTourCommand(
 ): Promise<TourResponse> {
   const res = await fetch(`${TOUR_API}/${sessionId}/command`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getJsonAuthHeaders(),
     body: JSON.stringify({
       command,
       step_id: options?.stepId,
@@ -106,7 +108,7 @@ export async function endTour(
 ): Promise<TourResponse> {
   const res = await fetch(`${TOUR_API}/${sessionId}/end`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getJsonAuthHeaders(),
     body: JSON.stringify({ cancelled }),
   });
   if (!res.ok) throw new Error(`Tour end failed: ${String(res.status)}`);
@@ -115,7 +117,7 @@ export async function endTour(
 
 export async function getTourPreferences(): Promise<TourPreferences> {
   try {
-    const res = await fetch(`${TOUR_API}/preferences`);
+    const res = await fetch(`${TOUR_API}/preferences`, { headers: getAuthHeaders() });
     if (!res.ok) {
       return { tour_completed: false };
     }

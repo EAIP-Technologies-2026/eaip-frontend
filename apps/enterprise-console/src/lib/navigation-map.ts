@@ -31,6 +31,8 @@ export const fullNavigation: NavCategory[] = [
     description: "Knowledge base, memory, and documents",
     items: [
       { label: "Knowledge", href: "/knowledge", icon: "book" },
+      { label: "Knowledge Graph", href: "/knowledge/graph", icon: "network" },
+      { label: "Semantic Search", href: "/knowledge/semantic", icon: "search" },
       { label: "Memory", href: "/memory", icon: "brain" },
       { label: "Documents", href: "/documents", icon: "folder" },
     ],
@@ -55,6 +57,7 @@ export const fullNavigation: NavCategory[] = [
     items: [
       { label: "Monitoring", href: "/monitoring", icon: "activity" },
       { label: "Health", href: "/health", icon: "cpu" },
+      { label: "Cost Intelligence", href: "/cost", icon: "dollar-sign" },
     ],
   },
   {
@@ -69,6 +72,18 @@ export const fullNavigation: NavCategory[] = [
       { label: "Roles", href: "/roles", icon: "shield" },
       { label: "Permissions", href: "/permissions", icon: "key" },
       { label: "Settings", href: "/settings", icon: "settings" },
+    ],
+  },
+  {
+    id: "governance",
+    label: "Governance",
+    icon: "shield",
+    href: "/governance",
+    description: "Policies, guardrails, and compliance",
+    items: [
+      { label: "Dashboard", href: "/governance", icon: "activity" },
+      { label: "Policies", href: "/governance/policies", icon: "file-text" },
+      { label: "Guardrails", href: "/governance/guardrails", icon: "shield-alert" },
     ],
   },
   {
@@ -153,6 +168,22 @@ export const commandPaletteCommands = [
     href: "/knowledge",
     category: "navigation" as const,
     icon: "book" as const,
+  },
+  {
+    id: "nav-knowledge-graph",
+    label: "Go to Knowledge Graph",
+    shortcut: "G G",
+    href: "/knowledge/graph",
+    category: "navigation" as const,
+    icon: "network" as const,
+  },
+  {
+    id: "nav-semantic-search",
+    label: "Go to Semantic Search",
+    shortcut: "G S",
+    href: "/knowledge/semantic",
+    category: "navigation" as const,
+    icon: "search" as const,
   },
   {
     id: "nav-profile",
@@ -309,6 +340,22 @@ export const routeAudit: RouteAuditEntry[] = [
     status: "implemented",
     phase: 2,
     description: "Knowledge base",
+  },
+  {
+    path: "/knowledge/graph",
+    label: "Knowledge Graph",
+    icon: "network",
+    status: "implemented",
+    phase: 5,
+    description: "Knowledge graph visualization and traversal",
+  },
+  {
+    path: "/knowledge/semantic",
+    label: "Semantic Search",
+    icon: "search",
+    status: "implemented",
+    phase: 5,
+    description: "Semantic search across knowledge, memory, and graph",
   },
   {
     path: "/memory",

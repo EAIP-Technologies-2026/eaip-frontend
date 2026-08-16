@@ -1,5 +1,6 @@
 import type { ServiceResult } from "./service-result";
 import { liveResult, fallbackResult, isNetworkError } from "./service-result";
+import { getDefaultClient } from "@eaip/api";
 import {
   createMarketplaceClient,
   type MarketplacePackage,
@@ -9,7 +10,7 @@ import {
 
 export async function fetchMarketplacePackages(options?: { search?: string; category?: string; page?: number; pageSize?: number }): Promise<ServiceResult<{ packages: MarketplacePackage[]; total: number }>> {
   try {
-    const client = createMarketplaceClient();
+    const client = createMarketplaceClient(getDefaultClient());
     const data = await client.listPackages(options);
     return liveResult({ packages: data.packages, total: data.total });
   } catch (err) {
@@ -22,7 +23,7 @@ export async function fetchMarketplacePackages(options?: { search?: string; cate
 
 export async function fetchFeaturedPackages(): Promise<ServiceResult<MarketplacePackage[]>> {
   try {
-    const client = createMarketplaceClient();
+    const client = createMarketplaceClient(getDefaultClient());
     const data = await client.getFeaturedPackages();
     return liveResult(data);
   } catch (err) {
@@ -35,7 +36,7 @@ export async function fetchFeaturedPackages(): Promise<ServiceResult<Marketplace
 
 export async function fetchCategories(): Promise<ServiceResult<PackageCategory[]>> {
   try {
-    const client = createMarketplaceClient();
+    const client = createMarketplaceClient(getDefaultClient());
     const data = await client.listCategories();
     return liveResult(data);
   } catch (err) {
@@ -48,7 +49,7 @@ export async function fetchCategories(): Promise<ServiceResult<PackageCategory[]
 
 export async function fetchInstallations(): Promise<ServiceResult<Installation[]>> {
   try {
-    const client = createMarketplaceClient();
+    const client = createMarketplaceClient(getDefaultClient());
     const data = await client.listInstallations();
     return liveResult(data);
   } catch (err) {
@@ -61,7 +62,7 @@ export async function fetchInstallations(): Promise<ServiceResult<Installation[]
 
 export async function installMarketplacePackage(packageId: string): Promise<ServiceResult<{ status: string; id: string }>> {
   try {
-    const client = createMarketplaceClient();
+    const client = createMarketplaceClient(getDefaultClient());
     const data = await client.installPackage(packageId);
     return liveResult(data);
   } catch (err) {
@@ -74,7 +75,7 @@ export async function installMarketplacePackage(packageId: string): Promise<Serv
 
 export async function uninstallMarketplacePackage(packageId: string): Promise<ServiceResult<{ status: string }>> {
   try {
-    const client = createMarketplaceClient();
+    const client = createMarketplaceClient(getDefaultClient());
     const data = await client.uninstallPackage(packageId);
     return liveResult(data);
   } catch (err) {
