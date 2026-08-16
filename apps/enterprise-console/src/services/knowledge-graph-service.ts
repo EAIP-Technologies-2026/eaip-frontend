@@ -160,7 +160,7 @@ export async function queryGraph(
   } catch (err) {
     if (isNetworkError(err)) {
       return fallbackResult(
-        { entities: [], relationships: [], paths: [], totalCount: 0, durationMs: 0 } as GraphQueryResult,
+        { entities: [], relationships: [], paths: [], totalCount: 0, durationMs: 0 },
         err instanceof Error ? err.message : "Backend unavailable"
       );
     }

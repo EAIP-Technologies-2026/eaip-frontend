@@ -73,7 +73,7 @@ function GraphOverview({ stats, loading }: { stats: GraphStats | null; loading: 
                       className="flex items-center justify-between py-1 text-sm"
                     >
                       <span className="text-text-secondary">{type}</span>
-                      <Badge variant="glass">{count as number}</Badge>
+                      <Badge variant="glass">{count}</Badge>
                     </div>
                   ))}
                 </div>
@@ -94,7 +94,7 @@ function GraphOverview({ stats, loading }: { stats: GraphStats | null; loading: 
                       className="flex items-center justify-between py-1 text-sm"
                     >
                       <span className="text-text-secondary">{type}</span>
-                      <Badge variant="glass">{count as number}</Badge>
+                      <Badge variant="glass">{count}</Badge>
                     </div>
                   ))}
                 </div>
@@ -270,7 +270,7 @@ function GraphVisualization({
           {nodePositions.map(({ x, y, entity }) => (
             <g key={entity.id} transform={`translate(${x}, ${y})`}>
               <circle r={20} fill="var(--color-surface-secondary)" stroke="var(--color-border)" strokeWidth="2"
-                style={{ cursor: "pointer" }} onClick={() => onNodeClick(entity)} />
+                style={{ cursor: "pointer" }} onClick={() => { onNodeClick(entity); }} />
               <text textAnchor="middle" dy="3" className="text-[8px] fill-text-muted">
                 {entity.name.length > 10 ? entity.name.substring(0, 10) + "…" : entity.name}
               </text>
@@ -320,7 +320,7 @@ function GraphQueryTab() {
           <Input
             placeholder="Enter search term or entity name..."
             value={queryText}
-            onChange={(e) => setQueryText(e.target.value)}
+            onChange={(e) => { setQueryText(e.target.value); }}
             onKeyDown={(e) => {
               if (e.key === "Enter") void handleQuery();
             }}
@@ -333,7 +333,7 @@ function GraphQueryTab() {
           <Input
             placeholder="Entity ID to start traversal from..."
             value={startEntity}
-            onChange={(e) => setStartEntity(e.target.value)}
+            onChange={(e) => { setStartEntity(e.target.value); }}
             aria-label="Start entity ID"
             className="mt-1"
           />
@@ -418,21 +418,21 @@ function CreateEntityModal({
             label="Name"
             placeholder="Entity name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => { setName(e.target.value); }}
             aria-label="Entity name"
           />
           <Input
             label="Type"
             placeholder="e.g. concept, person, document"
             value={type}
-            onChange={(e) => setType(e.target.value)}
+            onChange={(e) => { setType(e.target.value); }}
             aria-label="Entity type"
           />
           <Input
             label="Description"
             placeholder="Entity description"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => { setDescription(e.target.value); }}
             aria-label="Entity description"
           />
           <div className="flex gap-3 pt-2">

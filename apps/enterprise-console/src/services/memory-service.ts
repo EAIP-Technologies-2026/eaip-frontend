@@ -100,7 +100,7 @@ export async function setMemory(key: string, value: string): Promise<ServiceResu
   } catch (err) {
     if (isNetworkError(err)) {
       return fallbackResult(
-        { id: key, key, value, timestamp: new Date().toISOString() } as MemoryResult,
+        { id: key, key, value, timestamp: new Date().toISOString() },
         err instanceof Error ? err.message : "Backend unavailable"
       );
     }
