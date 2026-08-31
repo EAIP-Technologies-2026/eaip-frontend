@@ -20,17 +20,14 @@ import {
   LoadingState,
   ErrorState,
   SectionHeader,
+  StatCard,
 } from "@eaip/ui-enterprise";
 import { Button, Badge } from "@eaip/ui-primitives";
 import dynamic from "next/dynamic";
 
-const MetricCard = dynamic(
-  () => import("@eaip/ui-visualizations").then((mod) => mod.MetricCard),
-  { ssr: false, loading: () => <div className="h-24 skeleton rounded-lg" /> }
-);
 const StatusWidget = dynamic(
   () => import("@eaip/ui-visualizations").then((mod) => mod.StatusWidget),
-  { ssr: false, loading: () => <div className="h-24 skeleton rounded-lg" /> }
+  { ssr: false, loading: () => <div className="skeleton h-24 rounded-lg" /> },
 );
 import { EnterpriseIcon } from "@eaip/icons";
 import { logger } from "@eaip/logging";
@@ -68,11 +65,7 @@ const defaultMonitoringMetrics: MonitoringMetrics = {
   activeAlerts: 0,
 };
 
-import {
-  fetchAdminUsers,
-  fetchAdminStats,
-  createAdminUser,
-} from "../../services/admin-service";
+import { fetchAdminUsers, fetchAdminStats, createAdminUser } from "../../services/admin-service";
 import { fetchMonitoringMetrics } from "../../services/monitoring-service";
 
 function parseMonitoringMetrics(data: unknown): MonitoringMetrics {
@@ -87,8 +80,7 @@ function parseMonitoringMetrics(data: unknown): MonitoringMetrics {
   }
   if (!data || typeof data !== "object") return defaultMonitoringMetrics;
   const obj = data as Record<string, unknown>;
-  const num = (value: unknown): number =>
-    typeof value === "number" ? value : Number(value) || 0;
+  const num = (value: unknown): number => (typeof value === "number" ? value : Number(value) || 0);
   const health =
     typeof obj.systemHealth === "string"
       ? obj.systemHealth
@@ -123,9 +115,7 @@ function DashboardContent() {
   const addToast = usePlatformStore((state) => state.addToast);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [stats, setStats] = useState<AdminStats>(defaultAdminStats);
-  const [metrics, setMetrics] = useState<MonitoringMetrics>(
-    defaultMonitoringMetrics,
-  );
+  const [metrics, setMetrics] = useState<MonitoringMetrics>(defaultMonitoringMetrics);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -133,12 +123,11 @@ function DashboardContent() {
     setLoading(true);
     setError(null);
     try {
-      const [usersResponse, statsResponse, metricsResponse] =
-        await Promise.all([
-          fetchAdminUsers(),
-          fetchAdminStats(),
-          fetchMonitoringMetrics(),
-        ]);
+      const [usersResponse, statsResponse, metricsResponse] = await Promise.all([
+        fetchAdminUsers(),
+        fetchAdminStats(),
+        fetchMonitoringMetrics(),
+      ]);
       setUsers(parseUsers(usersResponse.data));
       setStats(statsResponse.data);
       setMetrics(parseMonitoringMetrics(metricsResponse.data));
@@ -187,15 +176,24 @@ function DashboardContent() {
       <div className="space-y-8">
         {/* Layer 1 — Context (Hero) */}
         <section className="surface-hero relative overflow-hidden p-8 lg:p-10">
-          <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-gradient-to-br from-primary-subtle/50 to-transparent blur-3xl" aria-hidden="true" />
-          <div className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-gradient-to-tr from-accent-glow/30 to-transparent blur-2xl" aria-hidden="true" />
+          <div
+            className="from-primary-subtle/50 absolute -top-20 -right-20 h-64 w-64 rounded-full bg-gradient-to-br to-transparent blur-3xl"
+            aria-hidden="true"
+          />
+          <div
+            className="from-accent-glow/30 absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-gradient-to-tr to-transparent blur-2xl"
+            aria-hidden="true"
+          />
           <div className="relative">
-            <div className="flex items-center gap-2 text-xs font-semibold tracking-widest text-primary uppercase mb-4">
+            <div className="text-primary mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest uppercase">
               <EnterpriseIcon name="activity" size={14} />
               Administration
             </div>
-            <h1 className="text-3xl font-bold text-text tracking-tight">Dashboard</h1>
-            <p className="mt-3 text-base text-text-secondary max-w-2xl leading-relaxed">Platform governance overview with user directory, roles, permissions, and operational health.</p>
+            <h1 className="text-text text-3xl font-bold tracking-tight">Dashboard</h1>
+            <p className="text-text-secondary mt-3 max-w-2xl text-base leading-relaxed">
+              Platform governance overview with user directory, roles, permissions, and operational
+              health.
+            </p>
           </div>
         </section>
 
@@ -203,22 +201,22 @@ function DashboardContent() {
         <section className="space-y-4">
           <SectionHeader icon="barChart" title="Governance Summary" />
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <MetricCard
+            <StatCard
               label="Total Users"
               value={stats.totalUsers}
               icon={<EnterpriseIcon name="users" size={20} />}
             />
-            <MetricCard
+            <StatCard
               label="Active Roles"
               value={stats.totalRoles}
               icon={<EnterpriseIcon name="shield" size={20} />}
             />
-            <MetricCard
+            <StatCard
               label="Permission Sets"
               value={stats.totalPermissions}
               icon={<EnterpriseIcon name="lock" size={20} />}
             />
-            <MetricCard
+            <StatCard
               label="System Status"
               value={metrics.systemHealth}
               icon={<EnterpriseIcon name="activity" size={20} />}
@@ -248,10 +246,7 @@ function DashboardContent() {
                     key: "name",
                     header: "Name",
                     render: (user) => (
-                      <Link
-                        href={`/users/${user.id}`}
-                        className="text-primary hover:underline"
-                      >
+                      <Link href={`/users/${user.id}`} className="text-primary hover:underline">
                         {user.name}
                       </Link>
                     ),
@@ -278,18 +273,14 @@ function DashboardContent() {
                     key: "status",
                     header: "Status",
                     render: (user) => (
-                      <span className="text-sm text-text-secondary">
-                        {user.status ?? "—"}
-                      </span>
+                      <span className="text-text-secondary text-sm">{user.status ?? "—"}</span>
                     ),
                   },
                   {
                     key: "lastActive",
                     header: "Last Active",
                     render: (user) => (
-                      <span className="text-sm text-text-secondary">
-                        {user.lastActive ?? "—"}
-                      </span>
+                      <span className="text-text-secondary text-sm">{user.lastActive ?? "—"}</span>
                     ),
                   },
                 ]}

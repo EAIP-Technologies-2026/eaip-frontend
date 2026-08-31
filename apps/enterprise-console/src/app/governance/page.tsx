@@ -1,135 +1,191 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Shield, ShieldAlert, FileText, CheckCircle } from "lucide-react";
-import { client } from "@/lib/api/client";
-import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
+import { RequireRole } from "@eaip/auth";
+import { getDefaultClient } from "@eaip/api";
+import {
+  EnterpriseShell,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  ErrorState,
+} from "@eaip/ui-enterprise";
+import { Badge, Skeleton } from "@eaip/ui-primitives";
 
-export default function GovernanceDashboard() {
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<any>(null);
+interface PoliciesResponse {
+  policies: unknown[];
+  total: number;
+}
+
+interface GovernanceResponse {
+  policies: { total: number };
+  guardrails: { status: string };
+  compliance: { status: string };
+  wave2Systems?: unknown[];
+  wave2Policies?: unknown[];
+}
+
+function GovernanceContent() {
+  const [data, setData] = useState<GovernanceResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     async function loadData() {
-      try {
-        const [policiesRes, guardrailsRes, complianceRes] = await Promise.all([
-          client.get("/api/governance/policies"),
-          client.get("/api/governance/guardrails"),
-          client.get("/api/governance/compliance"),
-        ]);
-        
-        setData({
-          policies: policiesRes.data,
-          guardrails: guardrailsRes.data,
-          compliance: complianceRes.data
-        });
-      } catch (err) {
-        console.error("Failed to load governance data", err);
-      } finally {
-        setLoading(false);
+      const client = getDefaultClient();
+      const [policies, guardrails, compliance, wave2Systems, wave2Policies] = await Promise.all([
+        client.get<PoliciesResponse>("/governance/policies"),
+        client.get<{ status: string }>("/governance/guardrails"),
+        client.get<{ status: string }>("/governance/compliance"),
+        client
+          .get<unknown[]>("/governance2/systems")
+          .catch(() => ({ data: [] as unknown[], error: null as unknown })),
+        client
+          .get<unknown[]>("/governance2/policies")
+          .catch(() => ({ data: [] as unknown[], error: null as unknown })),
+      ]);
+      if (cancelled) return;
+      const failed = [policies, guardrails, compliance].find((response) => response.error);
+      if (failed?.error) {
+        setError(failed.error.message);
+        return;
       }
+      setData({
+        policies: { total: policies.data?.total ?? 0 },
+        guardrails: guardrails.data ?? { status: "unavailable" },
+        compliance: compliance.data ?? { status: "unavailable" },
+        wave2Systems: (wave2Systems as { data?: unknown[] }).data ?? [],
+        wave2Policies: (wave2Policies as { data?: unknown[] }).data ?? [],
+      });
     }
-    loadData();
+    void loadData().catch((reason: unknown) => {
+      if (!cancelled)
+        setError(reason instanceof Error ? reason.message : "Unable to load governance data");
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  if (loading) {
-    return (
-      <div className="p-8 space-y-6">
-        <h1 className="text-3xl font-bold tracking-tight">Governance & Compliance</h1>
-        <div className="grid gap-4 md:grid-cols-3">
-          <Skeleton className="h-32" />
-          <Skeleton className="h-32" />
-          <Skeleton className="h-32" />
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex items-center justify-between">
+    <EnterpriseShell
+      appId="enterprise-console"
+      pageTitle="Governance & Compliance"
+      breadcrumbs={[{ label: "Dashboard", href: "/dashboard" }, { label: "Governance" }]}
+    >
+      <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Governance & Compliance</h1>
-          <p className="text-muted-foreground">Monitor policies, guardrails, and platform compliance.</p>
+          <h1 className="text-text text-2xl font-bold tracking-tight">
+            Governance &amp; Compliance
+          </h1>
+          <p className="text-text-secondary text-sm">
+            Live policy enforcement, AI guardrails, and enterprise compliance status.
+          </p>
         </div>
-      </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Link href="/governance/policies">
-          <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Policies</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{data?.policies?.total || 0}</div>
-              <p className="text-xs text-muted-foreground mt-1">Platform-wide governance policies</p>
-            </CardContent>
-          </Card>
-        </Link>
-        
-        <Link href="/governance/guardrails">
-          <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">AI Guardrails</CardTitle>
-              <ShieldAlert className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {data?.guardrails?.status === "healthy" ? (
-                  <span className="text-green-500 flex items-center gap-2"><CheckCircle className="h-5 w-5"/> Enforced</span>
-                ) : (
-                  <span className="text-amber-500">{data?.guardrails?.status || "Unknown"}</span>
-                )}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">Runtime AI safety and data leakage checks</p>
-            </CardContent>
-          </Card>
-        </Link>
+        {error ? <ErrorState message={error} /> : null}
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Compliance Framework</CardTitle>
-            <Shield className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold capitalize">
-                {data?.compliance?.status || "Unavailable"}
+        <div className="grid gap-4 md:grid-cols-3">
+          <StatusCard
+            label="Active policies"
+            value={data ? String(data.policies.total) : null}
+            href="/governance/policies"
+          />
+          <StatusCard
+            label="Guardrails status"
+            value={data?.guardrails.status ?? null}
+            href="/governance/guardrails"
+          />
+          <StatusCard label="Compliance posture" value={data?.compliance.status ?? null} />
+        </div>
+        {(data?.wave2Systems?.length ?? 0) > 0 && (
+          <div className="rounded-card border-border bg-surface border p-5">
+            <h3 className="text-text font-semibold">
+              AI Governance Center — Governed Systems ({String(data?.wave2Systems?.length)})
+            </h3>
+            <div className="mt-3 space-y-2">
+              {(
+                data?.wave2Systems as {
+                  system_id: string;
+                  name: string;
+                  risk: string;
+                  type: string;
+                }[]
+              )
+                .slice(0, 10)
+                .map((s) => (
+                  <div
+                    key={s.system_id}
+                    className="border-border flex items-center justify-between rounded border px-3 py-2"
+                  >
+                    <span className="text-text text-sm">{s.name}</span>
+                    <Badge variant="default">
+                      {s.risk} · {s.type}
+                    </Badge>
+                  </div>
+                ))}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Continuous regulatory scanning</p>
-          </CardContent>
-        </Card>
+          </div>
+        )}
+        {(data?.wave2Policies?.length ?? 0) > 0 && (
+          <div className="rounded-card border-border bg-surface border p-5">
+            <h3 className="text-text font-semibold">
+              Wave 2 Policies ({String(data?.wave2Policies?.length)})
+            </h3>
+            <div className="mt-3 space-y-2">
+              {(
+                data?.wave2Policies as { policy_id: string; name: string; risk_threshold: string }[]
+              )
+                .slice(0, 10)
+                .map((p) => (
+                  <div
+                    key={p.policy_id}
+                    className="border-border flex items-center justify-between rounded border px-3 py-2"
+                  >
+                    <span className="text-text text-sm">{p.name}</span>
+                    <Badge variant="default">{p.risk_threshold}</Badge>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
       </div>
-      
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Policy Violations</CardTitle>
-            <CardDescription>Policies triggered in the last 24 hours</CardDescription>
-          </CardHeader>
-          <CardContent>
-             <div className="text-sm text-muted-foreground">No recent violations.</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Compliance Audits</CardTitle>
-            <CardDescription>Recent regulatory checks</CardDescription>
-          </CardHeader>
-          <CardContent>
-             <div className="text-sm text-muted-foreground">All checks passed.</div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    </EnterpriseShell>
+  );
+}
+
+function StatusCard({
+  label,
+  value,
+  href,
+}: {
+  label: string;
+  value: string | null;
+  href?: string;
+}) {
+  const content = (
+    <Card liquid padding="md" className="transition-smooth hover:border-primary/50">
+      <CardHeader>
+        <CardTitle>{label}</CardTitle>
+      </CardHeader>
+      <CardContent className="mt-2">
+        {value === null ? (
+          <Skeleton className="h-8 w-24" />
+        ) : (
+          <Badge variant="primary">{value}</Badge>
+        )}
+      </CardContent>
+    </Card>
+  );
+  return href ? <Link href={href}>{content}</Link> : content;
+}
+
+export default function GovernanceDashboard() {
+  return (
+    <RequireRole requiredRole="admin">
+      <GovernanceContent />
+    </RequireRole>
   );
 }

@@ -24,6 +24,7 @@ export default defineConfig({
     env: {
       NODE_ENV: "development",
       NEXT_PUBLIC_API_URL: "/api",
+      PORT: "3001",
     },
   },
 });

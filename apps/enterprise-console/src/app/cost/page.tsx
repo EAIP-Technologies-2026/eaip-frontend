@@ -1,131 +1,156 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { client } from "@/lib/api/client";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, AlertCircle, TrendingUp } from "lucide-react";
+import { RequireAuth } from "@eaip/auth";
+import { getDefaultClient } from "@eaip/api";
+import {
+  EnterpriseShell,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  ErrorState,
+  StatCard,
+} from "@eaip/ui-enterprise";
+import { Badge, Skeleton } from "@eaip/ui-primitives";
+import { EnterpriseIcon } from "@eaip/icons";
 
-export default function CostIntelligencePage() {
-  const [loading, setLoading] = useState(true);
-  const [summary, setSummary] = useState<any>(null);
+interface CostOverview {
+  totalCost: number;
+  totalRequests: number;
+  totalTokens: number;
+  currency: string;
+}
+
+interface CostResponse {
+  overview: CostOverview;
+  byModel: Record<string, { cost: number; tokens: number }>;
+}
+
+function CostIntelligenceContent() {
+  const [data, setData] = useState<CostResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     async function loadData() {
-      try {
-        const res = await client.get("/api/cost/summary");
-        setSummary(res.data);
-      } catch (err) {
-        console.error("Failed to load cost intelligence data", err);
-      } finally {
-        setLoading(false);
+      const response = await getDefaultClient().get<CostResponse>("/cost/overview");
+      if (cancelled) return;
+      if (response.error) {
+        setError(response.error.message);
+        return;
       }
+      setData(response.data);
     }
-    loadData();
+    void loadData().catch((reason: unknown) => {
+      if (!cancelled)
+        setError(reason instanceof Error ? reason.message : "Unable to load cost data");
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
+  const [forecast, setForecast] = useState<{
+    estimated_cost: number;
+    forecast_next_days: number;
+  } | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    void getDefaultClient()
+      .get<{ estimated_cost: number; forecast_next_days: number }>("/cost-v2/forecast", {
+        days: "30",
+      })
+      .then((r) => {
+        if (!cancelled && !r.error && r.data) setForecast(r.data);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const overview = data?.overview;
+
   return (
-    <div className="p-8 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Cost Intelligence</h1>
-        <p className="text-muted-foreground">Monitor platform spending, active budgets, and resource allocation.</p>
-      </div>
+    <EnterpriseShell
+      appId="enterprise-console"
+      pageTitle="Cost Intelligence"
+      breadcrumbs={[{ label: "Dashboard", href: "/dashboard" }, { label: "Cost Intelligence" }]}
+    >
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-text text-2xl font-bold tracking-tight">Cost Intelligence</h1>
+          <p className="text-text-secondary text-sm">
+            Live platform token expenditure, LLM provider spending, budgets, and forecast.
+          </p>
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Spend (30d)</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {loading ? <Skeleton className="h-8 w-24" /> : (
-              <div className="text-2xl font-bold">${summary?.total_spend?.toFixed(2) || "1,245.00"}</div>
-            )}
-            <p className="text-xs text-muted-foreground">+2.1% from last month</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Budgets</CardTitle>
-            <AlertCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {loading ? <Skeleton className="h-8 w-24" /> : (
-              <div className="text-2xl font-bold">{summary?.active_budgets || 4}</div>
-            )}
-            <p className="text-xs text-muted-foreground">1 budget approaching limit</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Projected Spend</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {loading ? <Skeleton className="h-8 w-24" /> : (
-              <div className="text-2xl font-bold">${summary?.projected_spend?.toFixed(2) || "1,450.00"}</div>
-            )}
-            <p className="text-xs text-muted-foreground">Based on current trajectory</p>
-          </CardContent>
-        </Card>
-      </div>
+        {error ? <ErrorState message={error} /> : null}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Top Drivers</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Resource</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead className="text-right">Cost</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
-                    <Skeleton className="h-4 w-full" />
-                  </TableCell>
-                </TableRow>
-              ) : (
-                <>
-                  <TableRow>
-                    <TableCell className="font-medium">gpt-4-turbo inference</TableCell>
-                    <TableCell>Model Call</TableCell>
-                    <TableCell className="text-right">$845.20</TableCell>
-                    <TableCell><Badge variant="outline">Expected</Badge></TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Knowledge Graph embedding</TableCell>
-                    <TableCell>Embedding</TableCell>
-                    <TableCell className="text-right">$215.50</TableCell>
-                    <TableCell><Badge variant="outline">Expected</Badge></TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Background Worker #2</TableCell>
-                    <TableCell>Compute</TableCell>
-                    <TableCell className="text-right">$140.00</TableCell>
-                    <TableCell><Badge variant="destructive">Anomaly</Badge></TableCell>
-                  </TableRow>
-                </>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </div>
+        <div className="grid gap-4 md:grid-cols-4">
+          <StatCard
+            label="Total Spend"
+            value={overview ? `${overview.currency} ${overview.totalCost.toFixed(2)}` : null}
+            icon={<EnterpriseIcon name="creditCard" size={18} />}
+          />
+          <StatCard
+            label="API Requests"
+            value={overview ? overview.totalRequests.toLocaleString() : null}
+            icon={<EnterpriseIcon name="activity" size={18} />}
+          />
+          <StatCard
+            label="Token Volume"
+            value={overview ? overview.totalTokens.toLocaleString() : null}
+            icon={<EnterpriseIcon name="layers" size={18} />}
+          />
+          <StatCard
+            label="30d Forecast"
+            value={forecast ? `$${forecast.estimated_cost.toFixed(2)}` : null}
+            icon={<EnterpriseIcon name="activity" size={18} />}
+          />
+        </div>
+
+        <Card liquid padding="md">
+          <CardHeader>
+            <CardTitle>Top Model Cost Drivers</CardTitle>
+          </CardHeader>
+          <CardContent className="mt-4">
+            {data ? (
+              <div className="divide-border divide-y">
+                {Object.entries(data.byModel).map(([model, item]) => (
+                  <div key={model} className="flex items-center justify-between py-3">
+                    <span className="text-text font-medium">{model}</span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-text-muted text-xs">
+                        {item.tokens.toLocaleString()} tokens
+                      </span>
+                      <Badge variant="primary">${item.cost.toFixed(2)}</Badge>
+                    </div>
+                  </div>
+                ))}
+                {Object.keys(data.byModel).length === 0 ? (
+                  <p className="text-text-muted text-sm">No model cost records available.</p>
+                ) : null}
+              </div>
+            ) : (
+              <Skeleton className="h-24 w-full" />
+            )}
+          </CardContent>
+        </Card>
+        {forecast ? (
+          <p className="text-text-muted text-xs">
+            Forecast ({forecast.forecast_next_days}d) distinct from actual — based on historical
+            average.
+          </p>
+        ) : null}
+      </div>
+    </EnterpriseShell>
+  );
+}
+
+export default function CostIntelligencePage() {
+  return (
+    <RequireAuth>
+      <CostIntelligenceContent />
+    </RequireAuth>
   );
 }

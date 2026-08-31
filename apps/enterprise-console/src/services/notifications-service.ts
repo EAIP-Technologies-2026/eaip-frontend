@@ -62,7 +62,7 @@ export interface FetchNotificationsResult {
 }
 
 export async function fetchNotifications(
-  options?: FetchNotificationsOptions
+  options?: FetchNotificationsOptions,
 ): Promise<ServiceResult<FetchNotificationsResult>> {
   try {
     const client = getDefaultClient();
@@ -86,7 +86,9 @@ export async function fetchNotifications(
     if (res.error) throw res.error;
     const items = Array.isArray(res.data)
       ? res.data
-      : (Array.isArray(res.data?.notifications) ? res.data.notifications : []);
+      : Array.isArray(res.data?.notifications)
+        ? res.data.notifications
+        : [];
     return liveResult({
       notifications: items,
       total: res.data?.total ?? items.length,
@@ -98,14 +100,14 @@ export async function fetchNotifications(
   } catch (err) {
     if (isNetworkError(err)) {
       const mockData = createMockNotifications();
-      const mockItems = mockData.map((n) => ({
+      const mockItems = mockData.map((n): NotificationItem => ({
         id: n.id,
         type: "system",
         title: n.title,
         message: n.message,
         summary: n.message,
-        severity: "info" as NotificationSeverity,
-        category: "system" as NotificationCategory,
+        severity: "info",
+        category: "system",
         timestamp: n.timestamp,
         read: n.read,
         acknowledged: false,
@@ -121,11 +123,16 @@ export async function fetchNotifications(
           notifications: mockItems,
           total: mockItems.length,
           unreadCount: mockItems.filter((n) => !n.read).length,
-          counts: { total: mockItems.length, unread: mockItems.filter((n) => !n.read).length, acknowledged: 0, dismissed: 0 },
+          counts: {
+            total: mockItems.length,
+            unread: mockItems.filter((n) => !n.read).length,
+            acknowledged: 0,
+            dismissed: 0,
+          },
           categoryCounts: {},
           severityCounts: {},
         },
-        "Backend unavailable, showing cached notifications"
+        "Backend unavailable, showing cached notifications",
       );
     }
     throw err;

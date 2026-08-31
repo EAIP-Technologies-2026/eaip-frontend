@@ -28,12 +28,7 @@ describe("LoginShell — Ring Login & Cinematic Loading Integration", () => {
 
   it("submits email and password on form submission", () => {
     const handleSubmit = vi.fn();
-    render(
-      <LoginShell
-        appName="Enterprise Console"
-        onSubmit={handleSubmit}
-      />,
-    );
+    render(<LoginShell appName="Enterprise Console" onSubmit={handleSubmit} />);
 
     const emailInput = screen.getByPlaceholderText("name@company.com");
     const passwordInput = screen.getByPlaceholderText("Enter your password");
@@ -42,7 +37,7 @@ describe("LoginShell — Ring Login & Cinematic Loading Integration", () => {
     fireEvent.change(passwordInput, { target: { value: "AdminPass123!" } });
 
     fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
-    expect(handleSubmit).toHaveBeenCalledWith("admin@eaip.local", "AdminPass123!");
+    expect(handleSubmit).toHaveBeenCalledWith("admin@eaip.local", "AdminPass123!", undefined);
   });
 
   it("displays error message when error prop is provided", () => {
@@ -61,11 +56,7 @@ describe("LoginShell — Ring Login & Cinematic Loading Integration", () => {
 
   it("does not render authentication loading overlay when loading is false", () => {
     const { container } = render(
-      <LoginShell
-        appName="Enterprise Console"
-        onSubmit={() => {}}
-        loading={false}
-      />,
+      <LoginShell appName="Enterprise Console" onSubmit={() => {}} loading={false} />,
     );
 
     expect(container.querySelector(".loader--fullscreen")).toBeNull();
@@ -73,11 +64,7 @@ describe("LoginShell — Ring Login & Cinematic Loading Integration", () => {
 
   it("renders accessible cinematic gooey loader overlay when loading is true", () => {
     const { container } = render(
-      <LoginShell
-        appName="Enterprise Console"
-        onSubmit={() => {}}
-        loading={true}
-      />,
+      <LoginShell appName="Enterprise Console" onSubmit={() => {}} loading={true} />,
     );
 
     const overlay = container.querySelector(".loader--fullscreen");

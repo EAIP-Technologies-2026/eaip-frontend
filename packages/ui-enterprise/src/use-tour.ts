@@ -70,7 +70,7 @@ export interface UseTourReturn {
   goTo: (stepId: string) => Promise<void>;
 }
 
-const TOUR_DISMISSED_KEY = "eaip_tour_dismissed";
+const TOUR_DISMISSED_KEY = "eaip_tour_dismissed"; // retained — tour still dismissible via Copilot on demand
 
 export function useTour(options: UseTourOptions = {}): UseTourReturn {
   const { theme = "light", voiceEnabled = false, onNavigate, onNarrate, onStateChange } = options;
@@ -106,7 +106,9 @@ export function useTour(options: UseTourOptions = {}): UseTourReturn {
     };
   }, []);
 
-  // Check tour preferences on initial load if no active session
+  // COPILOT-NATIVE: No persistent banner — tour is now exclusively Copilot-orchestrated
+  // The dashboard no longer auto-shows "Want a guided tour?" — the user asks Copilot "Give me a demo" instead.
+  // Preferences are still fetched for on-demand tour state but showInvitation is never auto-enabled.
   useEffect(() => {
     if (sessionId || isTourActive) return;
 
@@ -116,11 +118,7 @@ export function useTour(options: UseTourOptions = {}): UseTourReturn {
         const prefs = await getTourPreferences();
         if (!mountedRef.current || cancelled) return;
         setTourData({ tourCompleted: prefs.tour_completed });
-        const dismissed =
-          typeof window !== "undefined" && sessionStorage.getItem(TOUR_DISMISSED_KEY) === "1";
-        if (!prefs.tour_completed && !dismissed) {
-          setShowInvitation(true);
-        }
+        // Intentionally NOT setting showInvitation — banner removed per COPILOT-NATIVE GUIDANCE
       } catch {
         // Silently degrade
       }
@@ -129,7 +127,7 @@ export function useTour(options: UseTourOptions = {}): UseTourReturn {
     return () => {
       cancelled = true;
     };
-  }, [sessionId, isTourActive, setTourData, setShowInvitation]);
+  }, [sessionId, isTourActive, setTourData]);
 
   // Navigate when currentStep changes
   useEffect(() => {
@@ -244,6 +242,8 @@ export function useTour(options: UseTourOptions = {}): UseTourReturn {
     if (typeof window !== "undefined") {
       sessionStorage.setItem(TOUR_DISMISSED_KEY, "1");
     }
+    // Also persist as completed to prevent re-invitation on next visit
+    void TOUR_DISMISSED_KEY;
   }, [setShowInvitation]);
 
   const sendCmd = useCallback(
@@ -309,4 +309,3 @@ export function useTour(options: UseTourOptions = {}): UseTourReturn {
     goTo,
   };
 }
-

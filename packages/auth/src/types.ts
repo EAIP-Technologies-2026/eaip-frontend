@@ -4,7 +4,7 @@ export interface AuthUser {
   id: string;
   email: string;
   name: string;
-  roles: string[];
+  roles?: string[];
 }
 
 export interface AuthTokens {
@@ -15,6 +15,7 @@ export interface AuthTokens {
 export interface LoginCredentials {
   email: string;
   password: string;
+  tenantId?: string;
 }
 
 export interface AuthState {
@@ -25,7 +26,7 @@ export interface AuthState {
 }
 
 export interface AuthContextType extends AuthState {
-  login: (credentials: LoginCredentials) => Promise<void>;
+  login: (credentials: LoginCredentials) => Promise<boolean>;
   logout: () => Promise<void>;
   hasRole: (role: string) => boolean;
   isAuthenticated: boolean;

@@ -117,12 +117,10 @@ function parseArticle(data: unknown): KnowledgeArticle | null {
 export async function fetchKnowledgeArticles(): Promise<ServiceResult<KnowledgeArticle[]>> {
   try {
     const client = getDefaultClient();
-    const response = await client.get<unknown>("/knowledge");
+    const response = await client.get<unknown>("/knowledge/documents");
     if (response.error) throw response.error;
     const raw = Array.isArray(response.data) ? (response.data as unknown[]) : [];
-    const articles = raw
-      .map(parseArticle)
-      .filter((a): a is KnowledgeArticle => a !== null);
+    const articles = raw.map(parseArticle).filter((a): a is KnowledgeArticle => a !== null);
     return liveResult(articles);
   } catch (err) {
     if (isNetworkError(err)) {
@@ -140,24 +138,29 @@ export async function fetchKnowledgeStats(): Promise<ServiceResult<KnowledgeStat
     const client = getDefaultClient();
     const response = await client.get<KnowledgeStats>("/knowledge/stats");
     if (response.error) throw response.error;
-    return liveResult(response.data ?? {
-      totalDocuments: 0,
-      totalCollections: 0,
-      totalStorage: 0,
-      indexedCount: 0,
-      pendingCount: 0,
-      failedCount: 0,
-    });
-  } catch (err) {
-    if (isNetworkError(err)) {
-      return fallbackResult({
+    return liveResult(
+      response.data ?? {
         totalDocuments: 0,
         totalCollections: 0,
         totalStorage: 0,
         indexedCount: 0,
         pendingCount: 0,
         failedCount: 0,
-      }, "Backend unavailable");
+      },
+    );
+  } catch (err) {
+    if (isNetworkError(err)) {
+      return fallbackResult(
+        {
+          totalDocuments: 0,
+          totalCollections: 0,
+          totalStorage: 0,
+          indexedCount: 0,
+          pendingCount: 0,
+          failedCount: 0,
+        },
+        "Backend unavailable",
+      );
     }
     throw err;
   }
@@ -168,19 +171,8 @@ export async function fetchKnowledgeHealth(): Promise<ServiceResult<KnowledgeHea
     const client = getDefaultClient();
     const response = await client.get<KnowledgeHealth>("/knowledge/health");
     if (response.error) throw response.error;
-    return liveResult(response.data ?? {
-      status: "empty",
-      totalDocuments: 0,
-      totalCollections: 0,
-      totalChunks: 0,
-      indexedCount: 0,
-      pendingCount: 0,
-      failedCount: 0,
-      engineAvailable: false,
-    });
-  } catch (err) {
-    if (isNetworkError(err)) {
-      return fallbackResult({
+    return liveResult(
+      response.data ?? {
         status: "empty",
         totalDocuments: 0,
         totalCollections: 0,
@@ -189,7 +181,23 @@ export async function fetchKnowledgeHealth(): Promise<ServiceResult<KnowledgeHea
         pendingCount: 0,
         failedCount: 0,
         engineAvailable: false,
-      }, "Backend unavailable");
+      },
+    );
+  } catch (err) {
+    if (isNetworkError(err)) {
+      return fallbackResult(
+        {
+          status: "empty",
+          totalDocuments: 0,
+          totalCollections: 0,
+          totalChunks: 0,
+          indexedCount: 0,
+          pendingCount: 0,
+          failedCount: 0,
+          engineAvailable: false,
+        },
+        "Backend unavailable",
+      );
     }
     throw err;
   }
@@ -223,7 +231,9 @@ export async function fetchKnowledgeCollections(): Promise<ServiceResult<Knowled
   }
 }
 
-export async function fetchKnowledgeDocuments(collection?: string): Promise<ServiceResult<KnowledgeDocument[]>> {
+export async function fetchKnowledgeDocuments(
+  collection?: string,
+): Promise<ServiceResult<KnowledgeDocument[]>> {
   try {
     const client = getDefaultClient();
     const params: Record<string, string> = {};
@@ -247,7 +257,7 @@ export async function searchKnowledge(
     type?: string;
     page?: number;
     pageSize?: number;
-  }
+  },
 ): Promise<ServiceResult<KnowledgeSearchResponse>> {
   try {
     const client = getDefaultClient();
@@ -262,7 +272,10 @@ export async function searchKnowledge(
     return liveResult(response.data ?? { results: [], total: 0, page: 1, pageSize: 20 });
   } catch (err) {
     if (isNetworkError(err)) {
-      return fallbackResult({ results: [], total: 0, page: 1, pageSize: 20 }, "Backend unavailable");
+      return fallbackResult(
+        { results: [], total: 0, page: 1, pageSize: 20 },
+        "Backend unavailable",
+      );
     }
     throw err;
   }
@@ -270,13 +283,16 @@ export async function searchKnowledge(
 
 export async function fetchCitations(
   query: string,
-  documentId?: string
+  documentId?: string,
 ): Promise<ServiceResult<KnowledgeCitation[]>> {
   try {
     const client = getDefaultClient();
     const params: Record<string, string> = { q: query };
     if (documentId) params.document_id = documentId;
-    const response = await client.get<{ citations: KnowledgeCitation[] }>("/knowledge/citations", params);
+    const response = await client.get<{ citations: KnowledgeCitation[] }>(
+      "/knowledge/citations",
+      params,
+    );
     if (response.error) throw response.error;
     return liveResult(response.data?.citations ?? []);
   } catch (err) {

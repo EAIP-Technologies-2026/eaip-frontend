@@ -8,7 +8,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: "html",
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: "http://localhost:3003",
     trace: "on-first-retry",
   },
   projects: [
@@ -19,10 +19,11 @@ export default defineConfig({
   ],
   webServer: {
     command: "pnpm dev",
-    url: "http://localhost:3000",
+    url: "http://localhost:3003",
     reuseExistingServer: !process.env.CI,
     env: {
       NEXT_PUBLIC_API_URL: "/api",
+      PORT: "3003",
     },
   },
 });

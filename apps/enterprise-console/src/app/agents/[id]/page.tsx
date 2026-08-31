@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { RequireAuth } from "@eaip/auth";
+import { RequireAuth, useAuth } from "@eaip/auth";
 import { usePlatformStore } from "@eaip/state";
 import {
   EnterpriseShell,
@@ -13,7 +13,7 @@ import {
   ConfirmDialog,
   SectionHeader,
 } from "@eaip/ui-enterprise";
-import { MetricCard } from "@eaip/ui-visualizations";
+import { MetricCard, Timeline } from "@eaip/ui-visualizations";
 import { Button, Input, Badge } from "@eaip/ui-primitives";
 import { EnterpriseIcon } from "@eaip/icons";
 import type { Agent, AgentExecution, AgentEvent } from "@eaip/agent";
@@ -53,6 +53,7 @@ function AgentDetailPageContent() {
   const router = useRouter();
   const hasPermission = usePlatformStore((state) => state.hasPermission);
   const addToast = usePlatformStore((state) => state.addToast);
+  const { isAuthenticated } = useAuth();
   const { setFallback } = useFallback();
   const { confirm, state: confirmState, cancel } = useConfirm();
   const [agent, setAgent] = useState<Agent | null>(null);
@@ -72,7 +73,11 @@ function AgentDetailPageContent() {
         listExecutions(agentId),
         getAgentEvents(agentId, 50),
       ]);
-      if (agentResult.source === "fallback" || executionResult.source === "fallback" || eventResult.source === "fallback") {
+      if (
+        agentResult.source === "fallback" ||
+        executionResult.source === "fallback" ||
+        eventResult.source === "fallback"
+      ) {
         setFallback("agents", true);
       }
       setAgent(agentResult.data);
@@ -101,7 +106,7 @@ function AgentDetailPageContent() {
         }
       }
     },
-    enabled: typeof window !== "undefined",
+    enabled: typeof window !== "undefined" && isAuthenticated,
   });
 
   async function handleExecute() {
@@ -166,13 +171,17 @@ function AgentDetailPageContent() {
     }
   }
 
-  const successRate = executions.length > 0
-    ? Math.round((executions.filter((e) => e.status === "completed").length / executions.length) * 100)
-    : 0;
+  const successRate =
+    executions.length > 0
+      ? Math.round(
+          (executions.filter((e) => e.status === "completed").length / executions.length) * 100,
+        )
+      : 0;
 
-  const avgDuration = executions.length > 0
-    ? Math.round(executions.reduce((sum, e) => sum + (e.duration ?? 0), 0) / executions.length)
-    : 0;
+  const avgDuration =
+    executions.length > 0
+      ? Math.round(executions.reduce((sum, e) => sum + (e.duration ?? 0), 0) / executions.length)
+      : 0;
 
   const lastRunTime = executions[0]?.startedAt
     ? new Date(executions[0].startedAt).toLocaleString()
@@ -191,19 +200,30 @@ function AgentDetailPageContent() {
       {loading ? (
         <LoadingState message="Loading agent..." />
       ) : error ? (
-        <ErrorState message={error} onRetry={() => { void loadAgent(); }} />
+        <ErrorState
+          message={error}
+          onRetry={() => {
+            void loadAgent();
+          }}
+        />
       ) : (
         <div className="space-y-8">
           <section className="surface-hero relative overflow-hidden p-8 lg:p-10">
-            <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-gradient-to-br from-primary-subtle/50 to-transparent blur-3xl" aria-hidden="true" />
-            <div className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-gradient-to-tr from-accent-glow/30 to-transparent blur-2xl" aria-hidden="true" />
+            <div
+              className="from-primary-subtle/50 absolute -top-20 -right-20 h-64 w-64 rounded-full bg-gradient-to-br to-transparent blur-3xl"
+              aria-hidden="true"
+            />
+            <div
+              className="from-accent-glow/30 absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-gradient-to-tr to-transparent blur-2xl"
+              aria-hidden="true"
+            />
             <div className="relative">
-              <div className="flex items-center gap-2 text-xs font-semibold tracking-widest text-primary uppercase mb-4">
+              <div className="text-primary mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest uppercase">
                 <EnterpriseIcon name="activity" size={14} />
                 Agent Detail
               </div>
-              <h1 className="text-3xl font-bold text-text tracking-tight">{agent?.name}</h1>
-              <p className="mt-3 text-base text-text-secondary max-w-2xl leading-relaxed">
+              <h1 className="text-text text-3xl font-bold tracking-tight">{agent?.name}</h1>
+              <p className="text-text-secondary mt-3 max-w-2xl text-base leading-relaxed">
                 Monitor executions, review events, and manage this agent&apos;s operational state.
               </p>
             </div>
@@ -212,10 +232,26 @@ function AgentDetailPageContent() {
           {/* Executive Summary Strip */}
           <section className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <MetricCard label="Total Executions" value={executions.length} icon={<EnterpriseIcon name="barChart" size={20} />} />
-              <MetricCard label="Success Rate" value={`${String(successRate)}%`} icon={<EnterpriseIcon name="check" size={20} />} />
-              <MetricCard label="Avg Duration" value={`${String(avgDuration)}ms`} icon={<EnterpriseIcon name="clock" size={20} />} />
-              <MetricCard label="Last Run" value={lastRunTime} icon={<EnterpriseIcon name="activity" size={20} />} />
+              <MetricCard
+                label="Total Executions"
+                value={executions.length}
+                icon={<EnterpriseIcon name="barChart" size={20} />}
+              />
+              <MetricCard
+                label="Success Rate"
+                value={`${String(successRate)}%`}
+                icon={<EnterpriseIcon name="check" size={20} />}
+              />
+              <MetricCard
+                label="Avg Duration"
+                value={`${String(avgDuration)}ms`}
+                icon={<EnterpriseIcon name="clock" size={20} />}
+              />
+              <MetricCard
+                label="Last Run"
+                value={lastRunTime}
+                icon={<EnterpriseIcon name="activity" size={20} />}
+              />
             </div>
           </section>
 
@@ -224,13 +260,13 @@ function AgentDetailPageContent() {
             <SectionHeader icon="zap" title="Agent Workspace" />
             <div className="grid gap-4 lg:grid-cols-3">
               {/* Left column — 2/3 */}
-              <div className="lg:col-span-2 space-y-4">
+              <div className="space-y-4 lg:col-span-2">
                 {/* Agent Profile */}
                 <div className="surface-card p-6">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h2 className="text-lg font-semibold text-text">{agent?.name}</h2>
-                      <p className="mt-1 text-sm text-text-secondary flex items-center gap-2">
+                      <h2 className="text-text text-lg font-semibold">{agent?.name}</h2>
+                      <p className="text-text-secondary mt-1 flex items-center gap-2 text-sm">
                         <EnterpriseIcon name="activity" size={14} />
                         Status: <StatusBadge status={agent?.status ?? "unknown"} />
                       </p>
@@ -241,19 +277,27 @@ function AgentDetailPageContent() {
                         variant="destructive"
                         size="sm"
                         iconLeft="trash"
-                        onClick={() => { void handleDelete(); }}
+                        onClick={() => {
+                          void handleDelete();
+                        }}
                       >
                         Delete
                       </Button>
                     ) : null}
                   </div>
                   {agent?.description ? (
-                    <p className="mt-4 text-sm text-text-secondary leading-relaxed">{agent.description}</p>
+                    <p className="text-text-secondary mt-4 text-sm leading-relaxed">
+                      {agent.description}
+                    </p>
                   ) : null}
                   {agent?.systemPrompt ? (
-                    <div className="mt-4 rounded-lg bg-surface-secondary border border-border/60 p-4">
-                      <p className="text-xs font-semibold tracking-wide text-text-muted uppercase">Operating Instructions</p>
-                      <p className="mt-2 text-sm text-text-secondary leading-relaxed">{agent.systemPrompt}</p>
+                    <div className="bg-surface-secondary border-border/60 mt-4 rounded-lg border p-4">
+                      <p className="text-text-muted text-xs font-semibold tracking-wide uppercase">
+                        Operating Instructions
+                      </p>
+                      <p className="text-text-secondary mt-2 text-sm leading-relaxed">
+                        {agent.systemPrompt}
+                      </p>
                     </div>
                   ) : null}
                 </div>
@@ -261,7 +305,7 @@ function AgentDetailPageContent() {
                 {/* Execute Agent */}
                 {hasPermission("manage:agents") ? (
                   <div className="surface-card p-6">
-                    <h3 className="mb-3 text-base font-semibold text-text">Execute Agent</h3>
+                    <h3 className="text-text mb-3 text-base font-semibold">Execute Agent</h3>
                     <div className="flex gap-2">
                       <Input
                         value={input}
@@ -272,7 +316,9 @@ function AgentDetailPageContent() {
                         className="flex-1"
                       />
                       <Button
-                        onClick={() => { void handleExecute(); }}
+                        onClick={() => {
+                          void handleExecute();
+                        }}
                         loading={executing}
                         iconLeft="play"
                       >
@@ -284,7 +330,7 @@ function AgentDetailPageContent() {
 
                 {/* Execution History */}
                 <div className="surface-card p-6">
-                  <h3 className="mb-4 text-base font-semibold text-text">Execution History</h3>
+                  <h3 className="text-text mb-4 text-base font-semibold">Execution History</h3>
                   <DataGrid
                     data={executions}
                     keyExtractor={(execution) => execution.id}
@@ -302,7 +348,9 @@ function AgentDetailPageContent() {
                         key: "output",
                         header: "Output",
                         render: (execution) => (
-                          <span className="max-w-xs truncate block text-text-secondary">{execution.output ?? "—"}</span>
+                          <span className="text-text-secondary block max-w-xs truncate">
+                            {execution.output ?? "—"}
+                          </span>
                         ),
                       },
                       {
@@ -319,15 +367,19 @@ function AgentDetailPageContent() {
                               <>
                                 <button
                                   type="button"
-                                  onClick={() => { void handleControl(execution, "pause"); }}
-                                  className="text-xs text-primary hover:text-primary-hover transition-smooth"
+                                  onClick={() => {
+                                    void handleControl(execution, "pause");
+                                  }}
+                                  className="text-primary hover:text-primary-hover transition-smooth text-xs"
                                 >
                                   Pause
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() => { void handleControl(execution, "stop"); }}
-                                  className="text-xs text-danger hover:text-danger/80 transition-smooth"
+                                  onClick={() => {
+                                    void handleControl(execution, "stop");
+                                  }}
+                                  className="text-danger hover:text-danger/80 transition-smooth text-xs"
                                 >
                                   Stop
                                 </button>
@@ -335,8 +387,10 @@ function AgentDetailPageContent() {
                             ) : (
                               <button
                                 type="button"
-                                onClick={() => { void handleControl(execution, "retry"); }}
-                                className="text-xs text-primary hover:text-primary-hover transition-smooth"
+                                onClick={() => {
+                                  void handleControl(execution, "retry");
+                                }}
+                                className="text-primary hover:text-primary-hover transition-smooth text-xs"
                               >
                                 Retry
                               </button>
@@ -350,22 +404,35 @@ function AgentDetailPageContent() {
               </div>
 
               {/* Right column — 1/3: Events Feed */}
-              <div className="surface-card p-6">
-                <h3 className="mb-4 text-base font-semibold text-text">Event Stream</h3>
+              <div className="surface-card flex h-full flex-col p-6">
+                <div className="mb-6 flex items-center gap-2">
+                  <EnterpriseIcon name="activity" size={16} className="text-primary" />
+                  <h3 className="text-text text-base font-semibold">Live Execution Flow</h3>
+                </div>
                 {events.length === 0 ? (
-                  <p className="text-sm text-text-muted text-center py-8">No events recorded yet.</p>
+                  <div className="flex flex-1 items-center justify-center">
+                    <p className="text-text-muted text-sm">Waiting for events...</p>
+                  </div>
                 ) : (
-                  <ul className="max-h-96 space-y-3 overflow-y-auto">
-                    {events.map((event) => (
-                      <li key={event.id} className="rounded-lg border border-border/60 p-4 text-sm bg-surface-secondary/50">
-                        <p className="font-medium text-text">{event.type}</p>
-                        <p className="text-xs text-text-muted mt-1">{event.timestamp}</p>
-                        <pre className="mt-2 max-w-full overflow-x-auto rounded bg-surface-tertiary p-2 text-xs text-text-secondary">
-                          {JSON.stringify(event.data, null, 2)}
-                        </pre>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="-mr-2 flex-1 overflow-y-auto pr-2">
+                    <Timeline
+                      items={events.map((event) => ({
+                        id: event.id,
+                        title: event.type,
+                        description:
+                          typeof event.data === "object" && event.data
+                            ? JSON.stringify(event.data)
+                            : undefined,
+                        timestamp: new Date(event.timestamp).toLocaleTimeString(),
+                        status: event.type.toLowerCase().includes("error")
+                          ? "error"
+                          : event.type.toLowerCase().includes("success") ||
+                              event.type.toLowerCase().includes("completed")
+                            ? "success"
+                            : "running",
+                      }))}
+                    />
+                  </div>
                 )}
               </div>
             </div>
@@ -380,7 +447,9 @@ function AgentDetailPageContent() {
         variant={confirmState.variant}
         confirmLabel={confirmState.confirmLabel}
         cancelLabel={confirmState.cancelLabel}
-        onConfirm={() => { confirmState.onConfirm?.(); }}
+        onConfirm={() => {
+          confirmState.onConfirm?.();
+        }}
         onCancel={cancel}
       />
     </EnterpriseShell>

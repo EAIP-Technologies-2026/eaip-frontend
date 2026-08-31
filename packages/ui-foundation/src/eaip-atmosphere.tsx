@@ -27,15 +27,14 @@ export function EAIPAtmosphere({
   const intensityClass = intensity ? `atmo-intensity-${intensity}` : undefined;
 
   return (
-    <div
-      aria-hidden="true"
-      className={cn("eaip-atmosphere", intensityClass, className)}
-    >
+    <div aria-hidden="true" className={cn("eaip-atmosphere", intensityClass, className)}>
       <span className="eaip-atmosphere__field eaip-atmosphere__field--a" />
       <span className="eaip-atmosphere__field eaip-atmosphere__field--b" />
       <span className="eaip-atmosphere__field eaip-atmosphere__field--c" />
       <span className="eaip-atmosphere__field eaip-atmosphere__field--d" />
       <span className="eaip-atmosphere__field eaip-atmosphere__field--e" />
+      {/* Light theme layered gradient background — hidden by CSS in dark/vibe modes */}
+      <span className="eaip-atmosphere--light" />
       {showParticles && !reduced ? (
         <div className="eaip-atmosphere__particles">
           {Array.from({ length: 16 }, (_, index) => (

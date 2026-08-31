@@ -92,7 +92,31 @@ export const fullNavigation: NavCategory[] = [
     icon: "package",
     href: "/marketplace",
     description: "Discover and install integrations",
-    items: [{ label: "Browse", href: "/marketplace", icon: "package" }],
+    items: [
+      { label: "Browse", href: "/marketplace", icon: "package" },
+      { label: "Deployments", href: "/deployments", icon: "layers" },
+      { label: "Solution Packs", href: "/solution-packs", icon: "briefcase" },
+      { label: "Onboarding", href: "/onboarding", icon: "users" },
+    ],
+  },
+  {
+    id: "executive",
+    label: "Executive OS",
+    icon: "briefcase",
+    href: "/executive",
+    description: "Executive cockpit, briefings, and departmental views",
+    items: [
+      { label: "Executive Cockpit", href: "/executive", icon: "activity" },
+      { label: "Operations", href: "/operations", icon: "activity" },
+    ],
+  },
+  {
+    id: "autonomous",
+    label: "Autonomous Loop",
+    icon: "cpu",
+    href: "/enterprise-loop",
+    description: "Full autonomous enterprise loop — capstone",
+    items: [{ label: "Enterprise Loop", href: "/enterprise-loop", icon: "cpu" }],
   },
 ];
 

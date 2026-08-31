@@ -5,12 +5,15 @@ export type HeadingSize = "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4x
 export type HeadingWeight = "medium" | "semibold" | "bold";
 export type HeadingColor = "default" | "secondary" | "muted" | "inverse" | "primary";
 
+export type HeadingTracking = "display" | "tight" | "snug" | "normal" | "wide";
+
 export interface HeadingProps extends HTMLAttributes<HTMLHeadingElement> {
   as?: ElementType;
   level?: HeadingLevel;
   size?: HeadingSize;
   weight?: HeadingWeight;
   color?: HeadingColor;
+  tracking?: HeadingTracking;
   children: ReactNode;
 }
 
@@ -33,14 +36,33 @@ const defaultWeightForLevel: Record<HeadingLevel, HeadingWeight> = {
 };
 
 const sizeMap: Record<HeadingSize, string> = {
-  xs: "text-xs",
-  sm: "text-sm",
-  md: "text-base",
-  lg: "text-lg",
-  xl: "text-xl",
-  "2xl": "text-2xl",
-  "3xl": "text-3xl",
-  "4xl": "text-4xl",
+  xs: "text-xs leading-normal",
+  sm: "text-sm leading-snug",
+  md: "text-base leading-snug",
+  lg: "text-lg leading-snug",
+  xl: "text-xl leading-snug",
+  "2xl": "text-2xl leading-tight",
+  "3xl": "text-3xl leading-tight",
+  "4xl": "text-4xl leading-tight sm:text-5xl",
+};
+
+const trackingForSize: Record<HeadingSize, string> = {
+  xs: "tracking-normal",
+  sm: "tracking-normal",
+  md: "tracking-snug-enterprise",
+  lg: "tracking-snug-enterprise",
+  xl: "tracking-tight-enterprise",
+  "2xl": "tracking-tight-enterprise",
+  "3xl": "tracking-display",
+  "4xl": "tracking-display",
+};
+
+const trackingMap: Record<HeadingTracking, string> = {
+  display: "tracking-display",
+  tight: "tracking-tight-enterprise",
+  snug: "tracking-snug-enterprise",
+  normal: "tracking-normal",
+  wide: "tracking-wide",
 };
 
 const weightMap: Record<HeadingWeight, string> = {
@@ -59,24 +81,17 @@ const colorMap: Record<HeadingColor, string> = {
 
 export const Heading = forwardRef<HTMLHeadingElement, HeadingProps>(
   (
-    {
-      level = 1,
-      size,
-      weight,
-      color = "default",
-      as,
-      children,
-      className,
-      ...props
-    },
+    { level = 1, size, weight, color = "default", tracking, as, children, className, ...props },
     ref,
   ) => {
     const Tag = as ?? (`h${String(level)}` as ElementType);
     const resolvedSize = size ?? defaultSizeForLevel[level];
     const resolvedWeight = weight ?? defaultWeightForLevel[level];
+    const resolvedTracking = tracking ? trackingMap[tracking] : trackingForSize[resolvedSize];
 
     const classes = [
-      "tracking-tight",
+      "text-balance",
+      resolvedTracking,
       sizeMap[resolvedSize],
       weightMap[resolvedWeight],
       colorMap[color],

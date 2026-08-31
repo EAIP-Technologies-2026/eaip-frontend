@@ -87,10 +87,7 @@ function applyThemeToDOM(variant: ThemeVariant, mode: ThemeMode) {
 
 function applyReducedMotionToDOM(reduced: boolean) {
   if (typeof document === "undefined") return;
-  document.documentElement.setAttribute(
-    DATA_ATTRIBUTE_MOTION,
-    reduced.toString(),
-  );
+  document.documentElement.setAttribute(DATA_ATTRIBUTE_MOTION, reduced.toString());
 }
 
 export function ThemeProvider({
@@ -99,14 +96,11 @@ export function ThemeProvider({
   defaultVariant,
 }: ThemeProviderProps) {
   const initialVariant = useMemo(
-    () => resolveVariant(defaultVariant ?? getStoredValue(STORAGE_KEY_VARIANT, "enterprise-light")),
+    () => resolveVariant(defaultVariant ?? "enterprise-light"),
     [defaultVariant],
   );
 
-  const initialMode = useMemo(
-    () => normalizeMode(getStoredValue<string>(STORAGE_KEY_MODE, defaultMode), defaultMode),
-    [defaultMode],
-  );
+  const initialMode = useMemo(() => normalizeMode(defaultMode, defaultMode), [defaultMode]);
 
   const [state, setState] = useState<ThemeState>(() => ({
     mode: initialMode,
@@ -123,6 +117,17 @@ export function ThemeProvider({
   }, [state.variant, state.mode, state.reducedMotion]);
 
   useEffect(() => {
+    setState((previous) => ({
+      ...previous,
+      mode: normalizeMode(getStoredValue<string>(STORAGE_KEY_MODE, defaultMode), defaultMode),
+      variant: resolveVariant(
+        defaultVariant ?? getStoredValue<ThemeVariant>(STORAGE_KEY_VARIANT, "enterprise-light"),
+      ),
+      reducedMotion: getReducedMotion(),
+    }));
+  }, [defaultMode, defaultVariant]);
+
+  useEffect(() => {
     return injectThemeStyles();
   }, []);
 
@@ -134,7 +139,9 @@ export function ThemeProvider({
       applyReducedMotionToDOM(reduced);
     };
     mq.addEventListener("change", handler);
-    return () => { mq.removeEventListener("change", handler); };
+    return () => {
+      mq.removeEventListener("change", handler);
+    };
   }, []);
 
   const resolved = state.mode;
@@ -160,7 +167,8 @@ export function ThemeProvider({
 
   const toggle = useCallback(() => {
     setState((prev) => {
-      const next: ThemeMode = prev.mode === "light" ? "dark" : prev.mode === "dark" ? "vibe" : "light";
+      const next: ThemeMode =
+        prev.mode === "light" ? "dark" : prev.mode === "dark" ? "vibe" : "light";
       try {
         localStorage.setItem(STORAGE_KEY_MODE, next);
       } catch {
@@ -191,4 +199,3 @@ export function useTheme(): Theme {
   if (!ctx) throw new Error("useTheme must be used within a ThemeProvider");
   return ctx;
 }
-

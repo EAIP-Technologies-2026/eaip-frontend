@@ -27,6 +27,7 @@ class ApiAuthService implements AuthService {
     const response: ApiResponse<LoginResponse> = await this.client.post("/auth/login", {
       username: credentials.email,
       password: credentials.password,
+      tenant_id: credentials.tenantId ?? "",
     });
 
     if (response.error) {
@@ -57,22 +58,36 @@ class ApiAuthService implements AuthService {
   }
 
   async getCurrentUser(): Promise<AuthUser | null> {
-    const response: ApiResponse<AuthUser> = await this.client.get("/users/me");
+    try {
+      const response: ApiResponse<AuthUser> = await this.client.get("/users/me", undefined, {
+        timeoutMs: 3000,
+        retries: 0,
+        suppressSessionExpired: true,
+      });
 
-    if (response.error) {
-      if (response.error.status === 401) {
+      if (response.error) {
+        if (response.error.status === 401 || response.error.status === 403) return null;
+        throw response.error;
+      }
+
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
         return null;
       }
-      throw response.error;
+      throw error;
     }
-
-    return response.data;
   }
 
   async refreshToken(refreshToken: string): Promise<AuthTokens> {
     const response: ApiResponse<{ token: string; refresh_token?: string }> = await this.client.post(
       "/auth/refresh",
       { refresh_token: refreshToken },
+      {
+        timeoutMs: 3000,
+        retries: 0,
+        suppressSessionExpired: true,
+      },
     );
 
     if (response.error) {
@@ -96,10 +111,14 @@ class ApiAuthService implements AuthService {
   }
 }
 
-export function createAuthService(tokenProvider: () => string | null): AuthService {
+export function createAuthService(
+  tokenProvider: () => string | null,
+  apiUrl?: string,
+): AuthService {
   const config = getConfig();
+  const baseUrl = apiUrl ?? config.apiUrl;
   const client = createDefaultClient({
-    baseUrl: config.apiUrl,
+    baseUrl,
     tokenProvider,
   });
   return new ApiAuthService(client);

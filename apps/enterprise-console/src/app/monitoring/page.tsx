@@ -22,6 +22,9 @@ function MonitoringContent() {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("all");
   const [sourceFilter, setSourceFilter] = useState<string>("all");
+  const [metricsText, setMetricsText] = useState<string>(
+    "Select the exporter to load current metrics.",
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -40,7 +43,9 @@ function MonitoringContent() {
       }
     }
     void load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [setFallback]);
 
   const filtered = useMemo(() => {
@@ -62,20 +67,30 @@ function MonitoringContent() {
   async function acknowledgeAll() {
     try {
       setEvents((prev) => prev.map((e) => ({ ...e, acknowledged: true })));
-      addToast({ type: "info", title: "All events acknowledged (local only)", message: "Changes will not persist on refresh — no backend endpoint available." });
+      addToast({
+        type: "info",
+        title: "All events acknowledged (local only)",
+        message: "Changes will not persist on refresh — no backend endpoint available.",
+      });
     } catch {
       addToast({ type: "error", title: "Failed to acknowledge events" });
     }
   }
 
   const timelineData = useMemo(
-    () => filtered.slice(0, 30).map((e) => ({
-      id: e.id,
-      title: e.title,
-      description: e.description,
-      timestamp: e.timestamp,
-      status: (e.severity === "critical" || e.severity === "error" ? "error" as const : e.severity === "warning" ? "warning" as const : "success" as const),
-    })),
+    () =>
+      filtered.slice(0, 30).map((e) => ({
+        id: e.id,
+        title: e.title,
+        description: e.description,
+        timestamp: e.timestamp,
+        status:
+          e.severity === "critical" || e.severity === "error"
+            ? ("error" as const)
+            : e.severity === "warning"
+              ? ("warning" as const)
+              : ("success" as const),
+      })),
     [filtered],
   );
 
@@ -86,22 +101,35 @@ function MonitoringContent() {
       breadcrumbs={[{ label: "Dashboard", href: "/dashboard" }, { label: "Monitoring" }]}
     >
       <div className="space-y-8">
-        <section data-tour="monitoring" className="surface-hero relative overflow-hidden p-8 lg:p-10">
+        <section
+          data-tour="monitoring"
+          className="surface-hero relative overflow-hidden p-8 lg:p-10"
+        >
           <div className="relative">
-            <div className="flex items-center gap-2 text-xs font-semibold tracking-widest text-primary uppercase mb-4">
+            <div className="text-primary mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest uppercase">
               <EnterpriseIcon name="activity" size={14} />
               Event Monitor
             </div>
-            <h1 className="text-3xl font-bold text-text tracking-tight">Monitoring</h1>
-            <p className="mt-3 text-base text-text-secondary max-w-2xl leading-relaxed">Track operational events, alerts, and system telemetry across your platform.</p>
+            <h1 className="text-text text-3xl font-bold tracking-tight">Monitoring</h1>
+            <p className="text-text-secondary mt-3 max-w-2xl text-base leading-relaxed">
+              Track operational events, alerts, and system telemetry across your platform.
+            </p>
           </div>
         </section>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <MetricCard label="Total Events" value={loading ? "—" : events.length} icon="activity" />
           <MetricCard label="Unacknowledged" value={loading ? "—" : unacknowledged} icon="alert" />
-          <MetricCard label="Critical" value={loading ? "—" : severityCounts.critical} icon="alert" />
-          <MetricCard label="Warnings" value={loading ? "—" : severityCounts.warning} icon="alert" />
+          <MetricCard
+            label="Critical"
+            value={loading ? "—" : severityCounts.critical}
+            icon="alert"
+          />
+          <MetricCard
+            label="Warnings"
+            value={loading ? "—" : severityCounts.warning}
+            icon="alert"
+          />
         </div>
 
         <div className="grid gap-4 lg:grid-cols-3">
@@ -111,18 +139,31 @@ function MonitoringContent() {
             </CardHeader>
             <CardContent className="px-5 py-4">
               {loading ? (
-              <div className="space-y-3">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="skeleton-card h-10" style={{ animationDelay: String(i * 80) + "ms" }} />
-                ))}
-              </div>
+                <div className="space-y-3">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div
+                      key={i}
+                      className="skeleton-card h-10"
+                      style={{ animationDelay: String(i * 80) + "ms" }}
+                    />
+                  ))}
+                </div>
               ) : timelineData.length === 0 ? (
                 <EmptyState
                   icon="activity"
                   title="No events"
                   description="No monitoring events match your filters."
                   action={
-                    <Button variant="secondary" size="sm" onClick={() => { setFilter("all"); setSourceFilter("all"); }}>Clear Filters</Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+                        setFilter("all");
+                        setSourceFilter("all");
+                      }}
+                    >
+                      Clear Filters
+                    </Button>
                   }
                 />
               ) : (
@@ -150,48 +191,46 @@ function MonitoringContent() {
         </div>
 
         <Card variant="elevated" padding="none">
-          <CardHeader className="px-5 py-4 flex justify-between items-center">
+          <CardHeader className="flex items-center justify-between px-5 py-4">
             <SectionTitle>Platform Metrics & Traces (Live)</SectionTitle>
-            <Button size="sm" variant="secondary" onClick={async () => {
-              try {
-                const res = await fetch("http://localhost:8000/api/metrics");
-                const text = await res.text();
-                alert("Latest Metrics:\n\n" + text.split('\n').slice(0, 10).join('\n') + "\n...");
-              } catch (e) {
-                alert("Failed to load metrics. Is the API running?");
-              }
-            }}>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={async () => {
+                try {
+                  const res = await fetch("/metrics", { credentials: "include" });
+                  if (!res.ok) throw new Error(`Metrics request failed (${String(res.status)})`);
+                  setMetricsText(await res.text());
+                } catch (e) {
+                  setMetricsText(e instanceof Error ? e.message : "Failed to load metrics");
+                }
+              }}
+            >
               View Prometheus Exporter
             </Button>
           </CardHeader>
-          <CardContent className="px-5 py-4 bg-black text-green-400 font-mono text-xs overflow-auto max-h-64">
-            <div># TYPE eaip_requests_total counter</div>
-            <div>eaip_requests_total&#123;method="GET",endpoint="/health"&#125; 142.0</div>
-            <div>eaip_requests_total&#123;method="POST",endpoint="/api/v1/agents"&#125; 23.0</div>
-            <div># TYPE eaip_request_duration_seconds histogram</div>
-            <div>eaip_request_duration_seconds_sum&#123;method="GET",endpoint="/health"&#125; 0.14</div>
-            <div>... live data feed ...</div>
-            <br />
-            <div className="text-blue-400">--- TRACE VIEWER (AI Observability) ---</div>
-            <div className="text-gray-300">trace_id: 54a8b7c29e1f... span_id: 1122334455... | Agent: Planner | duration: 1.2s</div>
-            <div className="text-gray-300">trace_id: 99x8b7c29e1f... span_id: aabbccddeeff... | Agent: Executor | duration: 0.8s</div>
+          <CardContent className="max-h-64 overflow-auto bg-black px-5 py-4 font-mono text-xs text-green-400">
+            <pre className="whitespace-pre-wrap">{metricsText}</pre>
           </CardContent>
         </Card>
-
 
         <Card variant="elevated" padding="none">
           <CardHeader className="px-5 py-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <SectionTitle>Events</SectionTitle>
               <div className="flex flex-wrap items-center gap-2">
-                <div className="flex gap-1 rounded-lg border border-border bg-surface p-0.5">
+                <div className="border-border bg-surface flex gap-1 rounded-lg border p-0.5">
                   {["all", "info", "warning", "error", "critical"].map((s) => (
                     <button
                       key={s}
                       type="button"
-                      onClick={() => { setFilter(s); }}
-                      className={`rounded-md px-2.5 py-1 text-xs font-medium transition-smooth ${
-                        filter === s ? "bg-primary text-text-inverse shadow-sm" : "text-text-secondary hover:bg-surface-tertiary hover:text-text"
+                      onClick={() => {
+                        setFilter(s);
+                      }}
+                      className={`transition-smooth rounded-md px-2.5 py-1 text-xs font-medium ${
+                        filter === s
+                          ? "bg-primary text-text-inverse shadow-sm"
+                          : "text-text-secondary hover:bg-surface-tertiary hover:text-text"
                       }`}
                     >
                       {s.charAt(0).toUpperCase() + s.slice(1)}
@@ -200,12 +239,16 @@ function MonitoringContent() {
                 </div>
                 <select
                   value={sourceFilter}
-                  onChange={(e) => { setSourceFilter(e.target.value); }}
-                  className="rounded-lg border border-border bg-surface px-2.5 py-1 text-xs text-text"
+                  onChange={(e) => {
+                    setSourceFilter(e.target.value);
+                  }}
+                  className="border-border bg-surface text-text rounded-lg border px-2.5 py-1 text-xs"
                 >
                   <option value="all">All Sources</option>
                   {sources.map((s) => (
-                    <option key={s} value={s}>{s}</option>
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
                   ))}
                 </select>
                 <Button variant="secondary" size="sm" onClick={acknowledgeAll}>
@@ -218,42 +261,76 @@ function MonitoringContent() {
             {loading ? (
               <div className="space-y-3">
                 {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                  <div key={i} className="skeleton-card h-12" style={{ animationDelay: String(i * 60) + "ms" }} />
+                  <div
+                    key={i}
+                    className="skeleton-card h-12"
+                    style={{ animationDelay: String(i * 60) + "ms" }}
+                  />
                 ))}
               </div>
             ) : error ? (
-              <ErrorState title="Could not load events" message={error} onRetry={() => { window.location.reload(); }} />
+              <ErrorState
+                title="Could not load events"
+                message={error}
+                onRetry={() => {
+                  window.location.reload();
+                }}
+              />
             ) : filtered.length === 0 ? (
               <EmptyState
                 icon="activity"
                 title="No events"
                 description="No monitoring events match your current filters."
                 action={
-                  <Button variant="secondary" size="sm" onClick={() => { setFilter("all"); setSourceFilter("all"); }}>Clear Filters</Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      setFilter("all");
+                      setSourceFilter("all");
+                    }}
+                  >
+                    Clear Filters
+                  </Button>
                 }
               />
             ) : (
-              <div className="divide-y divide-border">
+              <div className="divide-border divide-y">
                 {filtered.slice(0, 50).map((event) => (
-                  <div key={event.id} className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0 transition-smooth hover:bg-surface-secondary rounded-card -mx-2 px-2">
+                  <div
+                    key={event.id}
+                    className="transition-smooth hover:bg-surface-secondary rounded-card -mx-2 flex items-center justify-between px-2 py-2.5 first:pt-0 last:pb-0"
+                  >
                     <div className="flex items-center gap-3">
-                      <div className={`h-2 w-2 rounded-full ${
-                        event.severity === "critical" ? "bg-danger" :
-                        event.severity === "error" ? "bg-danger" :
-                        event.severity === "warning" ? "bg-warning" : "bg-primary"
-                      }`} />
+                      <div
+                        className={`h-2 w-2 rounded-full ${
+                          event.severity === "critical"
+                            ? "bg-danger"
+                            : event.severity === "error"
+                              ? "bg-danger"
+                              : event.severity === "warning"
+                                ? "bg-warning"
+                                : "bg-primary"
+                        }`}
+                      />
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-text">{event.title}</span>
-                          <Badge variant={
-                            event.severity === "critical" ? "danger" :
-                            event.severity === "error" ? "danger" :
-                            event.severity === "warning" ? "warning" : "default"
-                          }>
+                          <span className="text-text text-sm font-medium">{event.title}</span>
+                          <Badge
+                            variant={
+                              event.severity === "critical"
+                                ? "danger"
+                                : event.severity === "error"
+                                  ? "danger"
+                                  : event.severity === "warning"
+                                    ? "warning"
+                                    : "default"
+                            }
+                          >
                             {event.severity}
                           </Badge>
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-text-secondary">
+                        <div className="text-text-secondary flex items-center gap-2 text-xs">
                           <span>{event.source}</span>
                           <span>•</span>
                           <span>{new Date(event.timestamp).toLocaleString()}</span>
@@ -264,7 +341,9 @@ function MonitoringContent() {
                       </div>
                     </div>
                     {event.description ? (
-                      <p className="hidden max-w-xs text-xs text-text-secondary lg:block">{event.description}</p>
+                      <p className="text-text-secondary hidden max-w-xs text-xs lg:block">
+                        {event.description}
+                      </p>
                     ) : null}
                   </div>
                 ))}

@@ -46,3 +46,24 @@ pnpm-debug.log*
 
 # Misc
 *.tsbuildinfo
+
+# AI-generated acceptance/implementation reports (keep only README)
+/*REPORT.md
+/*_REPORT.md
+
+# Test acceptance evidence (screenshots)
+acceptance-evidence-rc/
+brain/
+
+# Ad-hoc debug/acceptance scripts (root)
+/chromium_*.cjs
+/debug_*.cjs
+/diagnose_*.cjs
+/eaip_chromium_final.cjs
+
+# Generated debug output
+lint-results.json
+recon-output.txt
+
+# One-shot RC verification script (local debug tool, not part of app build)
+apps/enterprise-console/run-release-candidate-verification.cjs

@@ -36,7 +36,10 @@ export async function fetchSystemHealth(): Promise<ServiceResult<SystemHealth>> 
     if (healthRes.error) throw healthRes.error;
     if (metricsRes.error) throw metricsRes.error;
     const metrics = metricsRes.data ?? [];
-    return liveResult({ ...(healthRes.data ?? { overall: "healthy", uptime: "", services: [], metrics }), metrics });
+    return liveResult({
+      ...(healthRes.data ?? { overall: "healthy", uptime: "", services: [], metrics }),
+      metrics,
+    });
   } catch (err) {
     if (isNetworkError(err)) {
       const cached = createMockSystemHealth();
@@ -46,15 +49,31 @@ export async function fetchSystemHealth(): Promise<ServiceResult<SystemHealth>> 
   }
 }
 
-export async function fetchAdminHealth(): Promise<ServiceResult<any>> {
+export interface HealthDependency {
+  component: string;
+  type: string;
+  status: string;
+}
+
+export interface AdminHealth {
+  status: string;
+  components: Record<string, unknown>[];
+  dependencies: HealthDependency[];
+  operations_status: string;
+}
+
+export async function fetchAdminHealth(): Promise<ServiceResult<AdminHealth | null>> {
   try {
     const client = getDefaultClient();
-    const res = await client.get<any>("/admin/health");
+    const res = await client.get<AdminHealth>("/admin/health");
     if (res.error) throw res.error;
     return liveResult(res.data);
   } catch (err) {
     if (isNetworkError(err)) {
-      return fallbackResult({ status: "down", components: [], dependencies: [], operations_status: "unknown" }, "Backend unavailable");
+      return fallbackResult(
+        { status: "down", components: [], dependencies: [], operations_status: "unknown" },
+        "Backend unavailable",
+      );
     }
     throw err;
   }

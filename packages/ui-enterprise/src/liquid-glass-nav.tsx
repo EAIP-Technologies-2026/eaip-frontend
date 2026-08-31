@@ -36,7 +36,7 @@ export function LiquidGlassNav({ appId }: LiquidGlassNavProps) {
     const nav = navRef.current;
     const pill = pillRef.current;
     if (!nav || !pill) return;
-    const target = Array.from(nav.querySelectorAll<HTMLElement>("[data-nav-active=\"true\"]")).find(
+    const target = Array.from(nav.querySelectorAll<HTMLElement>('[data-nav-active="true"]')).find(
       (element) => element.offsetParent !== null,
     );
     if (!target) {
@@ -61,7 +61,8 @@ export function LiquidGlassNav({ appId }: LiquidGlassNavProps) {
     if (observer && navRef.current) observer.observe(navRef.current);
     window.addEventListener("resize", updatePill);
     return () => {
-      if (typeof cancelAnimationFrame === "function" && frame !== undefined) cancelAnimationFrame(frame);
+      if (typeof cancelAnimationFrame === "function" && frame !== undefined)
+        cancelAnimationFrame(frame);
       observer?.disconnect();
       window.removeEventListener("resize", updatePill);
     };
@@ -72,15 +73,23 @@ export function LiquidGlassNav({ appId }: LiquidGlassNavProps) {
       if (event.key === "Escape") setMoreOpen(false);
     }
     document.addEventListener("keydown", closeOnEscape);
-    return () => { document.removeEventListener("keydown", closeOnEscape); };
+    return () => {
+      document.removeEventListener("keydown", closeOnEscape);
+    };
   }, []);
 
   const handleMouseMove = useCallback(
     (event: React.MouseEvent<HTMLElement>) => {
       if (reduced || !navRef.current) return;
       const rect = navRef.current.getBoundingClientRect();
-      navRef.current.style.setProperty("--glare-x", `${String(((event.clientX - rect.left) / rect.width) * 100)}%`);
-      navRef.current.style.setProperty("--glare-y", `${String(((event.clientY - rect.top) / rect.height) * 100)}%`);
+      navRef.current.style.setProperty(
+        "--glare-x",
+        `${String(((event.clientX - rect.left) / rect.width) * 100)}%`,
+      );
+      navRef.current.style.setProperty(
+        "--glare-y",
+        `${String(((event.clientY - rect.top) / rect.height) * 100)}%`,
+      );
     },
     [reduced],
   );
@@ -96,7 +105,9 @@ export function LiquidGlassNav({ appId }: LiquidGlassNavProps) {
       <Link
         key={item.id}
         href={item.href}
-        onClick={() => { navigate(item); }}
+        onClick={() => {
+          navigate(item);
+        }}
         aria-current={active ? "page" : undefined}
         data-nav-active={active ? "true" : undefined}
         className={cn("nav-item", active && "nav-item--active", mobile && "nav-item--mobile")}
@@ -108,18 +119,28 @@ export function LiquidGlassNav({ appId }: LiquidGlassNavProps) {
   }
 
   return (
-    <nav ref={navRef} className="nav-glass" aria-label="Enterprise Console navigation" onMouseMove={handleMouseMove}>
+    <nav
+      ref={navRef}
+      className="nav-glass"
+      aria-label="Enterprise Console navigation"
+      onMouseMove={handleMouseMove}
+    >
       <span className="nav-glare" aria-hidden="true" />
       <span ref={pillRef} className="nav-pill" aria-hidden="true" />
 
-      <Link href="/dashboard" className="nav-brand" aria-label="EAIP Dashboard" onClick={() => { setActiveRoute("/dashboard"); }}>
+      <Link
+        href="/dashboard"
+        className="nav-brand"
+        aria-label="EAIP Dashboard"
+        onClick={() => {
+          setActiveRoute("/dashboard");
+        }}
+      >
         <EnterpriseIcon name="layers" size={18} />
       </Link>
 
       <span className="nav-separator" aria-hidden="true" />
-      <div className="nav-primary-items">
-        {primaryItems.map((item) => renderItem(item))}
-      </div>
+      <div className="nav-primary-items">{primaryItems.map((item) => renderItem(item))}</div>
 
       {secondaryItems.length > 0 ? (
         <div className="nav-more-wrap">
@@ -130,27 +151,50 @@ export function LiquidGlassNav({ appId }: LiquidGlassNavProps) {
             aria-haspopup="menu"
             aria-expanded={moreOpen}
             aria-label="More destinations"
-            onClick={() => { setMoreOpen((open) => !open); }}
+            onClick={() => {
+              setMoreOpen((open) => !open);
+            }}
           >
             <EnterpriseIcon name="moreHorizontal" size={16} />
             <span>More</span>
             <EnterpriseIcon name={moreOpen ? "chevronUp" : "chevronDown"} size={13} />
           </button>
           {moreOpen ? (
-            <div className="nav-more-menu liquid-glass" role="menu" aria-label="More destinations">
-              <p className="nav-more-label">Platform</p>
-              {secondaryItems.map((item) => (
-                <Link
-                  key={item.id}
-                  href={item.href}
-                  role="menuitem"
-                  onClick={() => { navigate(item); }}
-                  className={cn("nav-more-item", routeMatches(activePath, item.href) && "nav-more-item--active")}
-                >
-                  <EnterpriseIcon name={item.icon} size={16} />
-                  <span>{item.label}</span>
-                </Link>
-              ))}
+            <div
+              className="nav-more-menu liquid-glass max-h-[75vh] overflow-y-auto p-2"
+              role="menu"
+              aria-label="More destinations"
+            >
+              {(["OPERATE", "INTELLIGENCE", "GOVERN", "OBSERVE", "EXTEND"] as const).map(
+                (category) => {
+                  const categoryItems = secondaryItems.filter((item) => item.category === category);
+                  if (categoryItems.length === 0) return null;
+                  return (
+                    <div key={category} className="mb-2 last:mb-0">
+                      <p className="text-primary/90 px-2 pt-2 pb-1 text-[10px] font-bold tracking-wider uppercase">
+                        {category}
+                      </p>
+                      {categoryItems.map((item) => (
+                        <Link
+                          key={item.id}
+                          href={item.href}
+                          role="menuitem"
+                          onClick={() => {
+                            navigate(item);
+                          }}
+                          className={cn(
+                            "nav-more-item",
+                            routeMatches(activePath, item.href) && "nav-more-item--active",
+                          )}
+                        >
+                          <EnterpriseIcon name={item.icon} size={16} />
+                          <span>{item.label}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  );
+                },
+              )}
             </div>
           ) : null}
         </div>
@@ -173,27 +217,50 @@ export function LiquidGlassNav({ appId }: LiquidGlassNavProps) {
             aria-haspopup="menu"
             aria-expanded={moreOpen}
             aria-label="More destinations"
-            onClick={() => { setMoreOpen((open) => !open); }}
+            onClick={() => {
+              setMoreOpen((open) => !open);
+            }}
           >
             <EnterpriseIcon name="moreHorizontal" size={18} />
             <span>More</span>
           </button>
           {moreOpen ? (
-            <div className="nav-more-menu nav-more-menu--mobile liquid-glass" role="menu" aria-label="More destinations">
-              <p className="nav-more-label">Platform</p>
-              {secondaryItems.map((item) => (
-                <Link
-                  key={item.id}
-                  href={item.href}
-                  role="menuitem"
-                  onClick={() => { navigate(item); }}
-                  className={cn("nav-more-item", routeMatches(activePath, item.href) && "nav-more-item--active")}
-                >
-                  <EnterpriseIcon name={item.icon} size={16} />
-                  <span>{item.label}</span>
-                </Link>
-              ))}
-              <div className="nav-more-utilities">
+            <div
+              className="nav-more-menu nav-more-menu--mobile liquid-glass max-h-[80vh] overflow-y-auto p-3"
+              role="menu"
+              aria-label="More destinations"
+            >
+              {(["OPERATE", "INTELLIGENCE", "GOVERN", "OBSERVE", "EXTEND"] as const).map(
+                (category) => {
+                  const categoryItems = secondaryItems.filter((item) => item.category === category);
+                  if (categoryItems.length === 0) return null;
+                  return (
+                    <div key={category} className="mb-3 last:mb-0">
+                      <p className="text-primary/90 px-2 pb-1 text-[10px] font-bold tracking-wider uppercase">
+                        {category}
+                      </p>
+                      {categoryItems.map((item) => (
+                        <Link
+                          key={item.id}
+                          href={item.href}
+                          role="menuitem"
+                          onClick={() => {
+                            navigate(item);
+                          }}
+                          className={cn(
+                            "nav-more-item",
+                            routeMatches(activePath, item.href) && "nav-more-item--active",
+                          )}
+                        >
+                          <EnterpriseIcon name={item.icon} size={16} />
+                          <span>{item.label}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  );
+                },
+              )}
+              <div className="nav-more-utilities border-border/50 mt-3 border-t pt-3">
                 <ThemeSwitcher compact />
                 <NotificationBell />
                 <UserProfileMenu />

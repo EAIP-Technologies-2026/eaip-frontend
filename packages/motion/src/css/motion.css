@@ -25,6 +25,73 @@
   --motion-spring-mass: 1;
 }
 
+/* Micro, Standard & Deliberate Interactive Transition Utilities */
+.motion-micro {
+  transition-property: color, background-color, border-color, opacity, transform, box-shadow;
+  transition-duration: var(--motion-duration-micro, 100ms);
+  transition-timing-function: var(--motion-ease-premium, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.motion-standard {
+  transition-property: color, background-color, border-color, opacity, transform, box-shadow;
+  transition-duration: var(--motion-duration-normal, 250ms);
+  transition-timing-function: var(--motion-ease-premium, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.motion-deliberate {
+  transition-property:
+    color, background-color, border-color, opacity, transform, box-shadow, height, max-height;
+  transition-duration: var(--motion-duration-medium, 350ms);
+  transition-timing-function: var(--motion-ease-premium, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.interactive-lift {
+  transition:
+    transform 200ms var(--motion-ease-premium, cubic-bezier(0.16, 1, 0.3, 1)),
+    box-shadow 200ms var(--motion-ease-premium, cubic-bezier(0.16, 1, 0.3, 1));
+  will-change: transform;
+}
+
+.interactive-lift:hover {
+  transform: translateY(-2px);
+}
+
+.interactive-lift:active {
+  transform: translateY(0px) scale(0.99);
+}
+
+.interactive-press {
+  transition: transform 120ms var(--motion-ease-premium, cubic-bezier(0.16, 1, 0.3, 1));
+  will-change: transform;
+}
+
+.interactive-press:active {
+  transform: scale(0.97);
+}
+
+/* Aurora Shimmer Animation for Unified Loading System */
+@keyframes eaip-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.eaip-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(129, 140, 248, 0.08) 25%,
+    rgba(56, 189, 248, 0.14) 50%,
+    rgba(129, 140, 248, 0.08) 75%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: eaip-shimmer 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
 /* Reduced Motion Support */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -34,5 +101,10 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .eaip-shimmer {
+    animation: none !important;
+    background-image: none !important;
   }
 }

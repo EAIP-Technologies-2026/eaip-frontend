@@ -33,28 +33,52 @@ function getStorage(): Storage | null {
 export function getStoredTokens(): AuthTokens | null {
   const storage = getStorage();
   if (!storage) return null;
-  const accessToken = storage.getItem(TOKEN_KEY);
+  let accessToken: string | null;
+  let refreshToken: string | null;
+  try {
+    accessToken = storage.getItem(TOKEN_KEY);
+    refreshToken = storage.getItem(REFRESH_TOKEN_KEY);
+  } catch {
+    accessToken = memoryStore.get(TOKEN_KEY) ?? null;
+    refreshToken = memoryStore.get(REFRESH_TOKEN_KEY) ?? null;
+  }
   if (!accessToken) return null;
   return {
     accessToken,
-    refreshToken: storage.getItem(REFRESH_TOKEN_KEY) ?? undefined,
+    refreshToken: refreshToken ?? undefined,
   };
 }
 
 export function storeTokens(tokens: AuthTokens): void {
   const storage = getStorage();
   if (!storage) return;
-  storage.setItem(TOKEN_KEY, tokens.accessToken);
-  if (tokens.refreshToken) {
-    storage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
+  try {
+    storage.setItem(TOKEN_KEY, tokens.accessToken);
+    if (tokens.refreshToken) {
+      storage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
+    } else {
+      storage.removeItem(REFRESH_TOKEN_KEY);
+    }
+  } catch {
+    memoryStore.set(TOKEN_KEY, tokens.accessToken);
+    if (tokens.refreshToken) {
+      memoryStore.set(REFRESH_TOKEN_KEY, tokens.refreshToken);
+    } else {
+      memoryStore.delete(REFRESH_TOKEN_KEY);
+    }
   }
 }
 
 export function clearStoredTokens(): void {
   const storage = getStorage();
   if (!storage) return;
-  storage.removeItem(TOKEN_KEY);
-  storage.removeItem(REFRESH_TOKEN_KEY);
+  try {
+    storage.removeItem(TOKEN_KEY);
+    storage.removeItem(REFRESH_TOKEN_KEY);
+  } catch {
+    memoryStore.delete(TOKEN_KEY);
+    memoryStore.delete(REFRESH_TOKEN_KEY);
+  }
 }
 
 export function tokenProvider(): string | null {

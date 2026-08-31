@@ -10,6 +10,7 @@ import {
   ToastContainer,
   GlobalSearchDialog,
   CommandPalette,
+  EAIPAtmosphere,
 } from "@eaip/ui-enterprise";
 
 const tabs = [
@@ -46,18 +47,22 @@ export function MobileShell({ children, pageTitle }: MobileShellProps) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-surface-secondary">
-      <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-border bg-surface/80 px-4 backdrop-blur-md">
-        <h1 className="text-lg font-semibold text-text">{pageTitle ?? routeTitle(pathname)}</h1>
+    <div className="bg-background flex min-h-screen flex-col overflow-hidden">
+      <EAIPAtmosphere intensity="dashboard" showParticles={false} />
+
+      <header className="border-border/80 bg-surface-glass sticky top-0 z-20 flex h-14 items-center justify-between border-b px-4 backdrop-blur-xl">
+        <h1 className="text-text text-lg font-semibold tracking-tight">
+          {pageTitle ?? routeTitle(pathname)}
+        </h1>
         <ThemeSwitcher />
       </header>
 
-      <main id="main-content" className="flex-1 px-4 pb-32 pt-4">
+      <main id="main-content" className="relative z-10 flex-1 px-4 pt-4 pb-32">
         {children}
       </main>
 
       <nav
-        className="fixed bottom-0 left-0 right-0 z-20 border-t border-border bg-surface/90 backdrop-blur-md"
+        className="bg-surface-glass fixed right-0 bottom-0 left-0 z-30 border-t border-white/[0.1] shadow-[0_-8px_32px_rgba(0,0,0,0.12)] backdrop-blur-2xl"
         aria-label="Primary navigation"
       >
         <div
@@ -71,7 +76,7 @@ export function MobileShell({ children, pageTitle }: MobileShellProps) {
                 key={tab.id}
                 href={tab.href}
                 className={cn(
-                  "flex flex-1 flex-col items-center gap-1 py-3 text-xs font-medium transition-smooth",
+                  "transition-smooth flex flex-1 flex-col items-center gap-1 py-3 text-xs font-medium",
                   active ? "text-primary" : "text-text-muted",
                 )}
                 aria-current={active ? "page" : undefined}

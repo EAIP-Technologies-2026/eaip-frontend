@@ -20,24 +20,24 @@ import {
 } from "@eaip/ui-enterprise";
 import { Button, Badge, SectionTitle, EmptyState } from "@eaip/ui-primitives";
 import dynamic from "next/dynamic";
-import {
-  MetricCard,
-  StatusWidget,
-  Timeline,
-} from "@eaip/ui-visualizations";
+import { MetricCard, StatusWidget, Timeline } from "@eaip/ui-visualizations";
 
 const BarChartWidget = dynamic(
   () => import("@eaip/ui-visualizations").then((mod) => mod.BarChartWidget),
-  { ssr: false, loading: () => <div className="h-48 skeleton rounded-lg" /> },
+  { ssr: false, loading: () => <div className="skeleton h-48 rounded-lg" /> },
 );
 const PieChartWidget = dynamic(
   () => import("@eaip/ui-visualizations").then((mod) => mod.PieChartWidget),
-  { ssr: false, loading: () => <div className="h-48 skeleton rounded-lg" /> },
+  { ssr: false, loading: () => <div className="skeleton h-48 rounded-lg" /> },
 );
 
 import { EnterpriseIcon } from "@eaip/icons";
 import type { Agent } from "@eaip/agent";
 import { useLocalStorage } from "@eaip/hooks";
+import { EnterprisePulse } from "../../components/enterprise-pulse";
+import { StorylineFeed } from "../../components/storyline-feed";
+import { ImpactMarkers } from "../../components/impact-markers";
+import { NextBestActions } from "../../components/next-best-actions";
 import { logger } from "@eaip/logging";
 import {
   fetchAgentStats,
@@ -50,6 +50,7 @@ import type { SystemHealth } from "../../services/health-service";
 import { fetchMonitoringEvents } from "../../services/monitoring-service";
 import type { MonitoringEvent } from "../../services/monitoring-service";
 import { useFallback } from "../../services/fallback-context";
+import { KnowledgeGraphWidget } from "../../components/knowledge-graph-widget";
 
 function formatPercent(value: number): string {
   return `${String(Math.round(value * 100))}%`;
@@ -80,10 +81,7 @@ function DashboardContent() {
   const [alerts, setAlerts] = useState<MonitoringEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [pinnedIds, setPinnedIds] = useLocalStorage<string[]>(
-    "eaip-enterprise-console-pinned",
-    [],
-  );
+  const [pinnedIds, setPinnedIds] = useLocalStorage<string[]>("eaip-enterprise-console-pinned", []);
 
   useEffect(() => {
     let cancelled = false;
@@ -167,9 +165,7 @@ function DashboardContent() {
 
   const recentAgents = useMemo(() => {
     const sorted = [...agents].sort((a, b) =>
-      (b.updatedAt ?? b.createdAt ?? "").localeCompare(
-        a.updatedAt ?? a.createdAt ?? "",
-      ),
+      (b.updatedAt ?? b.createdAt ?? "").localeCompare(a.updatedAt ?? a.createdAt ?? ""),
     );
     return sorted.slice(0, 5);
   }, [agents]);
@@ -193,7 +189,10 @@ function DashboardContent() {
           : "No agents are currently active. Deploy an agent to begin operations.";
 
   const criticalAlerts = useMemo(
-    () => alerts.filter((a) => a.severity === "critical" || a.severity === "error" || a.severity === "warning"),
+    () =>
+      alerts.filter(
+        (a) => a.severity === "critical" || a.severity === "error" || a.severity === "warning",
+      ),
     [alerts],
   );
 
@@ -240,36 +239,55 @@ function DashboardContent() {
         {/* ── Enterprise Hero ─────────────────────────────── */}
         <section data-tour="dashboard" className="surface-hero relative overflow-hidden p-4 lg:p-8">
           <div className="relative">
-            <div className="flex items-center gap-2 text-xs font-semibold tracking-widest text-primary uppercase mb-3">
+            <div className="text-primary mb-3 flex items-center gap-2 text-xs font-semibold tracking-widest uppercase">
               <EnterpriseIcon name="activity" size={14} />
               Enterprise Intelligence Operating System
+              <span className="border-primary/20 bg-primary/10 text-primary ml-2 rounded-full border px-2 py-0.5 text-[9px] font-medium tracking-wide uppercase">
+                Synthetic Demo Environment
+              </span>
             </div>
-            <h1 className="text-2xl font-bold text-text tracking-tight lg:text-3xl">
+            <h1 className="text-text text-2xl font-bold tracking-tight lg:text-3xl">
               Autonomous Agent Operations
             </h1>
-            <p className="mt-2 text-sm text-text-secondary max-w-2xl leading-relaxed">
+            <p className="text-text-secondary mt-2 max-w-2xl text-sm leading-relaxed">
               {statusCopy}
             </p>
           </div>
         </section>
 
+        {/* ── Enterprise Pulse — briefing-first narrative ─────────────── */}
+        <EnterprisePulse />
+
+        {/* ── Next Best Actions — grounded recommendations ────────────── */}
+        <NextBestActions />
+
+        {/* ── Storyline — WHAT CHANGED TODAY (Phase 5) ─────────────── */}
+        <StorylineFeed
+          onShowOnMap={(id) => {
+            router.push(`/knowledge/graph?focus=${encodeURIComponent(id)}`);
+          }}
+        />
+        <ImpactMarkers />
+
         {/* ── Alert Panel ──────────────────────────────────── */}
         {criticalAlerts.length > 0 && (
           <div
-            className="rounded-card border border-warning/30 bg-warning-subtle p-4 backdrop-blur-sm"
+            className="rounded-card border-warning/30 bg-warning-subtle border p-4 backdrop-blur-sm"
             role="alert"
             aria-live="polite"
           >
             <div className="flex items-start gap-3">
-              <div className="mt-0.5 text-warning">
+              <div className="text-warning mt-0.5">
                 <EnterpriseIcon name="alert" size={20} />
               </div>
               <div className="flex-1">
-                <h3 className="text-sm font-semibold text-text">
-                  System Alert ({criticalAlerts.length} active warning{criticalAlerts.length > 1 ? "s" : ""})
+                <h3 className="text-text text-sm font-semibold">
+                  System Alert ({criticalAlerts.length} active warning
+                  {criticalAlerts.length > 1 ? "s" : ""})
                 </h3>
-                <p className="mt-1 text-xs text-text-secondary">
-                  {criticalAlerts[0]?.title}: {criticalAlerts[0]?.description ?? "Requires operator attention."}
+                <p className="text-text-secondary mt-1 text-xs">
+                  {criticalAlerts[0]?.title}:{" "}
+                  {criticalAlerts[0]?.description ?? "Requires operator attention."}
                 </p>
               </div>
               <Button
@@ -314,6 +332,16 @@ function DashboardContent() {
                 value={formatPercent(stats.successRate)}
                 icon={<EnterpriseIcon name="chart" size={20} />}
                 sparklineData={stats.executionsByDay?.slice(-10)}
+                change={
+                  stats.successRate >= 0.95
+                    ? "Optimal efficiency"
+                    : stats.successRate >= 0.85
+                      ? "Stable execution"
+                      : "Requires attention"
+                }
+                changeDirection={
+                  stats.successRate >= 0.95 ? "up" : stats.successRate >= 0.85 ? "neutral" : "down"
+                }
               />
             </BentoGridItem>
 
@@ -323,6 +351,12 @@ function DashboardContent() {
                 label="Active Agents"
                 value={<NumberTicker value={stats.activeAgents} />}
                 icon={<EnterpriseIcon name="zap" size={20} />}
+                change={
+                  stats.totalAgents > 0
+                    ? `${((stats.activeAgents / stats.totalAgents) * 100).toFixed(0)}% of registered fleet`
+                    : "No agents registered"
+                }
+                changeDirection={stats.activeAgents > 0 ? "up" : "neutral"}
               />
             </BentoGridItem>
 
@@ -333,6 +367,12 @@ function DashboardContent() {
                 value={<NumberTicker value={stats.totalExecutions} />}
                 icon={<EnterpriseIcon name="barChart" size={20} />}
                 sparklineData={stats.executionsByDay?.slice(-10)}
+                change={
+                  stats.executionsByDay && stats.executionsByDay.length > 1
+                    ? `${String(stats.executionsByDay.slice(-1)[0]?.value ?? 0)} executions today`
+                    : "Continuous operation"
+                }
+                changeDirection="neutral"
               />
             </BentoGridItem>
 
@@ -342,27 +382,46 @@ function DashboardContent() {
                 label="Knowledge Collections"
                 value={<NumberTicker value={agents.length * 3} />}
                 icon={<EnterpriseIcon name="book" size={20} />}
+                change="Actively indexing"
+                changeDirection="up"
               />
             </BentoGridItem>
           </BentoGrid>
+        </section>
+
+        {/* ── Knowledge Graph Intelligence ──────────────────── */}
+        <section className="space-y-3">
+          <SectionHeader icon="graph" title="Knowledge Intelligence" />
+          <KnowledgeGraphWidget maxHeight={420} />
         </section>
 
         {/* ── Operational Context + Intelligence Visualization ── */}
         <section data-tour="system-twin" className="grid gap-3 lg:grid-cols-[1fr_auto]">
           <div className="surface-card relative overflow-hidden p-5">
             <div className="relative">
-              <p className="text-xs font-semibold uppercase tracking-wider text-primary">Operational context</p>
-              <h2 className="mt-2 text-lg font-semibold text-text">Distributed intelligence workspace</h2>
-              <p className="mt-1 max-w-xl text-sm text-text-secondary">A structural view of the current console context — computational intelligence operating across connected reasoning pathways.</p>
+              <p className="text-primary text-xs font-semibold tracking-wider uppercase">
+                Operational context
+              </p>
+              <h2 className="text-text mt-2 text-lg font-semibold">
+                Distributed intelligence workspace
+              </h2>
+              <p className="text-text-secondary mt-1 max-w-xl text-sm">
+                A structural view of the current console context — computational intelligence
+                operating across connected reasoning pathways.
+              </p>
               <div className="mt-4 flex items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-success shadow-[0_0_6px_var(--color-success)]" />
-                  <span className="text-xs text-text-secondary">{stats.activeAgents} active agents</span>
+                  <span className="bg-success h-2 w-2 rounded-full shadow-[0_0_6px_var(--color-success)]" />
+                  <span className="text-text-secondary text-xs">
+                    {stats.activeAgents} active agents
+                  </span>
                 </div>
                 <span className="text-border">·</span>
                 <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-primary shadow-[0_0_6px_var(--color-primary)]" />
-                  <span className="text-xs text-text-secondary">{stats.totalExecutions} executions</span>
+                  <span className="bg-primary h-2 w-2 rounded-full shadow-[0_0_6px_var(--color-primary)]" />
+                  <span className="text-text-secondary text-xs">
+                    {stats.totalExecutions} executions
+                  </span>
                 </div>
               </div>
             </div>
@@ -376,10 +435,34 @@ function DashboardContent() {
             <SectionHeader icon="zap" title="Active Operations" />
             <Dock
               items={[
-                { label: "Agents", onClick: () => { router.push("/agents"); }, icon: <EnterpriseIcon name="robot" size={14} /> },
-                { label: "Analytics", onClick: () => { router.push("/analytics"); }, icon: <EnterpriseIcon name="chart" size={14} /> },
-                { label: "Knowledge", onClick: () => { router.push("/knowledge"); }, icon: <EnterpriseIcon name="book" size={14} /> },
-                { label: "Monitoring", onClick: () => { router.push("/monitoring"); }, icon: <EnterpriseIcon name="activity" size={14} /> },
+                {
+                  label: "Agents",
+                  onClick: () => {
+                    router.push("/agents");
+                  },
+                  icon: <EnterpriseIcon name="robot" size={14} />,
+                },
+                {
+                  label: "Analytics",
+                  onClick: () => {
+                    router.push("/analytics");
+                  },
+                  icon: <EnterpriseIcon name="chart" size={14} />,
+                },
+                {
+                  label: "Knowledge",
+                  onClick: () => {
+                    router.push("/knowledge");
+                  },
+                  icon: <EnterpriseIcon name="book" size={14} />,
+                },
+                {
+                  label: "Monitoring",
+                  onClick: () => {
+                    router.push("/monitoring");
+                  },
+                  icon: <EnterpriseIcon name="activity" size={14} />,
+                },
               ]}
             />
             <div className="hidden items-center gap-3 lg:flex">
@@ -417,15 +500,15 @@ function DashboardContent() {
             </div>
           </div>
           <div className="grid gap-3 lg:grid-cols-3">
-            <div className="min-w-0 lg:col-span-2 surface-card p-5">
-              <div className="flex items-center justify-between mb-4">
+            <div className="surface-card min-w-0 p-5 lg:col-span-2">
+              <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <EnterpriseIcon name="robot" size={16} className="text-text-muted" />
                   <SectionTitle>Recent Intelligence</SectionTitle>
                 </div>
                 <Link
                   href="/agents"
-                  className="text-sm text-primary hover:text-primary-hover transition-smooth"
+                  className="text-primary hover:text-primary-hover transition-smooth text-sm"
                 >
                   View all
                 </Link>
@@ -496,10 +579,8 @@ function DashboardContent() {
                             onClick={() => {
                               togglePin(agent.id);
                             }}
-                            className="text-sm text-text-secondary hover:text-primary transition-smooth"
-                            aria-label={
-                              pinnedIds.includes(agent.id) ? "Unpin agent" : "Pin agent"
-                            }
+                            className="text-text-secondary hover:text-primary transition-smooth text-sm"
+                            aria-label={pinnedIds.includes(agent.id) ? "Unpin agent" : "Pin agent"}
                           >
                             <EnterpriseIcon
                               name={pinnedIds.includes(agent.id) ? "check" : "plus"}
@@ -514,7 +595,7 @@ function DashboardContent() {
               )}
             </div>
             <div className="surface-card p-5">
-              <div className="flex items-center gap-2 mb-4">
+              <div className="mb-4 flex items-center gap-2">
                 <EnterpriseIcon name="activity" size={16} className="text-text-muted" />
                 <SectionTitle>Activity Feed</SectionTitle>
               </div>
@@ -541,11 +622,7 @@ function DashboardContent() {
                   items={events.slice(0, 6).map((e) => ({
                     ...e,
                     status: (e.status ?? "idle") as
-                      | "idle"
-                      | "running"
-                      | "success"
-                      | "warning"
-                      | "error",
+                      "idle" | "running" | "success" | "warning" | "error",
                   }))}
                 />
               )}
@@ -561,7 +638,7 @@ function DashboardContent() {
               {pinnedAgents.map((agent) => (
                 <div
                   key={agent.id}
-                  className="surface-card flex items-center gap-3 px-4 py-3 cursor-pointer min-w-[240px] card-hover-lift"
+                  className="surface-card card-hover-lift flex min-w-[240px] cursor-pointer items-center gap-3 px-4 py-3"
                   onClick={() => {
                     router.push(`/agents/${agent.id}`);
                   }}
@@ -573,14 +650,12 @@ function DashboardContent() {
                     }
                   }}
                 >
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-subtle text-primary">
+                  <div className="bg-primary-subtle text-primary flex h-9 w-9 items-center justify-center rounded-lg">
                     <EnterpriseIcon name="robot" size={16} />
                   </div>
                   <div>
-                    <p className="font-medium text-text text-sm">{agent.name}</p>
-                    <p className="text-xs text-text-secondary">
-                      {agent.status ?? "unknown"}
-                    </p>
+                    <p className="text-text text-sm font-medium">{agent.name}</p>
+                    <p className="text-text-secondary text-xs">{agent.status ?? "unknown"}</p>
                   </div>
                   <button
                     type="button"

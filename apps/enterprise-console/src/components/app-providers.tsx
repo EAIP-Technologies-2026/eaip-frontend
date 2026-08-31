@@ -2,34 +2,24 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
-import { AuthProvider, useAuth, getStoredTokens } from "@eaip/auth";
+import { AuthProvider, useAuth, tokenProvider } from "@eaip/auth";
 import { ThemeProvider } from "@eaip/theme";
 import { createDefaultClient, setDefaultClient } from "@eaip/api";
 import { usePlatformStore } from "@eaip/state";
 import { createMockNotifications } from "../mock-data/data";
 import { getApiConfig } from "../config/api";
 import { FallbackProvider, useFallback } from "../services/fallback-context";
-import { WebSocketRealtimeClient } from "@eaip/realtime";
+import { isMockDataEnabled } from "../services/service-result";
 
 const config = getApiConfig();
-const wsUrl = config.baseUrl.replace(/^http/, "ws") + "/ws";
-
-const realtimeClient = new WebSocketRealtimeClient({
-  url: wsUrl,
-  tokenProvider: () => {
-    const tokens = getStoredTokens();
-    return tokens?.accessToken ?? null;
-  },
-});
-realtimeClient.connect();
 
 setDefaultClient(
   createDefaultClient({
     baseUrl: config.baseUrl,
-    tokenProvider: () => {
-      const tokens = getStoredTokens();
-      return tokens?.accessToken ?? null;
-    },
+    timeoutMs: config.timeoutMs,
+    retries: config.retries,
+    retryDelayMs: config.retryDelayMs,
+    tokenProvider,
   }),
 );
 
@@ -39,11 +29,11 @@ function FallbackBanner() {
   if (!isFallback) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex items-center gap-3 rounded-lg border border-warning/20 bg-warning-subtle px-4 py-2.5 shadow-lg">
-      <span className="flex h-2 w-2 rounded-full bg-warning">
-        <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-warning opacity-75" />
+    <div className="border-warning/20 bg-warning-subtle fixed right-4 bottom-4 z-50 flex items-center gap-3 rounded-lg border px-4 py-2.5 shadow-lg">
+      <span className="bg-warning flex h-2 w-2 rounded-full">
+        <span className="bg-warning absolute inline-flex h-2 w-2 animate-ping rounded-full opacity-75" />
       </span>
-      <div className="text-xs text-text">
+      <div className="text-text text-xs">
         <p className="font-medium">Connection Issue</p>
         <p className="text-warning">
           {fallbackServices.length === 1
@@ -66,7 +56,7 @@ function PlatformStateSync({ children }: { children: ReactNode }) {
   }, [user, setUser]);
 
   useEffect(() => {
-    if (notifications.length === 0) {
+    if (isMockDataEnabled() && notifications.length === 0) {
       const seed = createMockNotifications();
       for (const n of seed) {
         addNotification(n);
@@ -83,6 +73,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider>
       <AuthProvider
+        apiUrl={config.baseUrl}
         onSessionExpired={() => {
           router.push("/login");
         }}

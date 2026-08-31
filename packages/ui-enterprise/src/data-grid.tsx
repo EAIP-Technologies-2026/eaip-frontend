@@ -25,6 +25,7 @@ export interface DataGridProps<T> {
   selectedIds?: string[];
   onSelectionChange?: (ids: string[]) => void;
   pageSize?: number;
+  onRowClick?: (item: T) => void;
   emptyMessage?: string;
   errorMessage?: string;
   onRetry?: () => void;
@@ -41,6 +42,7 @@ export function DataGrid<T>({
   selectedIds = [],
   onSelectionChange,
   pageSize = 10,
+  onRowClick,
   emptyMessage = "No items found.",
   errorMessage,
   onRetry,
@@ -97,7 +99,9 @@ export function DataGrid<T>({
         const raw = column?.getValue
           ? column.getValue(item)
           : (item as Record<string, string | undefined>)[key];
-        return String(raw ?? "").toLowerCase().includes(value.toLowerCase());
+        return String(raw ?? "")
+          .toLowerCase()
+          .includes(value.toLowerCase());
       });
     }
 
@@ -132,9 +136,9 @@ export function DataGrid<T>({
     <div className="space-y-3">
       {toolbar ? <div className="flex flex-wrap items-center gap-2">{toolbar}</div> : null}
 
-      <div className="overflow-x-auto rounded-card border border-border">
-        <table className="min-w-full divide-y divide-border">
-          <thead className="bg-surface-secondary">
+      <div className="border-border/60 bg-surface max-h-[600px] overflow-x-auto overflow-y-auto rounded-xl border shadow-sm">
+        <table className="divide-border/60 relative min-w-full divide-y">
+          <thead className="bg-surface-secondary/90 sticky top-0 z-10 shadow-sm backdrop-blur-md">
             <tr>
               {selectable ? (
                 <th className="px-4 py-3">
@@ -146,14 +150,14 @@ export function DataGrid<T>({
                       paginatedData.every((item) => selectedIds.includes(keyExtractor(item)))
                     }
                     onChange={toggleAll}
-                    className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                    className="border-border text-primary focus:ring-primary h-4 w-4 rounded"
                   />
                 </th>
               ) : null}
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className="px-6 py-3 text-left text-xs font-medium tracking-wider text-text-muted uppercase"
+                  className="text-text-muted px-4 py-2.5 text-left text-xs font-semibold tracking-wider uppercase"
                   style={col.width ? { width: col.width } : undefined}
                 >
                   <div className="flex items-center gap-2">
@@ -163,7 +167,7 @@ export function DataGrid<T>({
                         onClick={() => {
                           toggleSort(col.key);
                         }}
-                        className="group flex items-center gap-1 transition-smooth hover:text-text"
+                        className="group transition-smooth hover:text-text flex items-center gap-1"
                       >
                         {col.header}
                         <span className="text-text-muted transition-smooth group-hover:text-text">
@@ -198,7 +202,7 @@ export function DataGrid<T>({
                         onChange={(e) => {
                           setFilter(col.key, e.target.value);
                         }}
-                        className="w-full rounded-input border border-border bg-surface px-2 py-1 text-xs text-text placeholder:text-text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                        className="rounded-input border-border bg-surface text-text placeholder:text-text-muted focus:border-primary focus:ring-primary w-full border px-2 py-1 text-xs focus:ring-1 focus:outline-none"
                       />
                     ) : null}
                   </th>
@@ -206,7 +210,7 @@ export function DataGrid<T>({
               </tr>
             ) : null}
           </thead>
-          <tbody className="divide-y divide-border bg-surface">
+          <tbody className="divide-border bg-surface divide-y">
             {loading ? (
               Array.from({ length: skeletonRows }).map((_, idx) => (
                 <tr key={idx}>
@@ -216,8 +220,11 @@ export function DataGrid<T>({
                     </td>
                   ) : null}
                   {columns.map((col) => (
-                    <td key={col.key} className="px-6 py-4">
-                      <div className="skeleton h-4" style={{ width: `${String(60 + Math.floor(Math.random() * 30))}%` }} />
+                    <td key={col.key} className="px-4 py-3">
+                      <div
+                        className="skeleton h-4"
+                        style={{ width: `${String(60 + Math.floor(Math.random() * 30))}%` }}
+                      />
                     </td>
                   ))}
                 </tr>
@@ -228,7 +235,18 @@ export function DataGrid<T>({
                   colSpan={columns.length + (selectable ? 1 : 0)}
                   className="px-6 py-8 text-center"
                 >
-                  <EmptyState icon="alert" title="Failed to load data" description={errorMessage} action={onRetry ? <Button variant="secondary" size="sm" onClick={onRetry}>Retry</Button> : undefined} />
+                  <EmptyState
+                    icon="alert"
+                    title="Failed to load data"
+                    description={errorMessage}
+                    action={
+                      onRetry ? (
+                        <Button variant="secondary" size="sm" onClick={onRetry}>
+                          Retry
+                        </Button>
+                      ) : undefined
+                    }
+                  />
                 </td>
               </tr>
             ) : showEmpty ? (
@@ -237,7 +255,11 @@ export function DataGrid<T>({
                   colSpan={columns.length + (selectable ? 1 : 0)}
                   className="px-6 py-8 text-center"
                 >
-                  <EmptyState icon="inbox" title={emptyMessage} description="No data is currently available for this view." />
+                  <EmptyState
+                    icon="inbox"
+                    title={emptyMessage}
+                    description="No data is currently available for this view."
+                  />
                 </td>
               </tr>
             ) : (
@@ -247,7 +269,14 @@ export function DataGrid<T>({
                 return (
                   <tr
                     key={id}
-                    className={`transition-smooth ${
+                    onClick={
+                      onRowClick
+                        ? () => {
+                            onRowClick(item);
+                          }
+                        : undefined
+                    }
+                    className={`transition-smooth ${onRowClick ? "cursor-pointer" : ""} ${
                       isSelected
                         ? "bg-primary-subtle/60 dark:bg-primary-subtle/30"
                         : "hover:bg-surface-secondary/80 focus-within:bg-surface-secondary/80"
@@ -262,14 +291,14 @@ export function DataGrid<T>({
                           onChange={() => {
                             toggleSelection(id);
                           }}
-                          className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                          className="border-border text-primary focus:ring-primary h-4 w-4 rounded"
                         />
                       </td>
                     ) : null}
                     {columns.map((col) => (
                       <td
                         key={col.key}
-                        className="px-6 py-4 text-sm whitespace-nowrap text-text"
+                        className="text-text group-hover:text-text px-4 py-3 text-sm whitespace-nowrap"
                       >
                         {col.render
                           ? col.render(item)
@@ -285,7 +314,7 @@ export function DataGrid<T>({
       </div>
 
       {filteredAndSortedData.length > pageSize ? (
-        <div className="flex items-center justify-between text-sm text-text-secondary">
+        <div className="text-text-secondary flex items-center justify-between text-sm">
           <span>
             Showing {start + 1}-{Math.min(start + pageSize, filteredAndSortedData.length)} of{" "}
             {filteredAndSortedData.length}

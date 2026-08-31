@@ -45,11 +45,11 @@
     "chromatic": {
       "dependsOn": ["storybook:build"]
     },
-    "e2e": {
+    "test:e2e": {
       "dependsOn": ["^build"],
       "outputs": []
     },
-    "e2e:ui": {
+    "test:e2e:ui": {
       "dependsOn": ["^build"],
       "cache": false
     }

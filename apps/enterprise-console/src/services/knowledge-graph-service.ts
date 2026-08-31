@@ -2,6 +2,11 @@ import { getDefaultClient } from "@eaip/api";
 import type { ServiceResult } from "./service-result";
 import { liveResult, fallbackResult, isNetworkError } from "./service-result";
 
+function requireData<T>(data: T | null): T {
+  if (data === null) throw new Error("Backend returned an empty response");
+  return data;
+}
+
 export interface GraphEntity {
   id: string;
   type: string;
@@ -49,9 +54,11 @@ export interface GraphQueryResult {
   durationMs: number;
 }
 
-export async function fetchGraphEntities(
-  options?: { type?: string; q?: string; limit?: number }
-): Promise<ServiceResult<GraphEntity[]>> {
+export async function fetchGraphEntities(options?: {
+  type?: string;
+  q?: string;
+  limit?: number;
+}): Promise<ServiceResult<GraphEntity[]>> {
   try {
     const client = getDefaultClient();
     const params: Record<string, string> = {};
@@ -69,7 +76,9 @@ export async function fetchGraphEntities(
   }
 }
 
-export async function fetchGraphEntity(entityId: string): Promise<ServiceResult<GraphEntity | null>> {
+export async function fetchGraphEntity(
+  entityId: string,
+): Promise<ServiceResult<GraphEntity | null>> {
   try {
     const client = getDefaultClient();
     const response = await client.get<GraphEntity>(`/knowledge-graph/entities/${entityId}`);
@@ -84,27 +93,30 @@ export async function fetchGraphEntity(entityId: string): Promise<ServiceResult<
 }
 
 export async function createGraphEntity(
-  body: Partial<GraphEntity>
+  body: Partial<GraphEntity>,
 ): Promise<ServiceResult<GraphEntity>> {
   try {
     const client = getDefaultClient();
     const response = await client.post<GraphEntity>("/knowledge-graph/entities", body);
     if (response.error) throw response.error;
-    return liveResult(response.data!);
+    return liveResult(requireData(response.data));
   } catch (err) {
     if (isNetworkError(err)) {
       return fallbackResult(
         null as never,
-        err instanceof Error ? err.message : "Backend unavailable"
+        err instanceof Error ? err.message : "Backend unavailable",
       );
     }
     throw err;
   }
 }
 
-export async function fetchGraphRelationships(
-  options?: { type?: string; sourceId?: string; targetId?: string; limit?: number }
-): Promise<ServiceResult<GraphRelationship[]>> {
+export async function fetchGraphRelationships(options?: {
+  type?: string;
+  sourceId?: string;
+  targetId?: string;
+  limit?: number;
+}): Promise<ServiceResult<GraphRelationship[]>> {
   try {
     const client = getDefaultClient();
     const params: Record<string, string> = {};
@@ -112,7 +124,10 @@ export async function fetchGraphRelationships(
     if (options?.sourceId) params.source_id = options.sourceId;
     if (options?.targetId) params.target_id = options.targetId;
     if (options?.limit) params.limit = String(options.limit);
-    const response = await client.get<GraphRelationship[]>("/knowledge-graph/relationships", params);
+    const response = await client.get<GraphRelationship[]>(
+      "/knowledge-graph/relationships",
+      params,
+    );
     if (response.error) throw response.error;
     return liveResult(response.data ?? []);
   } catch (err) {
@@ -124,44 +139,42 @@ export async function fetchGraphRelationships(
 }
 
 export async function createGraphRelationship(
-  body: Partial<GraphRelationship>
+  body: Partial<GraphRelationship>,
 ): Promise<ServiceResult<GraphRelationship>> {
   try {
     const client = getDefaultClient();
     const response = await client.post<GraphRelationship>("/knowledge-graph/relationships", body);
     if (response.error) throw response.error;
-    return liveResult(response.data!);
+    return liveResult(requireData(response.data));
   } catch (err) {
     if (isNetworkError(err)) {
       return fallbackResult(
         null as never,
-        err instanceof Error ? err.message : "Backend unavailable"
+        err instanceof Error ? err.message : "Backend unavailable",
       );
     }
     throw err;
   }
 }
 
-export async function queryGraph(
-  query: {
-    query: string;
-    entityTypes?: string[];
-    relationshipTypes?: string[];
-    maxDepth?: number;
-    minConfidence?: number;
-    startEntityId?: string;
-  }
-): Promise<ServiceResult<GraphQueryResult>> {
+export async function queryGraph(query: {
+  query: string;
+  entityTypes?: string[];
+  relationshipTypes?: string[];
+  maxDepth?: number;
+  minConfidence?: number;
+  startEntityId?: string;
+}): Promise<ServiceResult<GraphQueryResult>> {
   try {
     const client = getDefaultClient();
     const response = await client.post<GraphQueryResult>("/knowledge-graph/query", query);
     if (response.error) throw response.error;
-    return liveResult(response.data!);
+    return liveResult(requireData(response.data));
   } catch (err) {
     if (isNetworkError(err)) {
       return fallbackResult(
         { entities: [], relationships: [], paths: [], totalCount: 0, durationMs: 0 },
-        err instanceof Error ? err.message : "Backend unavailable"
+        err instanceof Error ? err.message : "Backend unavailable",
       );
     }
     throw err;
@@ -170,21 +183,21 @@ export async function queryGraph(
 
 export async function traverseGraph(
   entityId: string,
-  options?: { depth?: number; direction?: string }
+  options?: { depth?: number; direction?: string },
 ): Promise<ServiceResult<{ entities: GraphEntity[]; relationships: GraphRelationship[] }>> {
   try {
     const client = getDefaultClient();
-    const response = await client.post<{ entities: GraphEntity[]; relationships: GraphRelationship[] }>(
-      `/knowledge-graph/traversal/${entityId}`,
-      options ?? {}
-    );
+    const response = await client.post<{
+      entities: GraphEntity[];
+      relationships: GraphRelationship[];
+    }>(`/knowledge-graph/traversal/${entityId}`, options ?? {});
     if (response.error) throw response.error;
-    return liveResult(response.data!);
+    return liveResult(requireData(response.data));
   } catch (err) {
     if (isNetworkError(err)) {
       return fallbackResult(
         { entities: [], relationships: [] },
-        err instanceof Error ? err.message : "Backend unavailable"
+        err instanceof Error ? err.message : "Backend unavailable",
       );
     }
     throw err;
@@ -194,21 +207,23 @@ export async function traverseGraph(
 export async function fetchGraphPath(
   sourceId: string,
   targetId: string,
-  maxDepth?: number
+  maxDepth?: number,
 ): Promise<ServiceResult<{ path: GraphPath | null; found: boolean }>> {
   try {
     const client = getDefaultClient();
     const params: Record<string, string> = { source_id: sourceId, target_id: targetId };
     if (maxDepth) params.max_depth = String(maxDepth);
-    const response =
-      await client.get<{ path: GraphPath | null; found: boolean }>("/knowledge-graph/shortest-path", params);
+    const response = await client.get<{ path: GraphPath | null; found: boolean }>(
+      "/knowledge-graph/shortest-path",
+      params,
+    );
     if (response.error) throw response.error;
-    return liveResult(response.data!);
+    return liveResult(requireData(response.data));
   } catch (err) {
     if (isNetworkError(err)) {
       return fallbackResult(
         { path: null, found: false },
-        err instanceof Error ? err.message : "Backend unavailable"
+        err instanceof Error ? err.message : "Backend unavailable",
       );
     }
     throw err;
@@ -220,12 +235,14 @@ export async function fetchGraphStats(): Promise<ServiceResult<GraphStats>> {
     const client = getDefaultClient();
     const response = await client.get<GraphStats>("/knowledge-graph/stats");
     if (response.error) throw response.error;
-    return liveResult(response.data ?? {
-      totalEntities: 0,
-      totalRelationships: 0,
-      entityTypeCounts: {},
-      relationshipTypeCounts: {},
-    });
+    return liveResult(
+      response.data ?? {
+        totalEntities: 0,
+        totalRelationships: 0,
+        entityTypeCounts: {},
+        relationshipTypeCounts: {},
+      },
+    );
   } catch (err) {
     if (isNetworkError(err)) {
       return fallbackResult(
@@ -235,7 +252,7 @@ export async function fetchGraphStats(): Promise<ServiceResult<GraphStats>> {
           entityTypeCounts: {},
           relationshipTypeCounts: {},
         },
-        err instanceof Error ? err.message : "Backend unavailable"
+        err instanceof Error ? err.message : "Backend unavailable",
       );
     }
     throw err;
@@ -244,23 +261,23 @@ export async function fetchGraphStats(): Promise<ServiceResult<GraphStats>> {
 
 export async function fetchGraphSubgraph(
   entityIds: string[],
-  depth?: number
+  depth?: number,
 ): Promise<ServiceResult<{ entities: GraphEntity[]; relationships: GraphRelationship[] }>> {
   try {
     const client = getDefaultClient();
     const params: Record<string, string> = { entity_ids: entityIds.join(",") };
     if (depth) params.depth = String(depth);
-    const response = await client.get<{ entities: GraphEntity[]; relationships: GraphRelationship[] }>(
-      "/knowledge-graph/subgraph",
-      params
-    );
+    const response = await client.get<{
+      entities: GraphEntity[];
+      relationships: GraphRelationship[];
+    }>("/knowledge-graph/subgraph", params);
     if (response.error) throw response.error;
-    return liveResult(response.data!);
+    return liveResult(requireData(response.data));
   } catch (err) {
     if (isNetworkError(err)) {
       return fallbackResult(
         { entities: [], relationships: [] },
-        err instanceof Error ? err.message : "Backend unavailable"
+        err instanceof Error ? err.message : "Backend unavailable",
       );
     }
     throw err;

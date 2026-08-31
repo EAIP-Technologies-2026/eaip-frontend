@@ -7,7 +7,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  CartesianGrid,
   BarChart,
   Bar,
   PieChart,
@@ -24,6 +23,8 @@ export type {
   ChartLegendProps as ChartLegendInfrastructureProps,
   ChartTooltipProps,
 } from "./chart-infrastructure";
+export * from "./visualization";
+export * from "./interactive-graph-canvas";
 
 export interface ProgressBarProps extends HTMLAttributes<HTMLDivElement> {
   value: number;
@@ -172,11 +173,6 @@ export function BarChartWidget({
     <div className={["w-full", className].filter(Boolean).join(" ")} style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-          <CartesianGrid
-            strokeDasharray="3 3"
-            stroke="var(--color-border-subtle)"
-            vertical={false}
-          />
           <XAxis
             dataKey="name"
             tick={{ fill: "var(--color-text-muted)", fontSize: 12 }}
@@ -277,23 +273,37 @@ export function MetricCard({
     down: "text-danger",
     neutral: "text-text-muted",
   }[changeDirection];
+
+  // We manually apply the liquid-glass styles here since we can't easily import Card from ui-enterprise due to circular dependencies or package layering.
+  const liquidStyles =
+    "bg-surface-glass backdrop-blur-xl saturate-150 border-white/[0.18] dark:border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_4px_16px_rgba(17,24,39,0.05)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_4px_16px_rgba(0,0,0,0.3)] hover:translate-y-[-2px] hover:shadow-elevated hover:border-primary/20";
+
   return (
     <div
       data-slot="metric-card"
-      className={["surface-card card-hover-lift flex flex-col justify-between p-5", className]
+      className={[
+        "rounded-card flex flex-col justify-between border p-5 transition-all duration-280",
+        liquidStyles,
+        className,
+      ]
         .filter(Boolean)
         .join(" ")}
       {...props}
     >
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-text-secondary text-sm font-medium">{label}</p>
-          <div className="text-text mt-1 text-2xl font-semibold tracking-tight font-tabular tabular-nums">{value}</div>
+          <p className="text-text-secondary text-xs font-semibold tracking-widest uppercase">
+            {label}
+          </p>
+          <div className="text-text font-tabular mt-2 text-3xl font-bold tracking-tight tabular-nums">
+            {value}
+          </div>
           {change && (
             <div
-              className={["mt-1 flex items-center gap-1 text-xs font-medium", changeColor].join(
-                " ",
-              )}
+              className={[
+                "mt-2 flex items-center gap-1 text-xs font-semibold tracking-wide",
+                changeColor,
+              ].join(" ")}
             >
               <span>{changeDirection === "up" ? "↑" : changeDirection === "down" ? "↓" : "—"}</span>
               {change}
@@ -301,13 +311,17 @@ export function MetricCard({
           )}
         </div>
         {icon && (
-          <div className="bg-primary-subtle/80 text-primary flex h-10 w-10 items-center justify-center rounded-xl shadow-sm">
-            {typeof icon === "string" ? <EnterpriseIcon name={icon as IconName} size={18} aria-hidden="true" /> : icon}
+          <div className="bg-primary/10 text-primary ring-primary/20 flex h-10 w-10 items-center justify-center rounded-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] ring-1">
+            {typeof icon === "string" ? (
+              <EnterpriseIcon name={icon as IconName} size={18} aria-hidden="true" />
+            ) : (
+              icon
+            )}
           </div>
         )}
       </div>
       {sparklineData && (
-        <div className="mt-4">
+        <div className="-mx-1 mt-5">
           <Sparkline data={sparklineData} height={48} />
         </div>
       )}
@@ -330,22 +344,24 @@ export interface TimelineProps extends HTMLAttributes<HTMLOListElement> {
 export function Timeline({ items, className, ...props }: TimelineProps) {
   return (
     <ol
-      className={["relative border-l border-border pl-6 space-y-6", className]
+      className={["border-border relative space-y-6 border-l pl-6", className]
         .filter(Boolean)
         .join(" ")}
       {...props}
     >
       {items.map((item) => (
         <li key={item.id} className="relative">
-          <span className="absolute -left-[31px] top-1.5 flex h-3 w-3 items-center justify-center rounded-full bg-surface ring-4 ring-surface-secondary">
+          <span className="bg-surface ring-surface-secondary absolute top-1.5 -left-[31px] flex h-3 w-3 items-center justify-center rounded-full ring-4">
             <StatusRing status={item.status ?? "idle"} size="sm" />
           </span>
           <div>
-            <h4 className="text-sm font-semibold text-text">{item.title}</h4>
+            <h4 className="text-text text-sm font-semibold">{item.title}</h4>
             {item.description && (
-              <p className="text-xs text-text-secondary mt-0.5">{item.description}</p>
+              <p className="text-text-secondary mt-0.5 text-xs">{item.description}</p>
             )}
-            <time className="text-[11px] text-text-muted mt-1 block font-mono">{item.timestamp}</time>
+            <time className="text-text-muted mt-1 block font-mono text-[11px]">
+              {item.timestamp}
+            </time>
           </div>
         </li>
       ))}
@@ -395,26 +411,23 @@ export function StatusWidget({
     metrics ?? (value !== undefined ? [{ label: "Status", value }] : undefined);
 
   return (
-    <div
-      className={["surface-card p-5 space-y-4", className].filter(Boolean).join(" ")}
-      {...props}
-    >
+    <div className={["surface-card space-y-4 p-5", className].filter(Boolean).join(" ")} {...props}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <StatusRing status={status} pulse={status === "running"} size="md" />
-          <h3 className="font-semibold text-text text-sm">{title}</h3>
+          <h3 className="text-text text-sm font-semibold">{title}</h3>
         </div>
-        <span className="text-xs uppercase tracking-wider font-mono text-text-muted px-2 py-0.5 rounded-full bg-surface-tertiary">
+        <span className="text-text-muted bg-surface-tertiary rounded-full px-2 py-0.5 font-mono text-xs tracking-wider uppercase">
           {status}
         </span>
       </div>
-      {desc && <p className="text-xs text-text-secondary leading-relaxed">{desc}</p>}
+      {desc && <p className="text-text-secondary text-xs leading-relaxed">{desc}</p>}
       {computedMetrics && computedMetrics.length > 0 && (
-        <div className="grid grid-cols-2 gap-2 pt-1 border-t border-border/50">
+        <div className="border-border/50 grid grid-cols-2 gap-2 border-t pt-1">
           {computedMetrics.map((m) => (
             <div key={m.label} className="text-xs">
               <span className="text-text-muted block text-[11px]">{m.label}</span>
-              <span className="font-semibold text-text font-tabular">{m.value}</span>
+              <span className="text-text font-tabular font-semibold">{m.value}</span>
             </div>
           ))}
         </div>

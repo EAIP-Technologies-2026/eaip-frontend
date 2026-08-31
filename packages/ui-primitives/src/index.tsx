@@ -30,8 +30,24 @@ export type { TooltipRootProps, TooltipTriggerProps, TooltipContentProps } from 
 export { Popover, PopoverRoot, PopoverTrigger, PopoverContent } from "./popover";
 export type { PopoverRootProps, PopoverTriggerProps, PopoverContentProps } from "./popover";
 
-export { Skeleton, EmptyState, LoadingState, ErrorState } from "./states";
-export type { SkeletonProps, EmptyStateProps, LoadingStateProps, ErrorStateProps } from "./states";
+export {
+  Skeleton,
+  CardSkeleton,
+  TableSkeleton,
+  PageSkeleton,
+  EmptyState,
+  LoadingState,
+  ErrorState,
+} from "./states";
+export type {
+  SkeletonProps,
+  CardSkeletonProps,
+  TableSkeletonProps,
+  PageSkeletonProps,
+  EmptyStateProps,
+  LoadingStateProps,
+  ErrorStateProps,
+} from "./states";
 
 export { LinearProgress, CircularProgress, LinearProgress as ProgressBar } from "./progress";
 export type {
@@ -126,9 +142,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             data-type={type}
             data-state={error ? "error" : "idle"}
             className={[
-              "rounded-input bg-surface text-text transition-smooth block w-full border px-3 py-2.5 text-sm shadow-[inset_0_1px_2px_rgba(17,24,39,0.03)]",
-              "border-border placeholder:text-text-muted",
-              "focus:border-primary focus:ring-primary focus:ring-offset-surface focus:ring-2 focus:ring-offset-2 focus:outline-none",
+              "rounded-input bg-surface text-text block w-full border px-3 py-2 text-sm shadow-sm transition-all duration-200",
+              "border-border/80 placeholder:text-text-muted/70",
+              "focus:border-primary focus:ring-primary focus:ring-1 focus:outline-none",
               error && "border-danger focus:border-danger focus:ring-danger",
               (iconLeft ?? isSearch) && "pl-10",
               (iconRight ?? (isPassword || Boolean(isSearch && value))) && "pr-10",
@@ -198,9 +214,9 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           data-slot="textarea"
           data-state={error ? "error" : "idle"}
           className={[
-            "rounded-input bg-surface text-text transition-smooth block w-full border px-3 py-2.5 text-sm shadow-sm",
-            "border-border focus:border-primary focus:ring-primary focus:ring-1 focus:outline-none",
-            "placeholder:text-text-muted",
+            "rounded-input bg-surface text-text block w-full border px-3 py-2 text-sm shadow-sm transition-all duration-200",
+            "border-border/80 focus:border-primary focus:ring-primary focus:ring-1 focus:outline-none",
+            "placeholder:text-text-muted/70 min-h-[80px]",
             error && "border-danger focus:border-danger focus:ring-danger",
             className,
           ]
@@ -248,8 +264,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           data-slot="select"
           data-state={error ? "error" : "idle"}
           className={[
-            "rounded-input bg-surface text-text transition-smooth block w-full border px-3 py-2.5 text-sm shadow-sm",
-            "border-border focus:border-primary focus:ring-primary focus:ring-1 focus:outline-none",
+            "rounded-input bg-surface text-text block w-full appearance-none border px-3 py-2 pr-10 text-sm shadow-sm transition-all duration-200",
+            "border-border/80 focus:border-primary focus:ring-primary focus:ring-1 focus:outline-none",
             error && "border-danger focus:border-danger focus:ring-danger",
             className,
           ]

@@ -1,14 +1,10 @@
 /**
- * Governed Speech Input and Speech Output Abstractions for EAIP Conductor (Phase 2).
+ * Governed Speech Input and Speech Output Abstractions for EAIP Conductor (Phase 2 & Phase 5).
+ * Guaranteed instantaneous termination, stream cleanup, and zombie session prevention.
  */
 
 export type VoiceState =
-  | "idle"
-  | "listening"
-  | "transcribing"
-  | "thinking"
-  | "speaking"
-  | "error";
+  "idle" | "listening" | "transcribing" | "thinking" | "speaking" | "paused" | "error";
 
 export type PermissionState = "prompt" | "granted" | "denied" | "unsupported";
 
@@ -22,8 +18,7 @@ interface SpeechRecognitionResultItem {
   transcript: string;
 }
 
-interface SpeechRecognitionResultLike
-  extends ArrayLike<SpeechRecognitionResultItem> {
+interface SpeechRecognitionResultLike extends ArrayLike<SpeechRecognitionResultItem> {
   isFinal?: boolean;
 }
 
@@ -55,6 +50,7 @@ type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
 export class SpeechInputService {
   private recognition: SpeechRecognitionLike | null = null;
   private isListening = false;
+  private isDestroyed = false;
 
   constructor(private config: SpeechInputConfig = {}) {
     if (typeof window !== "undefined") {
@@ -70,11 +66,13 @@ export class SpeechInputService {
         this.recognition.lang = "en-US";
 
         this.recognition.onstart = () => {
+          if (this.isDestroyed) return;
           this.isListening = true;
           this.config.onStateChange?.("listening");
         };
 
         this.recognition.onresult = (event) => {
+          if (this.isDestroyed) return;
           let transcript = "";
           let isFinal = false;
           for (let i = event.resultIndex; i < event.results.length; ++i) {
@@ -91,12 +89,14 @@ export class SpeechInputService {
         };
 
         this.recognition.onerror = (event) => {
+          if (this.isDestroyed) return;
           this.isListening = false;
           this.config.onStateChange?.("error");
           this.config.onError?.(event.error || "Speech recognition error");
         };
 
         this.recognition.onend = () => {
+          if (this.isDestroyed) return;
           this.isListening = false;
           this.config.onStateChange?.("idle");
         };
@@ -105,16 +105,20 @@ export class SpeechInputService {
   }
 
   public isSupported(): boolean {
-    return this.recognition !== null;
+    return this.recognition !== null && !this.isDestroyed;
+  }
+
+  public getListening(): boolean {
+    return this.isListening;
   }
 
   public start(): void {
+    if (this.isDestroyed) return;
     if (this.recognition && !this.isListening) {
       try {
         this.recognition.start();
       } catch (err: unknown) {
-        const message =
-          err instanceof Error ? err.message : "Failed to start listening";
+        const message = err instanceof Error ? err.message : "Failed to start listening";
         this.config.onError?.(message);
       }
     }
@@ -131,6 +135,7 @@ export class SpeechInputService {
   }
 
   public cancel(): void {
+    this.isListening = false;
     if (this.recognition) {
       try {
         this.recognition.abort();
@@ -138,11 +143,31 @@ export class SpeechInputService {
         // ignore abort errors
       }
     }
+    this.config.onStateChange?.("idle");
+  }
+
+  public destroy(): void {
+    this.isDestroyed = true;
+    this.isListening = false;
+    if (this.recognition) {
+      try {
+        this.recognition.onstart = null;
+        this.recognition.onresult = null;
+        this.recognition.onerror = null;
+        this.recognition.onend = null;
+        this.recognition.abort();
+      } catch {
+        // ignore errors during teardown
+      }
+      this.recognition = null;
+    }
   }
 }
 
 export class SpeechOutputService {
   private synth: SpeechSynthesis | null = null;
+  private currentUtterance: SpeechSynthesisUtterance | null = null;
+  private isDestroyed = false;
 
   constructor() {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
@@ -151,34 +176,81 @@ export class SpeechOutputService {
   }
 
   public isSupported(): boolean {
-    return this.synth !== null;
+    return this.synth !== null && !this.isDestroyed;
   }
 
   public speak(text: string, onEnd?: () => void): void {
-    if (!this.synth) return;
+    if (!this.synth || this.isDestroyed) return;
     this.cancel();
 
     // Voice concise formatting: remove lengthy JSON strings or code blocks
     const conciseText = text
       .replace(/```[\s\S]*?```/g, "Code block omitted.")
       .replace(/\{[\s\S]*?\}/g, "Data summary ready.")
-      .slice(0, 200);
+      .slice(0, 300);
 
     const utterance = new SpeechSynthesisUtterance(conciseText);
     utterance.rate = 1.0;
     utterance.pitch = 1.0;
+    this.currentUtterance = utterance;
 
-    if (onEnd) {
-      utterance.onend = onEnd;
-      utterance.onerror = onEnd;
+    const handleFinish = () => {
+      this.currentUtterance = null;
+      onEnd?.();
+    };
+
+    utterance.onend = handleFinish;
+    utterance.onerror = handleFinish;
+
+    try {
+      this.synth.speak(utterance);
+    } catch {
+      handleFinish();
     }
+  }
 
-    this.synth.speak(utterance);
+  public pause(): void {
+    if (this.synth && !this.isDestroyed) {
+      try {
+        this.synth.pause();
+      } catch {
+        // ignore pause errors
+      }
+    }
+  }
+
+  public resume(): void {
+    if (this.synth && !this.isDestroyed) {
+      try {
+        this.synth.resume();
+      } catch {
+        // ignore resume errors
+      }
+    }
+  }
+
+  public stop(): void {
+    this.cancel();
   }
 
   public cancel(): void {
-    if (this.synth) {
-      this.synth.cancel();
+    if (this.currentUtterance) {
+      this.currentUtterance.onend = null;
+      this.currentUtterance.onerror = null;
+      this.currentUtterance = null;
     }
+    if (this.synth) {
+      try {
+        this.synth.cancel();
+      } catch {
+        // ignore cancel errors
+      }
+    }
+  }
+
+  public destroy(): void {
+    this.isDestroyed = true;
+    this.cancel();
+    this.synth = null;
   }
 }

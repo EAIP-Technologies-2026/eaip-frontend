@@ -25,6 +25,7 @@ export interface WebSocketRealtimeClientOptions {
   heartbeatIntervalMs?: number;
   heartbeatTimeoutMs?: number;
   maxReconnectDelayMs?: number;
+  maxReconnectAttempts?: number;
   fallbackPollUrl?: string | null;
 }
 
@@ -40,7 +41,10 @@ export class WebSocketRealtimeClient implements RealtimeClient {
   private heartbeatIntervalMs: number;
   private heartbeatTimeoutMs: number;
   private maxReconnectDelayMs: number;
+  private maxReconnectAttempts: number;
   private reconnectAttempt = 0;
+  private reconnectConfigured: boolean;
+  private manuallyDisconnected = false;
   private fallbackPollUrl: string | null;
   private fallbackTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -48,9 +52,11 @@ export class WebSocketRealtimeClient implements RealtimeClient {
     this.url = options.url;
     this.tokenProvider = options.tokenProvider;
     this.reconnectEnabled = options.reconnect ?? true;
+    this.reconnectConfigured = this.reconnectEnabled;
     this.heartbeatIntervalMs = options.heartbeatIntervalMs ?? 30_000;
     this.heartbeatTimeoutMs = options.heartbeatTimeoutMs ?? 10_000;
     this.maxReconnectDelayMs = options.maxReconnectDelayMs ?? 30_000;
+    this.maxReconnectAttempts = options.maxReconnectAttempts ?? 10;
     this.fallbackPollUrl = options.fallbackPollUrl ?? null;
   }
 
@@ -62,13 +68,17 @@ export class WebSocketRealtimeClient implements RealtimeClient {
   }
 
   connect(): void {
-    if (this.ws?.readyState === WebSocket.OPEN || this.ws?.readyState === WebSocket.CONNECTING) return;
+    this.manuallyDisconnected = false;
+    this.reconnectEnabled = this.reconnectConfigured;
+    if (this.ws?.readyState === WebSocket.OPEN || this.ws?.readyState === WebSocket.CONNECTING)
+      return;
     void this._connect();
   }
 
   private async _connect(): Promise<void> {
     try {
       const resolvedUrl = await this.resolveUrl();
+      if (this.manuallyDisconnected) return;
       this.ws = new WebSocket(resolvedUrl);
       this.ws.onopen = () => {
         this.reconnectAttempt = 0;
@@ -81,6 +91,7 @@ export class WebSocketRealtimeClient implements RealtimeClient {
       };
       this.ws.onclose = () => {
         this.cleanupSocket();
+        if (this.manuallyDisconnected) return;
         if (this.reconnectEnabled) {
           this.scheduleReconnect();
         } else if (this.fallbackPollUrl) {
@@ -109,6 +120,10 @@ export class WebSocketRealtimeClient implements RealtimeClient {
 
   private scheduleReconnect(): void {
     if (this.reconnectTimer) return;
+    if (this.reconnectAttempt >= this.maxReconnectAttempts) {
+      if (this.fallbackPollUrl) this.startFallbackPolling();
+      return;
+    }
     const delay = Math.min(1000 * 2 ** this.reconnectAttempt, this.maxReconnectDelayMs);
     this.reconnectAttempt += 1;
     this.reconnectTimer = setTimeout(() => {
@@ -216,17 +231,16 @@ export class WebSocketRealtimeClient implements RealtimeClient {
   }
 
   disconnect(): void {
+    this.manuallyDisconnected = true;
     this.reconnectEnabled = false;
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
     }
     this.stopFallbackPolling();
+    const socket = this.ws;
     this.cleanupSocket();
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
-    }
+    socket?.close();
   }
 
   subscribe(channel: string, handler: RealtimeEventHandler): () => void {
@@ -277,10 +291,18 @@ export function useRealtime({
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const clientRef = useRef<RealtimeClient | null>(null);
+  const onMessageRef = useRef(onMessage);
+  const tokenProviderRef = useRef(tokenProvider);
+  const channelsRef = useRef(channels);
+  onMessageRef.current = onMessage;
+  tokenProviderRef.current = tokenProvider;
+  channelsRef.current = channels;
+  const channelsKey = channels.join("\u0000");
 
   const resolveUrl = useCallback(() => {
     if (url) return url;
     if (typeof window === "undefined") return "";
+    if (process.env.NEXT_PUBLIC_WS_URL) return process.env.NEXT_PUBLIC_WS_URL;
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const host = window.location.host;
     return `${protocol}//${host}/ws`;
@@ -295,12 +317,13 @@ export function useRealtime({
     const fallbackPollUrl = wsUrl.replace(/^ws/, "http").replace("/ws", "/events/activity");
     const client = new WebSocketRealtimeClient({
       url: wsUrl,
-      tokenProvider,
+      tokenProvider: () => tokenProviderRef.current?.() ?? null,
       reconnect: true,
       fallbackPollUrl,
     });
     clientRef.current = client;
     setError(null);
+    setConnected(false);
 
     const cleanupFns: (() => void)[] = [];
 
@@ -316,10 +339,10 @@ export function useRealtime({
 
     client.connect();
 
-    for (const channel of channels) {
+    for (const channel of channelsRef.current) {
       cleanupFns.push(
         client.subscribe(channel, (data) => {
-          onMessage?.(channel, data);
+          onMessageRef.current?.(channel, data);
         }),
       );
     }
@@ -331,12 +354,16 @@ export function useRealtime({
       }
       client.disconnect();
       clientRef.current = null;
+      setConnected(false);
     };
-  }, [enabled, resolveUrl, onMessage, channels, tokenProvider]);
+  }, [enabled, resolveUrl, channelsKey]);
 
   return { connected, error };
 }
 
-export function createRealtimeClient(url: string, tokenProvider?: () => string | null): RealtimeClient {
+export function createRealtimeClient(
+  url: string,
+  tokenProvider?: () => string | null,
+): RealtimeClient {
   return new WebSocketRealtimeClient({ url, tokenProvider });
 }

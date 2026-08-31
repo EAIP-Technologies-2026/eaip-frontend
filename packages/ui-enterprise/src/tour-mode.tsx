@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
@@ -45,34 +46,34 @@ export function TourModeBar({
       role="region"
       aria-label="Guided tour controls"
       className={cn(
-        "rounded-xl border border-primary/30 bg-surface/90 dark:bg-surface/80 backdrop-blur-md px-4 py-3 shadow-lg transition-all duration-300",
+        "border-primary/30 bg-surface/90 dark:bg-surface/80 rounded-xl border px-4 py-3 shadow-lg backdrop-blur-md transition-all duration-300",
         className,
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between gap-2 mb-2">
+      <div className="mb-2 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-text-inverse text-[10px] font-bold shadow-sm">
+          <span className="bg-primary text-text-inverse inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold shadow-sm">
             {currentStepIndex + 1}
           </span>
-          <span className="text-xs font-semibold text-primary uppercase tracking-wide">
+          <span className="text-primary text-xs font-semibold tracking-wide uppercase">
             EAIP Guided Tour
           </span>
           {isPaused && (
-            <span className="rounded-full bg-warning/20 px-2 py-0.5 text-[10px] font-medium text-warning">
+            <span className="bg-warning/20 text-warning rounded-full px-2 py-0.5 text-[10px] font-medium">
               Paused
             </span>
           )}
         </div>
-        <span className="text-[10px] text-text-muted font-mono">
+        <span className="text-text-muted font-mono text-[10px]">
           {currentStepIndex + 1} / {totalSteps}
         </span>
       </div>
 
       {/* Progress bar */}
-      <div className="mb-2 h-1.5 w-full rounded-full bg-surface-tertiary overflow-hidden">
+      <div className="bg-surface-tertiary mb-2 h-1.5 w-full overflow-hidden rounded-full">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-primary via-cyan-400 to-indigo-500 transition-all duration-500 ease-out"
+          className="from-primary h-full rounded-full bg-gradient-to-r via-cyan-400 to-indigo-500 transition-all duration-500 ease-out"
           style={{ width: `${String(progress)}%` }}
           role="progressbar"
           aria-valuenow={currentStepIndex + 1}
@@ -85,18 +86,16 @@ export function TourModeBar({
       {/* Current step info */}
       {currentStep && !isCompleted && (
         <div className="mb-3">
-          <p className="text-sm font-semibold text-text">{currentStep.title}</p>
+          <p className="text-text text-sm font-semibold">{currentStep.title}</p>
           {currentStep.demo_description && (
-            <p className="text-[11px] text-text-muted mt-0.5">
-              {currentStep.demo_description}
-            </p>
+            <p className="text-text-muted mt-0.5 text-[11px]">{currentStep.demo_description}</p>
           )}
         </div>
       )}
 
       {/* Controls */}
       {!isCompleted && (
-        <div className="flex items-center gap-1.5 flex-wrap">
+        <div className="flex flex-wrap items-center gap-1.5">
           {isPaused ? (
             <TourButton onClick={onResume} aria-label="Resume tour">
               <PlayIcon /> Resume
@@ -109,7 +108,11 @@ export function TourModeBar({
           <TourButton onClick={onSkip} aria-label="Skip this step">
             <SkipIcon /> Skip
           </TourButton>
-          <TourButton onClick={onPrevious} aria-label="Previous step" disabled={currentStepIndex === 0}>
+          <TourButton
+            onClick={onPrevious}
+            aria-label="Previous step"
+            disabled={currentStepIndex === 0}
+          >
             <PreviousIcon /> Previous
           </TourButton>
           <TourButton onClick={onNext} aria-label="Next step">
@@ -189,8 +192,12 @@ export function TourSpotlight({
 
   useEffect(() => {
     updateTargetRect();
-    const handleResize = () => { updateTargetRect(); };
-    const handleScroll = () => { updateTargetRect(); };
+    const handleResize = () => {
+      updateTargetRect();
+    };
+    const handleScroll = () => {
+      updateTargetRect();
+    };
 
     window.addEventListener("resize", handleResize);
     window.addEventListener("scroll", handleScroll, true);
@@ -208,7 +215,7 @@ export function TourSpotlight({
   if (!active || !currentStep) return null;
 
   const isLastStep = currentStepIndex >= totalSteps - 1;
-  const displayText = narration || currentStep.narration;
+  const displayText = narration ?? currentStep.narration;
 
   // Calculate tooltip positioning
   let tooltipStyle: React.CSSProperties = {
@@ -246,7 +253,7 @@ export function TourSpotlight({
 
   return (
     <div
-      className="fixed inset-0 z-40 pointer-events-none transition-opacity duration-300"
+      className="pointer-events-none fixed inset-0 z-40 transition-opacity duration-300"
       aria-live="polite"
     >
       {/* Target spotlight glow highlight */}
@@ -262,7 +269,7 @@ export function TourSpotlight({
             boxShadow: "0 0 0 3px rgba(99, 102, 241, 0.6), 0 0 30px rgba(56, 189, 248, 0.45)",
             transition: reduced ? "none" : "all 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
           }}
-          className="pointer-events-none border-2 border-primary/60 bg-primary/5"
+          className="border-primary/60 bg-primary/5 pointer-events-none border-2"
           aria-hidden="true"
         />
       )}
@@ -270,42 +277,38 @@ export function TourSpotlight({
       {/* Floating Tour Step Dialog / Tooltip */}
       <div
         style={tooltipStyle}
-        className="pointer-events-auto rounded-xl border border-primary/40 bg-surface/95 dark:bg-surface/90 backdrop-blur-xl p-4 shadow-2xl transition-all duration-300 ease-out"
+        className="border-primary/40 bg-surface/95 dark:bg-surface/90 pointer-events-auto rounded-xl border p-4 shadow-2xl backdrop-blur-xl transition-all duration-300 ease-out"
         role="dialog"
         aria-label={`Tour step: ${currentStep.title}`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-border/50">
+        <div className="border-border/50 mb-2 flex items-center justify-between gap-2 border-b pb-2">
           <div className="flex items-center gap-2">
-            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-text-inverse text-[10px] font-bold shadow-sm">
+            <span className="bg-primary text-text-inverse inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold shadow-sm">
               {currentStepIndex + 1}
             </span>
-            <span className="text-xs font-semibold text-primary uppercase tracking-wide">
+            <span className="text-primary text-xs font-semibold tracking-wide uppercase">
               EAIP Tour
             </span>
           </div>
-          <span className="text-[10px] text-text-muted font-mono bg-surface-secondary px-2 py-0.5 rounded-full border border-border">
+          <span className="text-text-muted bg-surface-secondary border-border rounded-full border px-2 py-0.5 font-mono text-[10px]">
             {currentStepIndex + 1} of {totalSteps}
           </span>
         </div>
 
         {/* Title & Narration */}
-        <div className="space-y-1.5 mb-3">
-          <h4 className="text-sm font-semibold text-text tracking-tight">
-            {currentStep.title}
-          </h4>
-          <p className="text-xs text-text-secondary leading-relaxed line-clamp-3">
-            {displayText}
-          </p>
+        <div className="mb-3 space-y-1.5">
+          <h4 className="text-text text-sm font-semibold tracking-tight">{currentStep.title}</h4>
+          <p className="text-text-secondary line-clamp-3 text-xs leading-relaxed">{displayText}</p>
           {currentStep.why_it_matters && (
-            <p className="text-[11px] text-primary/90 bg-primary-subtle/50 px-2 py-1 rounded border border-primary/10 mt-1.5">
+            <p className="text-primary/90 bg-primary-subtle/50 border-primary/10 mt-1.5 rounded border px-2 py-1 text-[11px]">
               💡 {currentStep.why_it_matters}
             </p>
           )}
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/40">
+        <div className="border-border/40 flex items-center justify-between gap-2 border-t pt-1">
           <div className="flex items-center gap-1.5">
             <TourButton
               onClick={onPrevious}
@@ -325,7 +328,7 @@ export function TourSpotlight({
             <button
               type="button"
               onClick={onNext}
-              className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1 text-[11px] font-semibold text-text-inverse shadow-sm transition-all hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
+              className="bg-primary text-text-inverse hover:bg-primary-hover focus:ring-primary inline-flex items-center gap-1 rounded-md px-3 py-1 text-[11px] font-semibold shadow-sm transition-all focus:ring-2 focus:ring-offset-1 focus:outline-none"
               aria-label={isLastStep ? "Finish tour" : "Next tour step"}
             >
               {isLastStep ? "Finish" : "Next"} <NextIcon />
@@ -356,10 +359,10 @@ function TourButton({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 disabled:opacity-40 disabled:cursor-not-allowed",
+        "focus:ring-primary inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors focus:ring-2 focus:ring-offset-1 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40",
         variant === "danger"
-          ? "border border-danger/30 text-danger hover:bg-danger/10"
-          : "border border-border bg-surface text-text-secondary hover:bg-surface-tertiary hover:text-text",
+          ? "border-danger/30 text-danger hover:bg-danger/10 border"
+          : "border-border bg-surface text-text-secondary hover:bg-surface-tertiary hover:text-text border",
       )}
       {...props}
     >
@@ -415,4 +418,3 @@ function StopIcon() {
     </svg>
   );
 }
-

@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { RequireAuth } from "@eaip/auth";
+import { RequireAuth, useAuth } from "@eaip/auth";
 import { usePlatformStore } from "@eaip/state";
 import {
   EnterpriseShell,
@@ -18,7 +18,16 @@ import { EnterpriseIcon } from "@eaip/icons";
 import type { WorkflowDefinition, WorkflowRun } from "@eaip/workflow";
 import { useRealtime } from "@eaip/realtime";
 import { logger } from "@eaip/logging";
-import { getWorkflow, listRuns, startWorkflow, deleteWorkflow, pauseRun, resumeRun, cancelRun, retryRun } from "../../../services/workflows-service";
+import {
+  getWorkflow,
+  listRuns,
+  startWorkflow,
+  deleteWorkflow,
+  pauseRun,
+  resumeRun,
+  cancelRun,
+  retryRun,
+} from "../../../services/workflows-service";
 
 function StatusBadge({ status }: { status: string }) {
   const color =
@@ -41,6 +50,7 @@ function WorkflowDetailPageContent() {
   const workflowId = String(params.id);
   const hasPermission = usePlatformStore((state) => state.hasPermission);
   const addToast = usePlatformStore((state) => state.addToast);
+  const { isAuthenticated } = useAuth();
   const { confirm, state: confirmState, cancel } = useConfirm();
   const [workflow, setWorkflow] = useState<WorkflowDefinition | null>(null);
   const [runs, setRuns] = useState<WorkflowRun[]>([]);
@@ -83,7 +93,7 @@ function WorkflowDetailPageContent() {
         }
       }
     },
-    enabled: typeof window !== "undefined",
+    enabled: typeof window !== "undefined" && isAuthenticated,
   });
 
   async function handleStart() {
@@ -156,34 +166,55 @@ function WorkflowDetailPageContent() {
       {loading ? (
         <LoadingState message="Loading workflow..." />
       ) : error ? (
-        <ErrorState message={error} onRetry={() => { void loadWorkflow(); }} />
+        <ErrorState
+          message={error}
+          onRetry={() => {
+            void loadWorkflow();
+          }}
+        />
       ) : (
         <div className="space-y-8">
           {/* Executive Summary Strip (Layer 2) */}
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg border border-border bg-surface px-5 py-3">
-            <div className="flex items-center gap-2 text-sm text-text-secondary">
+          <div className="border-border bg-surface flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg border px-5 py-3">
+            <div className="text-text-secondary flex items-center gap-2 text-sm">
               <EnterpriseIcon name="activity" size={16} />
-              <span><strong className="text-text">{workflow?.status ?? "unknown"}</strong> status</span>
+              <span>
+                <strong className="text-text">{workflow?.status ?? "unknown"}</strong> status
+              </span>
             </div>
-            <div className="h-4 w-px bg-border" />
-            <div className="flex items-center gap-2 text-sm text-text-secondary">
+            <div className="bg-border h-4 w-px" />
+            <div className="text-text-secondary flex items-center gap-2 text-sm">
               <EnterpriseIcon name="layers" size={16} />
-              <span><strong className="text-text">{String(workflow?.steps.length ?? 0)}</strong> steps</span>
+              <span>
+                <strong className="text-text">{String(workflow?.steps.length ?? 0)}</strong> steps
+              </span>
             </div>
-            <div className="h-4 w-px bg-border" />
-            <div className="flex items-center gap-2 text-sm text-text-secondary">
+            <div className="bg-border h-4 w-px" />
+            <div className="text-text-secondary flex items-center gap-2 text-sm">
               <EnterpriseIcon name="play" size={16} />
-              <span><strong className="text-text">{String(runs.length)}</strong> runs</span>
+              <span>
+                <strong className="text-text">{String(runs.length)}</strong> runs
+              </span>
             </div>
-            <div className="h-4 w-px bg-border" />
-            <div className="flex items-center gap-2 text-sm text-text-secondary">
+            <div className="bg-border h-4 w-px" />
+            <div className="text-text-secondary flex items-center gap-2 text-sm">
               <EnterpriseIcon name="check" size={16} />
-              <span><strong className="text-text">{String(runs.filter((r) => r.status === "completed").length)}</strong> completed</span>
+              <span>
+                <strong className="text-text">
+                  {String(runs.filter((r) => r.status === "completed").length)}
+                </strong>{" "}
+                completed
+              </span>
             </div>
-            <div className="h-4 w-px bg-border" />
-            <div className="flex items-center gap-2 text-sm text-text-secondary">
+            <div className="bg-border h-4 w-px" />
+            <div className="text-text-secondary flex items-center gap-2 text-sm">
               <EnterpriseIcon name="alert" size={16} />
-              <span><strong className="text-text">{String(runs.filter((r) => r.status === "failed").length)}</strong> failed</span>
+              <span>
+                <strong className="text-text">
+                  {String(runs.filter((r) => r.status === "failed").length)}
+                </strong>{" "}
+                failed
+              </span>
             </div>
           </div>
 
@@ -198,12 +229,12 @@ function WorkflowDetailPageContent() {
                         <p className="font-medium">
                           {index + 1}. {step.name}
                         </p>
-                        <p className="text-sm text-text-secondary">Agent: {step.agentId}</p>
+                        <p className="text-text-secondary text-sm">Agent: {step.agentId}</p>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-sm text-text-secondary">No steps defined.</p>
+                  <p className="text-text-secondary text-sm">No steps defined.</p>
                 )}
               </div>
 
@@ -238,7 +269,7 @@ function WorkflowDetailPageContent() {
                                 onClick={() => {
                                   void handleControl(run, "pause");
                                 }}
-                                className="text-xs text-primary hover:underline"
+                                className="text-primary text-xs hover:underline"
                               >
                                 Pause
                               </button>
@@ -247,7 +278,7 @@ function WorkflowDetailPageContent() {
                                 onClick={() => {
                                   void handleControl(run, "cancel");
                                 }}
-                                className="text-xs text-danger hover:underline"
+                                className="text-danger text-xs hover:underline"
                               >
                                 Cancel
                               </button>
@@ -258,7 +289,7 @@ function WorkflowDetailPageContent() {
                               onClick={() => {
                                 void handleControl(run, "retry");
                               }}
-                              className="text-xs text-primary hover:underline"
+                              className="text-primary text-xs hover:underline"
                             >
                               Retry
                             </button>
@@ -276,13 +307,13 @@ function WorkflowDetailPageContent() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <h2 className="text-lg font-semibold break-words">{workflow?.name}</h2>
-                    <p className="mt-1 text-sm text-text-secondary">
+                    <p className="text-text-secondary mt-1 text-sm">
                       Status: <StatusBadge status={workflow?.status ?? "unknown"} />
                     </p>
                   </div>
                 </div>
                 {workflow?.description ? (
-                  <p className="mt-4 text-sm text-text">{workflow.description}</p>
+                  <p className="text-text mt-4 text-sm">{workflow.description}</p>
                 ) : null}
               </div>
 
@@ -301,7 +332,7 @@ function WorkflowDetailPageContent() {
                       </Button>
                       <Link
                         href={`/workflows/${workflowId}/designer`}
-                        className="inline-flex items-center justify-center rounded-button bg-surface-secondary px-4 py-2 text-sm font-medium text-text transition-smooth hover:bg-surface-tertiary focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="rounded-button bg-surface-secondary text-text transition-smooth hover:bg-surface-tertiary focus:ring-primary inline-flex items-center justify-center px-4 py-2 text-sm font-medium focus:ring-2 focus:outline-none"
                       >
                         Designer
                       </Link>
@@ -310,7 +341,7 @@ function WorkflowDetailPageContent() {
                         onClick={() => {
                           void handleDelete();
                         }}
-                        className="rounded-lg border border-danger px-3 py-2 text-sm text-danger hover:bg-danger-subtle"
+                        className="border-danger text-danger hover:bg-danger-subtle rounded-lg border px-3 py-2 text-sm"
                       >
                         Delete
                       </button>

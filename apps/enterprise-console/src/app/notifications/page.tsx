@@ -4,7 +4,12 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { RequireAuth } from "@eaip/auth";
 import { usePlatformStore } from "@eaip/state";
 import { EnterpriseShell, NotificationCenter } from "@eaip/ui-enterprise";
-import type { CenterNotificationItem, NotificationFilter as NFilter, NotificationSeverity, NotificationCategory } from "@eaip/ui-enterprise";
+import type {
+  CenterNotificationItem,
+  NotificationFilter as NFilter,
+  NotificationSeverity,
+  NotificationCategory,
+} from "@eaip/ui-enterprise";
 import { useRouter } from "next/navigation";
 import {
   fetchNotifications,
@@ -37,34 +42,37 @@ function NotificationsContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const { setFallback } = useFallback();
 
-  const loadData = useCallback(async (options?: {
-    unread?: boolean;
-    severity?: NotificationSeverity;
-    category?: NotificationCategory;
-    search?: string;
-  }) => {
-    try {
-      const result = await fetchNotifications(options);
-      if (result.source === "fallback") {
-        setFallback("notifications", true);
+  const loadData = useCallback(
+    async (options?: {
+      unread?: boolean;
+      severity?: NotificationSeverity;
+      category?: NotificationCategory;
+      search?: string;
+    }) => {
+      try {
+        const result = await fetchNotifications(options);
+        if (result.source === "fallback") {
+          setFallback("notifications", true);
+        }
+        setApiResult({
+          notifications: result.data.notifications,
+          counts: result.data.counts,
+          categoryCounts: result.data.categoryCounts,
+          severityCounts: result.data.severityCounts,
+        });
+      } catch {
+        setApiResult({
+          notifications: [],
+          counts: { total: 0, unread: 0, acknowledged: 0, dismissed: 0 },
+          categoryCounts: {},
+          severityCounts: {},
+        });
+      } finally {
+        setLoading(false);
       }
-      setApiResult({
-        notifications: result.data.notifications,
-        counts: result.data.counts,
-        categoryCounts: result.data.categoryCounts,
-        severityCounts: result.data.severityCounts,
-      });
-    } catch {
-      setApiResult({
-        notifications: [],
-        counts: { total: 0, unread: 0, acknowledged: 0, dismissed: 0 },
-        categoryCounts: {},
-        severityCounts: {},
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [setFallback]);
+    },
+    [setFallback],
+  );
 
   useEffect(() => {
     void loadData();
@@ -97,14 +105,14 @@ function NotificationsContent() {
           type: "system",
           title: n.title,
           message: n.message,
-          summary: n.summary ?? n.message,
-          severity: n.severity ?? "info",
-          category: n.category ?? "system",
+          summary: n.summary,
+          severity: n.severity,
+          category: n.category,
           timestamp: n.timestamp,
           read: n.read,
-          acknowledged: n.acknowledged ?? false,
-          dismissed: n.dismissed ?? false,
-          source: n.source ?? "store",
+          acknowledged: n.acknowledged,
+          dismissed: n.dismissed,
+          source: n.source,
           deepLink: n.deepLink ?? null,
           relatedEntityId: n.relatedEntityId ?? null,
           relatedEntityType: n.relatedEntityType ?? null,
@@ -113,7 +121,9 @@ function NotificationsContent() {
       }
     }
 
-    return combined.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    return combined.sort(
+      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+    );
   }, [apiResult.notifications, storeNotifications]);
 
   const counts: NotificationCounts = useMemo(() => {
@@ -124,12 +134,10 @@ function NotificationsContent() {
     return { total, unread, acknowledged, dismissed };
   }, [allNotifications]);
 
-  async function handleMarkAllRead() {
-    try {
-      await markAllNotificationsRead();
-    } catch {
-      // still update locally
-    }
+  function handleMarkAllRead(): void {
+    void markAllNotificationsRead().catch(() => {
+      // keep local update
+    });
     const store = usePlatformStore.getState();
     for (const n of allNotifications.filter((x) => !x.read)) {
       store.markNotificationRead(n.id);
@@ -140,53 +148,45 @@ function NotificationsContent() {
     }));
   }
 
-  async function handleMarkRead(id: string) {
-    try {
-      await markNotificationRead([id]);
-    } catch {
-      // still update locally
-    }
+  function handleMarkRead(id: string): void {
+    void markNotificationRead([id]).catch(() => {
+      // keep local update
+    });
     const store = usePlatformStore.getState();
-    if (store) store.markNotificationRead(id);
+    store.markNotificationRead(id);
     setApiResult((prev) => ({
       ...prev,
       notifications: prev.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
     }));
   }
 
-  async function handleAcknowledge(id: string) {
-    try {
-      await acknowledgeNotification(id);
-    } catch {
-      // still update locally
-    }
+  function handleAcknowledge(id: string): void {
+    void acknowledgeNotification(id).catch(() => {
+      // keep local update
+    });
     const store = usePlatformStore.getState();
-    if (store) store.acknowledgeNotification(id);
+    store.acknowledgeNotification(id);
     setApiResult((prev) => ({
       ...prev,
       notifications: prev.notifications.map((n) =>
-        n.id === id ? { ...n, acknowledged: true, read: true } : n
+        n.id === id ? { ...n, acknowledged: true, read: true } : n,
       ),
     }));
   }
 
-  async function handleDismiss(id: string) {
-    try {
-      await dismissNotification(id);
-    } catch {
-      // still update locally
-    }
+  function handleDismiss(id: string): void {
+    void dismissNotification(id).catch(() => {
+      // keep local update
+    });
     const store = usePlatformStore.getState();
-    if (store) store.dismissNotification(id);
+    store.dismissNotification(id);
     setApiResult((prev) => ({
       ...prev,
-      notifications: prev.notifications.map((n) =>
-        n.id === id ? { ...n, dismissed: true } : n
-      ),
+      notifications: prev.notifications.map((n) => (n.id === id ? { ...n, dismissed: true } : n)),
     }));
   }
 
-  async function handleRemove(id: string) {
+  function handleRemove(id: string): void {
     const store = usePlatformStore.getState();
     store.removeNotification(id);
     setApiResult((prev) => ({
@@ -245,7 +245,10 @@ function NotificationsContent() {
       pageTitle="Notifications"
       breadcrumbs={[{ label: "Dashboard", href: "/dashboard" }, { label: "Notifications" }]}
     >
-      <div className="rounded-card border border-border bg-surface shadow-elevated overflow-hidden" style={{ minHeight: "70vh" }}>
+      <div
+        className="rounded-card border-border bg-surface shadow-elevated overflow-hidden border"
+        style={{ minHeight: "70vh" }}
+      >
         <NotificationCenter
           items={allNotifications}
           counts={counts}

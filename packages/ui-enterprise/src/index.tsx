@@ -16,7 +16,6 @@ export type { EAIPAtmosphereProps } from "./eaip-atmosphere";
 export { LiquidGlassNav } from "./liquid-glass-nav";
 export { AppHeader, Header } from "./app-header";
 
-
 export { AppSidebar, Sidebar } from "./app-sidebar";
 export { Breadcrumbs } from "./breadcrumbs";
 export type { BreadcrumbItem } from "./breadcrumbs";
@@ -86,7 +85,13 @@ export { ChartContainer } from "./chart-container";
 export type { ChartContainerProps } from "./chart-container";
 
 // EP-UI-0021 – Enterprise AI
-export { AIChatPanel, SuggestionChips, ModelSelector, ConductorWidget, SystemTwinGraph } from "./ai-assistant";
+export {
+  AIChatPanel,
+  SuggestionChips,
+  ModelSelector,
+  ConductorWidget,
+  SystemTwinGraph,
+} from "./ai-assistant";
 export type {
   AIChatPanelProps,
   ChatMessage,
@@ -98,8 +103,6 @@ export type {
   ConductorApproval,
 } from "./ai-assistant";
 
-
-
 export { AIContextBar } from "./ai-context-bar";
 export type { AIContextBarProps, ContextItem } from "./ai-context-bar";
 export { SpeechInputService, SpeechOutputService } from "./speech-services";
@@ -110,8 +113,10 @@ export type {
   PersonalAssistantMarkState,
 } from "./personal-assistant-mark";
 
-
-
+export { AuroraOrb } from "./aurora-orb";
+export type { AuroraOrbProps, AuroraOrbState } from "./aurora-orb";
+export { DynamicConductorButton } from "./dynamic-conductor-button";
+export type { DynamicConductorButtonProps, ConductorButtonState } from "./dynamic-conductor-button";
 
 // EP-UI-0022 – Workspace
 export {
@@ -142,7 +147,11 @@ export type {
 } from "./notifications";
 
 // WS-001 – Enterprise Notification Center
-export { NotificationCenter, NotificationDetail, NotificationBell as NotificationBellEnhanced } from "./notification-center";
+export {
+  NotificationCenter,
+  NotificationDetail,
+  NotificationBell as NotificationBellEnhanced,
+} from "./notification-center";
 export type {
   NotificationCenterProps,
   NotificationDetailProps,
@@ -176,19 +185,8 @@ export { TourModeBar, TourSpotlight } from "./tour-mode";
 export type { TourModeBarProps, TourSpotlightProps } from "./tour-mode";
 export { useTour } from "./use-tour";
 export type { UseTourOptions, UseTourReturn } from "./use-tour";
-export {
-  startTour,
-  sendTourCommand,
-  endTour,
-  getTourPreferences,
-} from "./tour";
-export type {
-  TourState,
-  TourCommand,
-  TourStep,
-  TourResponse,
-  TourPreferences,
-} from "./tour";
+export { startTour, sendTourCommand, endTour, getTourPreferences } from "./tour";
+export type { TourState, TourCommand, TourStep, TourResponse, TourPreferences } from "./tour";
 
 // EP-UI-0025 — Phase 9 Investigations
 export { InvestigationCard } from "./investigation-card";

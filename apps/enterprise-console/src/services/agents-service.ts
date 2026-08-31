@@ -57,80 +57,33 @@ export async function createAgent(
   name: string,
   description?: string,
 ): Promise<ServiceResult<Agent>> {
-  try {
-    const client = createAgentClient();
-    const data = await client.createAgent(name, description);
-    return liveResult(data);
-  } catch (err) {
-    if (isNetworkError(err)) {
-      const local: Agent = {
-        id: `local-${String(Date.now())}`,
-        name,
-        description: description ?? "",
-        status: "active",
-        model: "gpt-4",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        metrics: { totalExecutions: 0, successRate: 0, avgLatencyMs: 0 },
-      };
-      return fallbackResult(local, "Backend unavailable, created locally");
-    }
-    throw err;
-  }
+  const client = createAgentClient();
+  const data = await client.createAgent(name, description);
+  return liveResult(data);
 }
 
 export async function updateAgent(
   id: string,
   updates: Partial<Agent>,
 ): Promise<ServiceResult<Agent>> {
-  try {
-    const client = createAgentClient();
-    const data = await client.updateAgent(id, updates);
-    return liveResult(data);
-  } catch (err) {
-    if (isNetworkError(err)) {
-      return fallbackResult({ ...getFallbackAgent(id), ...updates } as Agent, "Backend unavailable, updated locally");
-    }
-    throw err;
-  }
+  const client = createAgentClient();
+  const data = await client.updateAgent(id, updates);
+  return liveResult(data);
 }
 
 export async function deleteAgent(id: string): Promise<ServiceResult<void>> {
-  try {
-    const client = createAgentClient();
-    await client.deleteAgent(id);
-    return liveResult(undefined);
-  } catch (err) {
-    if (isNetworkError(err)) {
-      return fallbackResult(undefined, "Backend unavailable, removed locally");
-    }
-    throw err;
-  }
+  const client = createAgentClient();
+  await client.deleteAgent(id);
+  return liveResult(undefined);
 }
 
 export async function executeAgent(
   id: string,
   input: string,
 ): Promise<ServiceResult<AgentExecution>> {
-  try {
-    const client = createAgentClient();
-    const data = await client.executeAgent(id, input);
-    return liveResult(data);
-  } catch (err) {
-    if (isNetworkError(err)) {
-      const execId = `exec-local-${String(Date.now())}`;
-      const local: AgentExecution = {
-        id: execId,
-        agentId: id,
-        status: "running",
-        input,
-        startedAt: new Date().toISOString(),
-        duration: 0,
-      };
-      return fallbackResult(local, "Backend unavailable, execution recorded locally");
-    }
-    throw err;
-  }
+  const client = createAgentClient();
+  const data = await client.executeAgent(id, input);
+  return liveResult(data);
 }
 
 export async function listExecutions(id: string): Promise<ServiceResult<AgentExecution[]>> {
@@ -166,68 +119,31 @@ export async function pauseExecution(
   id: string,
   executionId: string,
 ): Promise<ServiceResult<void>> {
-  try {
-    const client = createAgentClient();
-    await client.pauseExecution(id, executionId);
-    return liveResult(undefined);
-  } catch (err) {
-    if (isNetworkError(err)) {
-      return fallbackResult(undefined, "Backend unavailable");
-    }
-    throw err;
-  }
+  const client = createAgentClient();
+  await client.pauseExecution(id, executionId);
+  return liveResult(undefined);
 }
 
 export async function resumeExecution(
   id: string,
   executionId: string,
 ): Promise<ServiceResult<void>> {
-  try {
-    const client = createAgentClient();
-    await client.resumeExecution(id, executionId);
-    return liveResult(undefined);
-  } catch (err) {
-    if (isNetworkError(err)) {
-      return fallbackResult(undefined, "Backend unavailable");
-    }
-    throw err;
-  }
+  const client = createAgentClient();
+  await client.resumeExecution(id, executionId);
+  return liveResult(undefined);
 }
 
-export async function stopExecution(
-  id: string,
-  executionId: string,
-): Promise<ServiceResult<void>> {
-  try {
-    const client = createAgentClient();
-    await client.stopExecution(id, executionId);
-    return liveResult(undefined);
-  } catch (err) {
-    if (isNetworkError(err)) {
-      return fallbackResult(undefined, "Backend unavailable");
-    }
-    throw err;
-  }
+export async function stopExecution(id: string, executionId: string): Promise<ServiceResult<void>> {
+  const client = createAgentClient();
+  await client.stopExecution(id, executionId);
+  return liveResult(undefined);
 }
 
 export async function retryExecution(
   id: string,
   executionId: string,
 ): Promise<ServiceResult<AgentExecution>> {
-  try {
-    const client = createAgentClient();
-    const data = await client.retryExecution(id, executionId);
-    return liveResult(data);
-  } catch (err) {
-    if (isNetworkError(err)) {
-      return fallbackResult({
-        id: `exec-local-${String(Date.now())}`,
-        agentId: id,
-        status: "running",
-        startedAt: new Date().toISOString(),
-        duration: 0,
-      }, "Backend unavailable, retry recorded locally");
-    }
-    throw err;
-  }
+  const client = createAgentClient();
+  const data = await client.retryExecution(id, executionId);
+  return liveResult(data);
 }

@@ -12,10 +12,11 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export interface AuthProviderProps {
   children: ReactNode;
+  apiUrl?: string;
   onSessionExpired?: () => void;
 }
 
-export function AuthProvider({ children, onSessionExpired }: AuthProviderProps) {
+export function AuthProvider({ children, apiUrl, onSessionExpired }: AuthProviderProps) {
   const [state, setState] = useState<AuthState>({
     user: null,
     token: null,
@@ -23,7 +24,7 @@ export function AuthProvider({ children, onSessionExpired }: AuthProviderProps) 
     error: null,
   });
 
-  const authService = useMemo(() => createAuthService(tokenProvider), []);
+  const authService = useMemo(() => createAuthService(tokenProvider, apiUrl), [apiUrl]);
 
   const handleSessionExpired = useCallback(() => {
     clearStoredTokens();
@@ -60,21 +61,31 @@ export function AuthProvider({ children, onSessionExpired }: AuthProviderProps) 
 
       try {
         let user = await authService.getCurrentUser();
+        let transientError: Error | null = null;
         if (!user && tokens.refreshToken) {
           try {
             const newTokens = await authService.refreshToken(tokens.refreshToken);
             if (newTokens.accessToken) {
               user = await authService.getCurrentUser();
             }
-          } catch {
-            // Token refresh attempt failed
+          } catch (error) {
+            if (!(error instanceof ApiError) || (error.status !== 401 && error.status !== 403)) {
+              transientError = error instanceof Error ? error : new Error("Session refresh failed");
+            }
           }
         }
+
+        if (transientError) throw transientError;
 
         if (mounted) {
           if (user) {
             const currentTokens = getStoredTokens();
-            setState({ user, token: currentTokens?.accessToken ?? tokens.accessToken, loading: false, error: null });
+            setState({
+              user,
+              token: currentTokens?.accessToken ?? tokens.accessToken,
+              loading: false,
+              error: null,
+            });
           } else {
             clearStoredTokens();
             setState({ user: null, token: null, loading: false, error: null });
@@ -84,9 +95,13 @@ export function AuthProvider({ children, onSessionExpired }: AuthProviderProps) 
         logger.error("Failed to restore session", {
           error: error instanceof Error ? error.message : String(error),
         });
-        clearStoredTokens();
         if (mounted) {
-          setState({ user: null, token: null, loading: false, error: null });
+          setState({
+            user: null,
+            token: tokens.accessToken,
+            loading: false,
+            error: "Unable to verify the current session. Please retry.",
+          });
         }
       }
     }
@@ -105,11 +120,13 @@ export function AuthProvider({ children, onSessionExpired }: AuthProviderProps) 
         const user = await authService.login(credentials);
         const tokens = getStoredTokens();
         setState({ user, token: tokens?.accessToken ?? null, loading: false, error: null });
+        return true;
       } catch (error) {
         const message =
           error instanceof ApiError ? error.message : "Login failed. Please try again.";
         logger.error("Login failed", { error: message });
         setState({ user: null, token: null, loading: false, error: message });
+        return false;
       }
     },
     [authService],
@@ -135,7 +152,7 @@ export function AuthProvider({ children, onSessionExpired }: AuthProviderProps) 
 
   const hasRole = useCallback(
     (role: string) => {
-      return state.user?.roles.includes(role) ?? false;
+      return state.user?.roles?.includes(role) ?? false;
     },
     [state.user],
   );

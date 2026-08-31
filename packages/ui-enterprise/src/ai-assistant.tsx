@@ -5,7 +5,7 @@ import { Tooltip } from "@eaip/ui-foundation";
 import { useConductorStore } from "@eaip/state";
 import { SpeechInputService, SpeechOutputService, type VoiceState } from "./speech-services";
 import { PersonalAssistantMark } from "./personal-assistant-mark";
-
+import { DynamicConductorButton, type ConductorButtonState } from "./dynamic-conductor-button";
 
 export interface ChatMessage {
   id: string;
@@ -24,7 +24,14 @@ export interface AIChatPanelProps {
   className?: string;
 }
 
-export function AIChatPanel({ messages, onSend, loading = false, placeholder = "Ask anything...", title = "AI Assistant", className }: AIChatPanelProps) {
+export function AIChatPanel({
+  messages,
+  onSend,
+  loading = false,
+  placeholder = "Ask anything...",
+  title = "AI Assistant",
+  className,
+}: AIChatPanelProps) {
   const [input, setInput] = useState("");
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -42,55 +49,88 @@ export function AIChatPanel({ messages, onSend, loading = false, placeholder = "
   };
 
   return (
-    <div className={cn("flex flex-col rounded-card border border-border bg-surface overflow-hidden", className)}>
-      <div className="flex items-center justify-between border-b border-border px-4 py-3">
+    <div
+      className={cn(
+        "rounded-card border-border bg-surface flex flex-col overflow-hidden border",
+        className,
+      )}
+    >
+      <div className="border-border flex items-center justify-between border-b px-4 py-3">
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-text-inverse">
+          <div className="bg-primary text-text-inverse flex h-7 w-7 items-center justify-center rounded-full">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke="currentColor" strokeWidth="2" />
+              <path
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
               <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             </svg>
           </div>
-          <span className="text-sm font-semibold text-text">{title}</span>
+          <span className="text-text text-sm font-semibold">{title}</span>
         </div>
         <Tooltip content="New conversation">
           <Button type="button" variant="ghost" size="sm" iconOnly>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <path
+                d="M12 5v14M5 12h14"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
             </svg>
           </Button>
         </Tooltip>
       </div>
 
-      <div ref={listRef} className="flex-1 overflow-y-auto space-y-3 p-4 min-h-[300px] max-h-[500px]">
+      <div
+        ref={listRef}
+        className="max-h-[500px] min-h-[300px] flex-1 space-y-3 overflow-y-auto p-4"
+      >
         {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full text-center py-8">
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary-subtle text-primary">
+          <div className="flex h-full flex-col items-center justify-center py-8 text-center">
+            <div className="bg-primary-subtle text-primary mb-3 flex h-12 w-12 items-center justify-center rounded-full">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke="currentColor" strokeWidth="2" />
+                <path
+                  d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
                 <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </div>
-            <p className="text-sm font-medium text-text">How can I help you today?</p>
-            <p className="text-xs text-text-muted mt-1">Ask a question or describe a task</p>
+            <p className="text-text text-sm font-medium">How can I help you today?</p>
+            <p className="text-text-muted mt-1 text-xs">Ask a question or describe a task</p>
           </div>
         )}
         {messages.map((msg) => (
-          <div key={msg.id} className={cn("flex gap-3", msg.role === "user" ? "justify-end" : "justify-start")}>
+          <div
+            key={msg.id}
+            className={cn("flex gap-3", msg.role === "user" ? "justify-end" : "justify-start")}
+          >
             {msg.role === "assistant" && (
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-subtle text-primary mt-1">
+              <div className="bg-primary-subtle text-primary mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke="currentColor" strokeWidth="2" />
-                  <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <path
+                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                  <path
+                    d="M12 6v6l4 2"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
                 </svg>
               </div>
             )}
             <div
               className={cn(
-                "max-w-[80%] rounded-card px-3 py-2 text-sm",
+                "rounded-card max-w-[80%] px-3 py-2 text-sm",
                 msg.role === "user"
                   ? "bg-primary text-text-inverse"
-                  : "bg-surface-secondary text-text border border-border",
+                  : "bg-surface-secondary text-text border-border border",
               )}
             >
               {msg.loading ? (
@@ -103,7 +143,7 @@ export function AIChatPanel({ messages, onSend, loading = false, placeholder = "
               )}
             </div>
             {msg.role === "user" && (
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-surface-tertiary text-text-muted mt-1">
+              <div className="bg-surface-tertiary text-text-muted mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full">
                 <Avatar name="You" size="sm" />
               </div>
             )}
@@ -111,23 +151,41 @@ export function AIChatPanel({ messages, onSend, loading = false, placeholder = "
         ))}
       </div>
 
-      <div className="border-t border-border p-4">
+      <div className="border-border border-t p-4">
         <div className="flex items-end gap-2">
-          <div className="flex-1 relative">
+          <div className="relative flex-1">
             <input
               type="text"
               value={input}
-              onChange={(e) => { setInput(e.target.value); }}
-              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
+              onChange={(e) => {
+                setInput(e.target.value);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit();
+                }
+              }}
               placeholder={placeholder}
               disabled={loading}
-              className="block w-full rounded-input border bg-surface px-3 py-2.5 pr-10 text-sm text-text shadow-sm transition-smooth border-border focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none placeholder:text-text-muted disabled:opacity-50"
+              className="rounded-input bg-surface text-text transition-smooth border-border focus:border-primary focus:ring-primary placeholder:text-text-muted block w-full border px-3 py-2.5 pr-10 text-sm shadow-sm focus:ring-1 focus:outline-none disabled:opacity-50"
               aria-label="Chat input"
             />
           </div>
-          <Button type="button" size="sm" onClick={handleSubmit} disabled={!input.trim() || loading}>
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleSubmit}
+            disabled={!input.trim() || loading}
+          >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
             Send
           </Button>
@@ -190,13 +248,13 @@ export function ConductorWidget({
   const storeTts = useConductorStore((s) => s.ttsEnabled);
   const setStoreTts = useConductorStore((s) => s.setTtsEnabled);
 
-  const mode = storeMode || initialMode;
+  const mode = storeMode;
   const setMode = setStoreMode;
   const ttsEnabled = storeTts;
   const setTtsEnabled = setStoreTts;
 
   useEffect(() => {
-    if (initialMode && initialMode !== "collapsed") {
+    if (initialMode !== "collapsed") {
       setStoreMode(initialMode);
     }
   }, [initialMode, setStoreMode]);
@@ -207,6 +265,25 @@ export function ConductorWidget({
   const speechOutputRef = useRef<SpeechOutputService | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const stopVoiceSession = useCallback(() => {
+    speechInputRef.current?.cancel();
+    speechOutputRef.current?.cancel();
+    setVoiceState("idle");
+  }, []);
+
+  const pauseOrResumeVoice = useCallback(() => {
+    if (voiceState === "speaking") {
+      speechOutputRef.current?.pause();
+      setVoiceState("paused");
+    } else if (voiceState === "paused") {
+      speechOutputRef.current?.resume();
+      setVoiceState("speaking");
+    } else if (voiceState === "listening") {
+      speechInputRef.current?.stop();
+      setVoiceState("idle");
+    }
+  }, [voiceState]);
 
   useEffect(() => {
     speechInputRef.current = new SpeechInputService({
@@ -222,6 +299,11 @@ export function ConductorWidget({
       },
     });
     speechOutputRef.current = new SpeechOutputService();
+
+    return () => {
+      speechInputRef.current?.destroy();
+      speechOutputRef.current?.destroy();
+    };
   }, [onSend]);
 
   useEffect(() => {
@@ -236,14 +318,19 @@ export function ConductorWidget({
     }
   }, [messages, ttsEnabled]);
 
-
   const toggleMic = useCallback(() => {
-    if (voiceState === "listening") {
-      speechInputRef.current?.stop();
+    if (
+      voiceState === "listening" ||
+      voiceState === "transcribing" ||
+      voiceState === "speaking" ||
+      voiceState === "paused"
+    ) {
+      stopVoiceSession();
     } else {
+      speechOutputRef.current?.cancel();
       speechInputRef.current?.start();
     }
-  }, [voiceState]);
+  }, [voiceState, stopVoiceSession]);
 
   useEffect(() => {
     if (listRef.current) {
@@ -253,8 +340,14 @@ export function ConductorWidget({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && mode !== "collapsed") {
-        setMode("collapsed");
+      if (e.key === "Escape") {
+        if (voiceState !== "idle") {
+          stopVoiceSession();
+          return;
+        }
+        if (mode !== "collapsed") {
+          setMode("collapsed");
+        }
       }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "m" && mode !== "collapsed") {
         e.preventDefault();
@@ -265,79 +358,47 @@ export function ConductorWidget({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [mode, voiceState, toggleMic]);
+  }, [mode, voiceState, toggleMic, stopVoiceSession, setMode]);
 
   const handleSubmit = () => {
     const trimmed = input.trim();
     if (!trimmed || loading) return;
+    if (voiceState === "speaking" || voiceState === "listening") {
+      stopVoiceSession();
+    }
     onSend(trimmed);
     setInput("");
   };
 
-
   if (mode === "collapsed") {
     const hasApprovals = approvals.length > 0;
+
+    // Map voice/loading state to ConductorButtonState
+    const buttonState: ConductorButtonState = loading
+      ? "thinking"
+      : voiceState === "listening"
+        ? "listening"
+        : voiceState === "transcribing"
+          ? "transcribing"
+          : voiceState === "speaking"
+            ? "speaking"
+            : voiceState === "paused"
+              ? "paused"
+              : hasApprovals
+                ? "approval"
+                : "idle";
+
     return (
-      <div data-tour="conductor" className={cn("fixed bottom-6 right-6 z-50", className)}>
-        <button
-          type="button"
-          onClick={() => {
-            setMode("docked");
-            setTimeout(() => inputRef.current?.focus(), 100);
-          }}
-          className={cn(
-            "group relative flex items-center gap-2.5 rounded-full px-3.5 py-2",
-            "bg-surface/90 dark:bg-surface/85 backdrop-blur-xl",
-            "border border-border/80 dark:border-white/15",
-            "shadow-[0_8px_32px_rgba(0,0,0,0.12),0_2px_8px_rgba(56,189,248,0.15)]",
-            "dark:shadow-[0_8px_32px_rgba(0,0,0,0.45),0_2px_12px_rgba(56,189,248,0.25)]",
-            "text-text transition-all duration-300 ease-out",
-            "hover:scale-[1.03] hover:border-primary/40 hover:shadow-[0_12px_40px_rgba(56,189,248,0.25)]",
-            "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-surface",
-            "motion-reduce:hover:scale-100 motion-reduce:transition-none",
-            hasApprovals && "ring-2 ring-warning/60 animate-pulse",
-          )}
-          aria-label="Open personal EAIP assistant"
-          aria-expanded={false}
-          aria-haspopup="dialog"
-        >
-          {/* Ambient Glow Aura */}
-          <span
-            className="absolute -inset-0.5 -z-10 rounded-full bg-gradient-to-r from-primary/30 via-primary-subtle/40 to-primary/30 opacity-0 blur-sm transition-opacity duration-300 group-hover:opacity-100 motion-reduce:hidden"
-            aria-hidden="true"
-          />
-
-          {/* Mark / Icon */}
-          <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none">
-            <PersonalAssistantMark
-              size="sm"
-              state={loading ? "thinking" : voiceState !== "idle" ? voiceState : hasApprovals ? "approval" : "idle"}
-              className="border-0 bg-transparent shadow-none"
-            />
-          </div>
-
-          {/* Assistant Info */}
-          <div className="flex flex-col items-start pr-1 text-left">
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-semibold tracking-tight text-text">Conductor</span>
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500 motion-safe:animate-pulse motion-reduce:animate-none" />
-            </div>
-            <span className="text-[10px] text-text-muted font-medium">Enterprise Assistant</span>
-          </div>
-
-          {/* Pending approval badge if any */}
-          {hasApprovals && (
-            <span className="flex h-5 items-center justify-center rounded-full bg-warning px-1.5 text-[10px] font-bold text-black shadow-sm">
-              {String(approvals.length)}
-            </span>
-          )}
-
-          {/* Shortcut hint */}
-          <kbd className="hidden sm:inline-flex items-center rounded border border-border/80 bg-surface-tertiary/80 px-1.5 py-0.5 text-[9px] font-mono text-text-muted">
-            ⌘M
-          </kbd>
-        </button>
-      </div>
+      <DynamicConductorButton
+        state={buttonState}
+        label="Open personal EAIP assistant"
+        ariaExpanded={false}
+        onClick={() => {
+          setMode("docked");
+          setTimeout(() => inputRef.current?.focus(), 100);
+        }}
+        badge={hasApprovals ? approvals.length : undefined}
+      />
     );
   }
 
@@ -347,40 +408,38 @@ export function ConductorWidget({
     <div
       role="region"
       aria-label="Personal EAIP Assistant (Conductor)"
-      aria-expanded={true}
       className={cn(
-        "fixed z-50 flex flex-col rounded-2xl border border-border/80 bg-surface/95 dark:bg-surface/90 backdrop-blur-2xl shadow-2xl transition-all duration-300 ease-out",
+        "border-border/80 bg-surface/95 dark:bg-surface/90 fixed z-50 flex flex-col rounded-2xl border shadow-2xl backdrop-blur-2xl transition-all duration-300 ease-out",
         "motion-safe:animate-in motion-safe:fade-in-50 motion-safe:zoom-in-95 motion-reduce:animate-none",
         isExpanded
-          ? "bottom-6 right-4 left-4 top-20 max-w-5xl sm:mx-auto"
-          : "bottom-6 right-4 left-4 sm:left-auto sm:right-6 sm:w-96 max-h-[85vh] sm:max-h-[600px] h-[520px] max-w-[calc(100vw-2rem)]",
+          ? "top-20 right-4 bottom-6 left-4 max-w-5xl sm:mx-auto"
+          : "right-4 bottom-6 left-4 h-[520px] max-h-[85vh] max-w-[calc(100vw-2rem)] sm:right-6 sm:left-auto sm:max-h-[600px] sm:w-96",
         className,
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border px-4 py-3 bg-surface-secondary/50">
+      <div className="border-border bg-surface-secondary/50 flex items-center justify-between border-b px-4 py-3">
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-text-inverse">
+          <div className="bg-primary text-text-inverse flex h-7 w-7 items-center justify-center rounded-full">
             <PersonalAssistantMark size="sm" className="border-0 bg-transparent shadow-none" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-text flex items-center gap-2">
+            <h3 className="text-text flex items-center gap-2 text-sm font-semibold">
               Your personal assistant
-              <span className="rounded-full border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-primary">
+              <span className="border-primary/20 bg-primary/10 text-primary rounded-full border px-1.5 py-0.5 text-[9px] font-medium tracking-wide uppercase">
                 Conductor
               </span>
               {voiceState !== "idle" && (
-                <span className="rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-mono text-primary animate-pulse">
+                <span className="bg-primary/20 text-primary animate-pulse rounded-full px-2 py-0.5 font-mono text-[10px]">
                   {voiceState}
                 </span>
               )}
             </h3>
-            <p className="text-[10px] text-text-muted flex items-center gap-1">
+            <p className="text-text-muted flex items-center gap-1 text-[10px]">
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
               <span>EAIP context</span>
             </p>
           </div>
-
         </div>
         <div className="flex items-center gap-1">
           <button
@@ -389,8 +448,10 @@ export function ConductorWidget({
               setTtsEnabled(!ttsEnabled);
             }}
             className={cn(
-              "p-1.5 rounded-md text-xs font-medium transition-colors",
-              ttsEnabled ? "bg-primary/20 text-primary" : "text-text-muted hover:text-text hover:bg-surface-tertiary"
+              "rounded-md p-1.5 text-xs font-medium transition-colors",
+              ttsEnabled
+                ? "bg-primary/20 text-primary"
+                : "text-text-muted hover:text-text hover:bg-surface-tertiary",
             )}
             title={ttsEnabled ? "Voice Output Active" : "Enable Voice Output"}
             aria-label="Toggle Voice Output"
@@ -399,11 +460,20 @@ export function ConductorWidget({
           </button>
           <button
             type="button"
-            onClick={() => { setMode(isExpanded ? "docked" : "expanded"); }}
-            className="p-1.5 text-text-muted hover:text-text rounded-md hover:bg-surface-tertiary"
+            onClick={() => {
+              setMode(isExpanded ? "docked" : "expanded");
+            }}
+            className="text-text-muted hover:text-text hover:bg-surface-tertiary rounded-md p-1.5"
             aria-label={isExpanded ? "Dock window" : "Expand window"}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               {isExpanded ? (
                 <path d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7" />
               ) : (
@@ -413,11 +483,20 @@ export function ConductorWidget({
           </button>
           <button
             type="button"
-            onClick={() => { setMode("collapsed"); }}
-            className="p-1.5 text-text-muted hover:text-text rounded-md hover:bg-surface-tertiary"
+            onClick={() => {
+              setMode("collapsed");
+            }}
+            className="text-text-muted hover:text-text hover:bg-surface-tertiary rounded-md p-1.5"
             aria-label="Minimize Conductor"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
@@ -425,19 +504,27 @@ export function ConductorWidget({
       </div>
 
       {/* Messages */}
-      <div ref={listRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div ref={listRef} className="flex-1 space-y-4 overflow-y-auto p-4">
         {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full text-center py-8 text-text-muted">
-            <PersonalAssistantMark size="lg" state={loading ? "thinking" : voiceState} className="mb-3" />
-            <p className="text-sm font-medium text-text">Hi, I&apos;m your personal EAIP assistant.</p>
-            <p className="text-xs mt-1 max-w-[18rem]">Ask about EAIP, investigate an issue, or help operate the platform.</p>
+          <div className="text-text-muted flex h-full flex-col items-center justify-center py-8 text-center">
+            <PersonalAssistantMark
+              size="lg"
+              state={loading ? "thinking" : voiceState}
+              className="mb-3"
+            />
+            <p className="text-text text-sm font-medium">
+              Hi, I&apos;m your personal EAIP assistant.
+            </p>
+            <p className="mt-1 max-w-[18rem] text-xs">
+              Ask about EAIP, investigate an issue, or help operate the platform.
+            </p>
             <div className="mt-3 flex gap-2">
               <button
                 type="button"
                 onClick={() => {
                   onSend("give me the morning briefing");
                 }}
-                className="rounded-md border border-border bg-surface px-3 py-1.5 text-xs text-text-secondary hover:bg-surface-tertiary"
+                className="border-border bg-surface text-text-secondary hover:bg-surface-tertiary rounded-md border px-3 py-1.5 text-xs"
               >
                 📋 System Briefing
               </button>
@@ -446,49 +533,100 @@ export function ConductorWidget({
                 onClick={() => {
                   onSend("show system twin overview");
                 }}
-                className="rounded-md border border-border bg-surface px-3 py-1.5 text-xs text-text-secondary hover:bg-surface-tertiary"
+                className="border-border bg-surface text-text-secondary hover:bg-surface-tertiary rounded-md border px-3 py-1.5 text-xs"
               >
                 🌐 System Twin
               </button>
               <button
                 type="button"
-                onClick={() => { onSend("What do you remember about me?"); }}
-                className="rounded-md border border-border bg-surface px-3 py-1.5 text-xs text-text-secondary hover:bg-surface-tertiary"
+                onClick={() => {
+                  onSend("What do you remember about me?");
+                }}
+                className="border-border bg-surface text-text-secondary hover:bg-surface-tertiary rounded-md border px-3 py-1.5 text-xs"
               >
                 ✦ My memory
               </button>
             </div>
           </div>
-        )}        {messages.map((msg) => (
-
-          <div key={msg.id} className={cn("flex flex-col gap-1", msg.role === "user" ? "items-end" : "items-start")}>
-            {/* Tool Events Activity Badges */}
-            {msg.toolEvents?.map((event, idx) => (
-              <div
-                key={idx}
-                className="mb-1 flex items-center gap-2 rounded-lg border border-border/60 bg-surface-secondary/80 px-2.5 py-1 text-xs text-text-secondary"
-              >
-                <span className="text-primary font-mono font-bold">◇</span>
-                <span className="font-medium">{event.tool_name}</span>
-                <span className="text-[10px] opacity-75">{event.status}</span>
+        )}{" "}
+        {messages.map((msg) => (
+          <div
+            key={msg.id}
+            className={cn("flex flex-col gap-1", msg.role === "user" ? "items-end" : "items-start")}
+          >
+            {/* Modern Tool Events Activity Badges */}
+            {msg.toolEvents && msg.toolEvents.length > 0 && (
+              <div className="mb-2 flex w-full flex-col gap-1.5">
+                {msg.toolEvents.map((event, idx) => (
+                  <div
+                    key={idx}
+                    className="border-border/40 bg-surface-tertiary/50 text-text-secondary flex items-center gap-2.5 rounded-lg border px-3 py-1.5 text-[11px] shadow-sm transition-all"
+                  >
+                    {event.status === "running" ? (
+                      <Spinner size="sm" className="text-primary h-3 w-3" />
+                    ) : event.status === "executed" ? (
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        className="text-success"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M20 6L9 17l-5-5"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    ) : event.status === "failed" ? (
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        className="text-danger"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M18 6L6 18M6 6l12 12"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    ) : (
+                      <span className="text-primary font-mono text-[10px] font-bold">◇</span>
+                    )}
+                    <span className="font-mono font-medium">{event.tool_name}</span>
+                    {event.summary && (
+                      <span className="text-text-muted ml-1 truncate opacity-80">
+                        {event.summary}
+                      </span>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
 
             <div
               className={cn(
                 "max-w-[85%] rounded-lg px-3.5 py-2.5 text-sm shadow-sm",
                 msg.role === "user"
                   ? "bg-primary text-text-inverse"
-                  : "bg-surface-secondary border border-border text-text",
+                  : "bg-surface-secondary border-border text-text border",
               )}
             >
               {msg.loading ? (
                 <div className="flex items-center gap-2">
                   <Spinner size="sm" />
-                  <span className="text-xs text-text-muted">Conductor is thinking...</span>
+                  <span className="text-text-muted text-xs">Conductor is thinking...</span>
                 </div>
               ) : (
-                <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
               )}
             </div>
           </div>
@@ -497,29 +635,33 @@ export function ConductorWidget({
 
       {/* Pending approvals */}
       {approvals.length > 0 && (
-        <div className="border-t border-border bg-surface-secondary/60 px-3 py-2 space-y-2 max-h-44 overflow-y-auto">
-          <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-warning">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-warning" />
+        <div className="border-border bg-surface-secondary/60 max-h-44 space-y-2 overflow-y-auto border-t px-3 py-2">
+          <p className="text-warning flex items-center gap-1.5 text-[11px] font-semibold tracking-wider uppercase">
+            <span className="bg-warning inline-block h-1.5 w-1.5 rounded-full" />
             {approvals.length} action{approvals.length > 1 ? "s" : ""} awaiting approval
           </p>
           {approvals.map((approval) => (
-            <div key={approval.id} className="rounded-md border border-border bg-surface p-2.5">
+            <div key={approval.id} className="border-border bg-surface rounded-md border p-2.5">
               <div className="flex items-center justify-between gap-2">
-                <span className="font-mono text-xs font-bold text-primary">{approval.tool_name}</span>
+                <span className="text-primary font-mono text-xs font-bold">
+                  {approval.tool_name}
+                </span>
                 {approval.risk && (
-                  <span className="rounded-full border border-warning/30 bg-warning-subtle px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-warning">
+                  <span className="border-warning/30 bg-warning-subtle text-warning rounded-full border px-2 py-0.5 text-[10px] font-medium tracking-wide uppercase">
                     {approval.risk}
                   </span>
                 )}
               </div>
-              <p className="mt-1 text-[11px] leading-relaxed text-text-secondary">
+              <p className="text-text-secondary mt-1 text-[11px] leading-relaxed">
                 {approvalSummary(approval)}
               </p>
               <div className="mt-2 flex gap-2">
                 <Button
                   type="button"
                   size="sm"
-                  onClick={() => { onApprove?.(approval.id); }}
+                  onClick={() => {
+                    onApprove?.(approval.id);
+                  }}
                   disabled={approvingId !== null}
                 >
                   Approve
@@ -528,7 +670,9 @@ export function ConductorWidget({
                   type="button"
                   variant="secondary"
                   size="sm"
-                  onClick={() => { onReject?.(approval.id); }}
+                  onClick={() => {
+                    onReject?.(approval.id);
+                  }}
                   disabled={approvingId !== null}
                 >
                   Reject
@@ -539,8 +683,66 @@ export function ConductorWidget({
         </div>
       )}
 
+      {/* Live Voice Active Control Banner */}
+      {voiceState !== "idle" && (
+        <div className="border-border/80 bg-surface-secondary/80 flex items-center justify-between gap-3 border-t px-3.5 py-2 backdrop-blur-md transition-all">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-4 items-center gap-0.5">
+              <span className="bg-primary h-3 w-1 animate-[pulse_0.6s_ease-in-out_infinite] rounded-full" />
+              <span className="h-4 w-1 animate-[pulse_0.4s_ease-in-out_infinite] rounded-full bg-sky-400" />
+              <span className="bg-primary h-2 w-1 animate-[pulse_0.7s_ease-in-out_infinite] rounded-full" />
+              <span className="h-3.5 w-1 animate-[pulse_0.5s_ease-in-out_infinite] rounded-full bg-violet-400" />
+            </div>
+            <span className="text-text text-xs font-medium">
+              {voiceState === "listening"
+                ? "Listening to your voice..."
+                : voiceState === "transcribing"
+                  ? "Transcribing voice..."
+                  : voiceState === "speaking"
+                    ? "Conductor is speaking..."
+                    : voiceState === "paused"
+                      ? "Voice paused"
+                      : "Voice active"}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            {voiceState === "speaking" && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={pauseOrResumeVoice}
+                className="text-text-secondary hover:text-text h-7 px-2 text-xs"
+              >
+                Pause
+              </Button>
+            )}
+            {voiceState === "paused" && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={pauseOrResumeVoice}
+                className="text-text-secondary hover:text-text h-7 px-2 text-xs"
+              >
+                Resume
+              </Button>
+            )}
+            <button
+              type="button"
+              onClick={stopVoiceSession}
+              className="inline-flex items-center gap-1 rounded-full border border-rose-500/30 bg-rose-500/15 px-2.5 py-1 text-xs font-semibold text-rose-500 transition-colors hover:bg-rose-500/25"
+              aria-label="Stop Voice Session"
+            >
+              <span className="h-2 w-2 rounded-xs bg-rose-500" />
+              Stop Voice
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Input Footer */}
-      <div className="border-t border-border p-3 bg-surface">
+      <div className="border-border bg-surface border-t p-3">
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -548,8 +750,8 @@ export function ConductorWidget({
             className={cn(
               "flex h-9 w-9 items-center justify-center rounded-md border transition-all",
               voiceState === "listening"
-                ? "bg-rose-500/20 border-rose-500 text-rose-500 animate-pulse"
-                : "border-border bg-surface-secondary text-text-secondary hover:bg-surface-tertiary"
+                ? "animate-pulse border-rose-500 bg-rose-500/20 text-rose-500"
+                : "border-border bg-surface-secondary text-text-secondary hover:bg-surface-tertiary",
             )}
             aria-label="Push to Talk"
             title="Push to Talk (Mic)"
@@ -560,7 +762,9 @@ export function ConductorWidget({
             ref={inputRef}
             type="text"
             value={input}
-            onChange={(e) => { setInput(e.target.value); }}
+            onChange={(e) => {
+              setInput(e.target.value);
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -569,7 +773,7 @@ export function ConductorWidget({
             }}
             placeholder={voiceState === "listening" ? "Listening..." : "Ask Conductor..."}
             disabled={loading}
-            className="flex-1 rounded-md border border-border bg-surface-secondary px-3 py-2 text-sm text-text focus:border-primary focus:outline-none placeholder:text-text-muted"
+            className="border-border bg-surface-secondary text-text focus:border-primary placeholder:text-text-muted flex-1 rounded-md border px-3 py-2 text-sm focus:outline-none"
           />
           <Button size="sm" onClick={handleSubmit} disabled={!input.trim() || loading}>
             Send
@@ -594,8 +798,10 @@ export function SuggestionChips({ items, onSelect, className }: SuggestionChipPr
         <button
           key={item.id}
           type="button"
-          onClick={() => { onSelect(item.id); }}
-          className="rounded-full border border-border bg-surface px-3 py-1 text-xs text-text-secondary transition-smooth hover:bg-surface-tertiary hover:text-text hover:border-border-strong"
+          onClick={() => {
+            onSelect(item.id);
+          }}
+          className="border-border bg-surface text-text-secondary transition-smooth hover:bg-surface-tertiary hover:text-text hover:border-border-strong rounded-full border px-3 py-1 text-xs"
         >
           {item.label}
         </button>
@@ -620,9 +826,11 @@ export function ModelSelector({ models, value, onChange, className }: ModelSelec
           <button
             key={model.id}
             type="button"
-            onClick={() => { onChange(model.id); }}
+            onClick={() => {
+              onChange(model.id);
+            }}
             className={cn(
-              "rounded-button px-3 py-1.5 text-xs font-medium transition-smooth border",
+              "rounded-button transition-smooth border px-3 py-1.5 text-xs font-medium",
               active
                 ? "bg-primary text-text-inverse border-primary shadow-sm"
                 : "bg-surface text-text-secondary border-border hover:bg-surface-tertiary hover:text-text",
@@ -639,20 +847,30 @@ export function ModelSelector({ models, value, onChange, className }: ModelSelec
 
 export function SystemTwinGraph({ className }: { className?: string }) {
   return (
-    <div className={cn("relative flex items-center justify-center p-6 border border-border/40 rounded-xl bg-surface-secondary/40 backdrop-blur-sm overflow-hidden", className)}>
+    <div
+      className={cn(
+        "border-border/40 bg-surface-secondary/40 relative flex items-center justify-center overflow-hidden rounded-xl border p-6 backdrop-blur-sm",
+        className,
+      )}
+    >
       <div className="relative z-10 flex flex-col items-center gap-4">
         {/* Central Nucleus */}
-        <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-primary/20 border border-primary/40 shadow-lg animate-pulse">
-          <div className="h-8 w-8 rounded-full bg-primary text-text-inverse flex items-center justify-center font-mono font-bold text-xs">
+        <div className="bg-primary/20 border-primary/40 relative flex h-16 w-16 animate-pulse items-center justify-center rounded-full border shadow-lg">
+          <div className="bg-primary text-text-inverse flex h-8 w-8 items-center justify-center rounded-full font-mono text-xs font-bold">
             EAIP
           </div>
         </div>
-        <span className="text-xs font-mono font-semibold tracking-wider text-text uppercase">System Twin Nucleus</span>
-        
+        <span className="text-text font-mono text-xs font-semibold tracking-wider uppercase">
+          System Twin Nucleus
+        </span>
+
         {/* Surrounding Nodes */}
-        <div className="flex flex-wrap items-center justify-center gap-2 max-w-sm">
+        <div className="flex max-w-sm flex-wrap items-center justify-center gap-2">
           {["Agents", "Workflows", "Missions", "Automations", "Knowledge", "Health"].map((node) => (
-            <div key={node} className="flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-[11px] font-medium text-text-secondary shadow-xs">
+            <div
+              key={node}
+              className="border-border bg-surface text-text-secondary flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-medium shadow-xs"
+            >
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
               {node}
             </div>

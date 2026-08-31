@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { RequireAuth } from "@eaip/auth";
 import {
   EnterpriseShell,
@@ -12,7 +12,9 @@ import {
 } from "@eaip/ui-enterprise";
 import { Badge, Button, EmptyState, Input } from "@eaip/ui-primitives";
 import { Dialog } from "@eaip/ui-foundation";
+import { InteractiveGraphCanvas, type GraphNode, type GraphEdge } from "@eaip/ui-visualizations";
 import { EnterpriseIcon } from "@eaip/icons";
+import { cn } from "@eaip/utilities";
 import {
   fetchGraphEntities,
   fetchGraphRelationships,
@@ -24,6 +26,10 @@ import {
   type GraphStats,
   type GraphQueryResult,
 } from "../../../services/knowledge-graph-service";
+import { LivingMapOverlays } from "../../../components/living-map-overlays";
+import { ExplainThis } from "../../../components/explain-this";
+import { ShowRelated } from "../../../components/show-related-panel";
+import { StorylineFeed } from "../../../components/storyline-feed";
 import { useFallback } from "../../../services/fallback-context";
 
 type GraphTab = "overview" | "entities" | "relationships" | "visualize" | "query";
@@ -63,15 +69,12 @@ function GraphOverview({ stats, loading }: { stats: GraphStats | null; loading: 
           {Object.keys(stats.entityTypeCounts).length > 0 && (
             <Card>
               <CardHeader>
-                <h3 className="text-sm font-semibold text-text">Entity Types</h3>
+                <h3 className="text-text text-sm font-semibold">Entity Types</h3>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   {Object.entries(stats.entityTypeCounts).map(([type, count]) => (
-                    <div
-                      key={type}
-                      className="flex items-center justify-between py-1 text-sm"
-                    >
+                    <div key={type} className="flex items-center justify-between py-1 text-sm">
                       <span className="text-text-secondary">{type}</span>
                       <Badge variant="glass">{count}</Badge>
                     </div>
@@ -84,15 +87,12 @@ function GraphOverview({ stats, loading }: { stats: GraphStats | null; loading: 
           {Object.keys(stats.relationshipTypeCounts).length > 0 && (
             <Card>
               <CardHeader>
-                <h3 className="text-sm font-semibold text-text">Relationship Types</h3>
+                <h3 className="text-text text-sm font-semibold">Relationship Types</h3>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   {Object.entries(stats.relationshipTypeCounts).map(([type, count]) => (
-                    <div
-                      key={type}
-                      className="flex items-center justify-between py-1 text-sm"
-                    >
+                    <div key={type} className="flex items-center justify-between py-1 text-sm">
                       <span className="text-text-secondary">{type}</span>
                       <Badge variant="glass">{count}</Badge>
                     </div>
@@ -112,7 +112,7 @@ function EntityList({ entities, loading }: { entities: GraphEntity[]; loading: b
     return (
       <div className="space-y-3">
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="skeleton h-16 rounded-card" />
+          <div key={i} className="skeleton rounded-card h-16" />
         ))}
       </div>
     );
@@ -129,23 +129,21 @@ function EntityList({ entities, loading }: { entities: GraphEntity[]; loading: b
   }
 
   return (
-    <div className="divide-y divide-border rounded-card border border-border bg-surface">
+    <div className="divide-border rounded-card border-border bg-surface divide-y border">
       {entities.map((entity) => (
         <div
           key={entity.id}
-          className="flex items-start justify-between px-4 py-3 transition-smooth hover:bg-surface-secondary"
+          className="transition-smooth hover:bg-surface-secondary flex items-start justify-between px-4 py-3"
         >
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <Badge variant="glass" className="text-[10px] uppercase">
                 {entity.type}
               </Badge>
-              <p className="text-sm font-medium text-text">{entity.name}</p>
+              <p className="text-text text-sm font-medium">{entity.name}</p>
             </div>
             {entity.description && (
-              <p className="mt-1 text-xs text-text-secondary line-clamp-2">
-                {entity.description}
-              </p>
+              <p className="text-text-secondary mt-1 line-clamp-2 text-xs">{entity.description}</p>
             )}
             <div className="mt-1 flex flex-wrap gap-1">
               {entity.tags.map((tag) => (
@@ -161,12 +159,18 @@ function EntityList({ entities, loading }: { entities: GraphEntity[]; loading: b
   );
 }
 
-function RelationshipList({ relationships, loading }: { relationships: GraphRelationship[]; loading: boolean }) {
+function RelationshipList({
+  relationships,
+  loading,
+}: {
+  relationships: GraphRelationship[];
+  loading: boolean;
+}) {
   if (loading) {
     return (
       <div className="space-y-3">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="skeleton h-12 rounded-card" />
+          <div key={i} className="skeleton rounded-card h-12" />
         ))}
       </div>
     );
@@ -183,19 +187,16 @@ function RelationshipList({ relationships, loading }: { relationships: GraphRela
   }
 
   return (
-    <div className="divide-y divide-border rounded-card border border-border bg-surface">
+    <div className="divide-border rounded-card border-border bg-surface divide-y border">
       {relationships.map((rel) => (
-        <div
-          key={rel.id}
-          className="flex items-center justify-between px-4 py-3"
-        >
+        <div key={rel.id} className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
             <Badge variant="glass" className="text-[10px] uppercase">
               {rel.type}
             </Badge>
-            <span className="text-sm font-medium text-text">{rel.sourceEntityId}</span>
+            <span className="text-text text-sm font-medium">{rel.sourceEntityId}</span>
             <EnterpriseIcon name="arrowRight" size={14} className="text-text-muted" />
-            <span className="text-sm font-medium text-text">{rel.targetEntityId}</span>
+            <span className="text-text text-sm font-medium">{rel.targetEntityId}</span>
           </div>
           <Badge variant="glass">{rel.weight.toFixed(2)}</Badge>
         </div>
@@ -208,11 +209,42 @@ function GraphVisualization({
   entities,
   relationships,
   onNodeClick,
+  selectedEntityId,
 }: {
   entities: GraphEntity[];
   relationships: GraphRelationship[];
-  onNodeClick: (entity: GraphEntity) => void;
+  onNodeClick: (entity: GraphEntity | null) => void;
+  selectedEntityId?: string | null;
 }) {
+  const [filterTypes, setFilterTypes] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const entityTypes = useMemo(() => {
+    const types = new Set(entities.map((e) => e.type));
+    return Array.from(types).sort();
+  }, [entities]);
+
+  const filteredEntities = useMemo(() => {
+    let filtered = entities;
+    if (filterTypes.size > 0) {
+      filtered = filtered.filter((e) => filterTypes.has(e.type));
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (e) => e.name.toLowerCase().includes(q) || e.type.toLowerCase().includes(q),
+      );
+    }
+    return filtered;
+  }, [entities, filterTypes, searchQuery]);
+
+  const filteredRelationships = useMemo(() => {
+    const entityIds = new Set(filteredEntities.map((e) => e.id));
+    return relationships.filter(
+      (r) => entityIds.has(r.sourceEntityId) && entityIds.has(r.targetEntityId),
+    );
+  }, [relationships, filteredEntities]);
+
   if (entities.length === 0) {
     return (
       <EmptyState
@@ -223,62 +255,116 @@ function GraphVisualization({
     );
   }
 
-  // Simple node-link visualization using SVG
-  const width = 800;
-  const height = 500;
-  const centerX = width / 2;
-  const centerY = height / 2;
-  const radius = 180;
+  const nodes: GraphNode[] = filteredEntities.map((e) => ({
+    id: e.id,
+    label: e.name.length > 18 ? e.name.substring(0, 18) + "…" : e.name,
+    type: e.type,
+    data: e as unknown as Record<string, unknown>,
+  }));
 
-  const nodes = entities.slice(0, 20);
-  const nodePositions = nodes.map((node, i) => {
-    const angle = (i / nodes.length) * 2 * Math.PI;
-    return {
-      id: node.id,
-      x: centerX + radius * Math.cos(angle),
-      y: centerY + radius * Math.sin(angle),
-      entity: node,
-    };
-  });
+  const edges: GraphEdge[] = filteredRelationships.map((r) => ({
+    id: r.id,
+    source: r.sourceEntityId,
+    target: r.targetEntityId,
+    type: r.type,
+    label: r.type,
+  }));
+
+  const toggleType = (type: string) => {
+    setFilterTypes((prev) => {
+      const next = new Set(prev);
+      if (next.has(type)) next.delete(type);
+      else next.add(type);
+      return next;
+    });
+  };
 
   return (
-    <Card>
-      <CardContent className="p-4">
-        <svg width={width} height={height} className="w-full border border-border rounded-lg">
-          {relationships.slice(0, 30).map((rel) => {
-            const source = nodePositions.find((n) => n.id === rel.sourceEntityId);
-            const target = nodePositions.find((n) => n.id === rel.targetEntityId);
-            if (!source || !target) return null;
-            return (
-              <line
-                key={rel.id}
-                x1={source.x}
-                y1={source.y}
-                x2={target.x}
-                y2={target.y}
-                stroke="var(--color-border)"
-                strokeWidth="1"
-                markerEnd="url(#arrowhead)"
-              />
-            );
-          })}
-          <defs>
-            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-              <polygon points="0 0, 10 3.5, 0 7" fill="var(--color-border)" />
-            </marker>
-          </defs>
-          {nodePositions.map(({ x, y, entity }) => (
-            <g key={entity.id} transform={`translate(${x}, ${y})`}>
-              <circle r={20} fill="var(--color-surface-secondary)" stroke="var(--color-border)" strokeWidth="2"
-                style={{ cursor: "pointer" }} onClick={() => { onNodeClick(entity); }} />
-              <text textAnchor="middle" dy="3" className="text-[8px] fill-text-muted">
-                {entity.name.length > 10 ? entity.name.substring(0, 10) + "…" : entity.name}
-              </text>
-            </g>
+    <div className="space-y-3">
+      {/* Graph toolbar — frosted glass */}
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-2.5 backdrop-blur-md">
+        <div className="relative max-w-sm min-w-[200px] flex-1">
+          <EnterpriseIcon
+            name="search"
+            size={14}
+            className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-500"
+          />
+          <input
+            type="text"
+            placeholder="Search entities..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+            }}
+            className="w-full rounded-lg border border-white/[0.08] bg-[#0d1220]/60 py-2 pr-3 pl-9 text-sm text-slate-200 transition-colors placeholder:text-slate-600 focus:border-indigo-500/40 focus:ring-1 focus:ring-indigo-500/20 focus:outline-none"
+            aria-label="Search graph entities"
+          />
+        </div>
+        <div className="flex flex-wrap items-center gap-1.5">
+          {entityTypes.map((type) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => {
+                toggleType(type);
+              }}
+              className={cn(
+                "rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all duration-200",
+                filterTypes.has(type)
+                  ? "border-indigo-500/40 bg-indigo-500/10 text-indigo-400"
+                  : "border-white/[0.06] bg-white/[0.03] text-slate-500 hover:border-white/[0.12] hover:text-slate-400",
+              )}
+            >
+              {type}
+            </button>
           ))}
-        </svg>
-      </CardContent>
-    </Card>
+          {filterTypes.size > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                setFilterTypes(new Set());
+              }}
+              className="rounded-full border border-white/[0.06] px-2.5 py-1 text-[11px] font-medium text-slate-500 transition-colors hover:text-slate-400"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Graph canvas — premium container */}
+      <LivingMapOverlays />
+      <div className="relative h-[560px] overflow-hidden rounded-2xl border border-white/[0.08] shadow-2xl shadow-black/30">
+        <div className="relative h-full w-full flex-1">
+          <InteractiveGraphCanvas
+            nodes={nodes}
+            edges={edges}
+            onNodeSelect={(n) => {
+              if (n?.data) onNodeClick(n.data as unknown as GraphEntity);
+              else onNodeClick(null);
+            }}
+            selectedNodeId={selectedEntityId}
+            className="rounded-lg"
+          />
+        </div>
+      </div>
+
+      {/* Entity count */}
+      <p className="font-mono text-xs text-slate-600">
+        Showing {filteredEntities.length} of {entities.length} entities
+        {filterTypes.size > 0 && ` (${String(filterTypes.size)} type filter active)`}
+      </p>
+      <div className="grid gap-4 md:grid-cols-2">
+        <ExplainThis entityId={selectedEntityId ?? undefined} entityType="entity" />
+        <ShowRelated entityId={selectedEntityId ?? ""} />
+      </div>
+      <StorylineFeed
+        onShowOnMap={(id) => {
+          const el = document.querySelector(`[data-entity-id="${id}"]`);
+          el?.scrollIntoView({ behavior: "smooth" });
+        }}
+      />
+    </div>
   );
 }
 
@@ -303,7 +389,7 @@ function GraphQueryTab() {
         setResult(result.data);
       } else {
         setResult(null);
-        setError(result.error || "Backend unavailable");
+        setError(result.error ?? "Backend unavailable");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Query failed");
@@ -316,11 +402,16 @@ function GraphQueryTab() {
     <div className="space-y-4">
       <div className="space-y-3">
         <div>
-          <label className="text-xs font-medium text-text-muted">Query</label>
+          <label htmlFor="graph-query" className="text-text-muted text-xs font-medium">
+            Query
+          </label>
           <Input
+            id="graph-query"
             placeholder="Enter search term or entity name..."
             value={queryText}
-            onChange={(e) => { setQueryText(e.target.value); }}
+            onChange={(e) => {
+              setQueryText(e.target.value);
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter") void handleQuery();
             }}
@@ -329,20 +420,22 @@ function GraphQueryTab() {
           />
         </div>
         <div>
-          <label className="text-xs font-medium text-text-muted">Start Entity ID (optional)</label>
+          <label htmlFor="graph-start-entity" className="text-text-muted text-xs font-medium">
+            Start Entity ID (optional)
+          </label>
           <Input
+            id="graph-start-entity"
             placeholder="Entity ID to start traversal from..."
             value={startEntity}
-            onChange={(e) => { setStartEntity(e.target.value); }}
+            onChange={(e) => {
+              setStartEntity(e.target.value);
+            }}
             aria-label="Start entity ID"
             className="mt-1"
           />
         </div>
         <div className="flex gap-3">
-          <Button
-            onClick={() => void handleQuery()}
-            disabled={searching || !queryText.trim()}
-          >
+          <Button onClick={() => void handleQuery()} disabled={searching || !queryText.trim()}>
             {searching ? "Querying..." : "Run Query"}
           </Button>
         </div>
@@ -352,23 +445,25 @@ function GraphQueryTab() {
         <ErrorState
           title="Query failed"
           message={error}
-          onRetry={() => { void handleQuery(); }}
+          onRetry={() => {
+            void handleQuery();
+          }}
         />
       )}
 
       {result && (
         <div className="space-y-4">
-          <p className="text-xs text-text-muted">
+          <p className="text-text-muted text-xs">
             Found {result.totalCount} results in {result.durationMs}ms
           </p>
           {result.entities.length > 0 && (
             <div>
-              <h4 className="mb-2 text-sm font-semibold text-text">Entities</h4>
+              <h4 className="text-text mb-2 text-sm font-semibold">Entities</h4>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {result.entities.map((e) => (
-                  <div key={e.id} className="rounded-card border border-border bg-surface p-3">
-                    <p className="text-sm font-medium text-text">{e.name}</p>
-                    <p className="text-xs text-text-secondary">{e.type}</p>
+                  <div key={e.id} className="rounded-card border-border bg-surface border p-3">
+                    <p className="text-text text-sm font-medium">{e.name}</p>
+                    <p className="text-text-secondary text-xs">{e.type}</p>
                   </div>
                 ))}
               </div>
@@ -418,21 +513,27 @@ function CreateEntityModal({
             label="Name"
             placeholder="Entity name"
             value={name}
-            onChange={(e) => { setName(e.target.value); }}
+            onChange={(e) => {
+              setName(e.target.value);
+            }}
             aria-label="Entity name"
           />
           <Input
             label="Type"
             placeholder="e.g. concept, person, document"
             value={type}
-            onChange={(e) => { setType(e.target.value); }}
+            onChange={(e) => {
+              setType(e.target.value);
+            }}
             aria-label="Entity type"
           />
           <Input
             label="Description"
             placeholder="Entity description"
             value={description}
-            onChange={(e) => { setDescription(e.target.value); }}
+            onChange={(e) => {
+              setDescription(e.target.value);
+            }}
             aria-label="Entity description"
           />
           <div className="flex gap-3 pt-2">
@@ -469,7 +570,10 @@ function GraphContent() {
         fetchGraphEntities({ limit: 100 }),
         fetchGraphRelationships({ limit: 100 }),
       ]);
-      setFallback("knowledge-graph", statsResult.source === "fallback" || entitiesResult.source === "fallback");
+      setFallback(
+        "knowledge-graph",
+        statsResult.source === "fallback" || entitiesResult.source === "fallback",
+      );
       if (statsResult.source === "live") setStats(statsResult.data);
       if (entitiesResult.source === "live") setEntities(entitiesResult.data);
       if (relsResult.source === "live") setRelationships(relsResult.data);
@@ -505,14 +609,12 @@ function GraphContent() {
       <div className="space-y-6">
         <section className="surface-hero relative overflow-hidden p-8 lg:p-10">
           <div className="relative">
-            <div className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-primary uppercase">
+            <div className="text-primary mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest uppercase">
               <EnterpriseIcon name="workflow" size={14} />
               Knowledge Graph
             </div>
-            <h1 className="text-3xl font-bold text-text tracking-tight">
-              Knowledge Graph
-            </h1>
-            <p className="mt-3 max-w-2xl text-base leading-relaxed text-text-secondary">
+            <h1 className="text-text text-3xl font-bold tracking-tight">Knowledge Graph</h1>
+            <p className="text-text-secondary mt-3 max-w-2xl text-base leading-relaxed">
               Visualize and explore the interconnected web of entities, concepts, and relationships
               that power enterprise intelligence.
             </p>
@@ -520,12 +622,14 @@ function GraphContent() {
         </section>
 
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1 rounded-lg border border-border bg-surface p-1">
+          <div className="border-border bg-surface flex items-center gap-1 rounded-lg border p-1">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 type="button"
-                onClick={() => { setActiveTab(tab.id); }}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                }}
                 className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                   activeTab === tab.id
                     ? "bg-primary text-text-inverse"
@@ -538,11 +642,22 @@ function GraphContent() {
             ))}
           </div>
           <div className="flex gap-2">
-            <Button variant="ghost" size="sm" onClick={() => { setShowCreate(true); }}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setShowCreate(true);
+              }}
+            >
               <EnterpriseIcon name="plus" size={14} />
               Add Entity
             </Button>
-            <Button size="sm" onClick={() => { void load(); }}>
+            <Button
+              size="sm"
+              onClick={() => {
+                void load();
+              }}
+            >
               <EnterpriseIcon name="refresh" size={14} />
               Refresh
             </Button>
@@ -553,59 +668,156 @@ function GraphContent() {
           <ErrorState
             title="Could not load graph data"
             message={error}
-            onRetry={() => { void load(); }}
+            onRetry={() => {
+              void load();
+            }}
           />
         )}
 
         {activeTab === "overview" && <GraphOverview stats={stats} loading={loading} />}
         {activeTab === "entities" && <EntityList entities={entities} loading={loading} />}
-        {activeTab === "relationships" && <RelationshipList relationships={relationships} loading={loading} />}
+        {activeTab === "relationships" && (
+          <RelationshipList relationships={relationships} loading={loading} />
+        )}
         {activeTab === "visualize" && (
-          <GraphVisualization
-            entities={entities}
-            relationships={relationships}
-            onNodeClick={(entity) => { setSelectedEntity(entity); }}
-          />
+          <div className="relative overflow-hidden rounded-lg">
+            <GraphVisualization
+              entities={entities}
+              relationships={relationships}
+              selectedEntityId={selectedEntity?.id}
+              onNodeClick={(entity) => {
+                setSelectedEntity(entity);
+              }}
+            />
+
+            {/* Contextual Intelligence Panel — premium frosted glass */}
+            <div
+              className={cn(
+                "absolute top-0 right-0 z-10 flex h-full w-[340px] flex-col border-l border-white/[0.06] shadow-2xl shadow-black/40 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+                selectedEntity ? "translate-x-0" : "translate-x-full",
+              )}
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(13,18,32,0.95) 0%, rgba(7,11,20,0.98) 100%)",
+                backdropFilter: "blur(40px) saturate(180%)",
+              }}
+            >
+              {selectedEntity && (
+                <>
+                  <div className="flex items-start justify-between border-b border-white/[0.06] p-4">
+                    <div>
+                      <div className="mb-1.5 flex items-center gap-2">
+                        <span className="text-[10px] font-bold tracking-widest text-indigo-400 uppercase">
+                          {selectedEntity.type}
+                        </span>
+                        <span className="text-[10px] text-slate-600">·</span>
+                        <span className="text-[10px] font-semibold text-slate-500">
+                          Intelligence Node
+                        </span>
+                      </div>
+                      <h3 className="text-lg font-bold tracking-tight text-slate-100">
+                        {selectedEntity.name}
+                      </h3>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedEntity(null);
+                      }}
+                      className="flex h-7 w-7 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-white/[0.06] hover:text-slate-300"
+                      aria-label="Close panel"
+                    >
+                      <EnterpriseIcon name="x" size={15} />
+                    </button>
+                  </div>
+
+                  <div className="flex-1 space-y-5 overflow-y-auto p-4">
+                    <div>
+                      <span className="text-[10px] font-bold tracking-widest text-slate-600 uppercase">
+                        ID
+                      </span>
+                      <p className="mt-1 font-mono text-[12px] break-all text-slate-400">
+                        {selectedEntity.id}
+                      </p>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] font-bold tracking-widest text-slate-600 uppercase">
+                        Description
+                      </span>
+                      <p className="mt-1 text-[13px] leading-relaxed text-slate-400">
+                        {selectedEntity.description || "No description available for this entity."}
+                      </p>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] font-bold tracking-widest text-slate-600 uppercase">
+                        Tags
+                      </span>
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {selectedEntity.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="rounded-full border border-white/[0.06] bg-white/[0.04] px-2.5 py-0.5 text-[10px] text-slate-500"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] font-bold tracking-widest text-slate-600 uppercase">
+                        Confidence
+                      </span>
+                      <div className="mt-2 flex items-center gap-3">
+                        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.04]">
+                          <div
+                            className="h-full rounded-full bg-indigo-500/60"
+                            style={{ width: `${String(selectedEntity.confidence * 100)}%` }}
+                          />
+                        </div>
+                        <span className="font-mono text-[11px] text-slate-500">
+                          {(selectedEntity.confidence * 100).toFixed(0)}%
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] font-bold tracking-widest text-slate-600 uppercase">
+                        Source
+                      </span>
+                      <p className="mt-1 text-[12px] text-slate-500">
+                        {selectedEntity.source || "Unknown"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-white/[0.06] p-4">
+                    <button
+                      type="button"
+                      className="w-full rounded-lg bg-indigo-600/80 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-indigo-500/80"
+                    >
+                      Investigate Entity
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
         )}
         {activeTab === "query" && <GraphQueryTab />}
 
         <CreateEntityModal
           open={showCreate}
-          onClose={() => { setShowCreate(false); }}
-          onCreated={() => { setShowCreate(false); void load(); }}
+          onClose={() => {
+            setShowCreate(false);
+          }}
+          onCreated={() => {
+            setShowCreate(false);
+            void load();
+          }}
         />
-
-        {selectedEntity && (
-          <Dialog open={true} onClose={() => { setSelectedEntity(null); }}>
-            <Dialog.Content>
-              <div className="flex items-start justify-between">
-                <Dialog.Title>{selectedEntity.name}</Dialog.Title>
-                <Dialog.Close />
-              </div>
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs font-medium text-text-muted">ID</label>
-                  <p className="text-sm text-text">{selectedEntity.id}</p>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-text-muted">Type</label>
-                  <p className="text-sm text-text">{selectedEntity.type}</p>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-text-muted">Description</label>
-                  <p className="text-sm text-text-secondary">{selectedEntity.description || "No description"}</p>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-text-muted">Confidence</label>
-                  <p className="text-sm text-text">{selectedEntity.confidence.toFixed(2)}</p>
-                </div>
-                <Button variant="ghost" size="sm" onClick={() => { setSelectedEntity(null); }}>
-                  Close
-                </Button>
-              </div>
-            </Dialog.Content>
-          </Dialog>
-        )}
       </div>
     </EnterpriseShell>
   );

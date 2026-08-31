@@ -3,6 +3,7 @@
     "@eaip/core": "workspace:*",
     "@eaip/icons": "workspace:*",
     "@eaip/ui-foundation": "workspace:*",
+    "@eaip/utilities": "workspace:*",
     "react": "^19.1.0",
     "recharts": "^3.10.0"
   },

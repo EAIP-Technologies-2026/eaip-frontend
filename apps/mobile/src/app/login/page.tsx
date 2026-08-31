@@ -13,8 +13,9 @@ export default function LoginPage() {
   async function handleSubmit(email: string, password: string) {
     setSubmitting(true);
     try {
-      await login({ email, password });
-      router.push("/dashboard");
+      if (await login({ email, password })) {
+        router.push("/dashboard");
+      }
     } catch {
       // Error is already handled by useAuth
     } finally {

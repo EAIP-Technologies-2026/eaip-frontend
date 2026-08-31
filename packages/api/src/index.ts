@@ -44,11 +44,12 @@ export interface RequestOptions {
   headers?: Record<string, string>;
   timeoutMs?: number;
   retries?: number;
+  suppressSessionExpired?: boolean;
 }
 
-const DEFAULT_TIMEOUT_MS = 10_000;
-const DEFAULT_RETRIES = 2;
-const DEFAULT_RETRY_DELAY_MS = 500;
+const DEFAULT_TIMEOUT_MS = 3_000;
+const DEFAULT_RETRIES = 1;
+const DEFAULT_RETRY_DELAY_MS = 200;
 
 function isRetryableError(error: ApiError): boolean {
   if (error.status >= 500 && error.status < 600) return true;
@@ -109,6 +110,14 @@ export class ApiClient {
     return headers;
   }
 
+  private async notifySessionExpired(options?: RequestOptions): Promise<void> {
+    if (options?.suppressSessionExpired || typeof window === "undefined") return;
+    const token = this.config.tokenProvider ? await this.config.tokenProvider() : null;
+    if (token) {
+      window.dispatchEvent(new CustomEvent("eaip:session-expired"));
+    }
+  }
+
   private async executeRequest<T>(
     url: string,
     method: HttpMethod,
@@ -116,7 +125,8 @@ export class ApiClient {
     options?: RequestOptions,
   ): Promise<ApiResponse<T>> {
     const timeoutMs = options?.timeoutMs ?? this.config.timeoutMs ?? DEFAULT_TIMEOUT_MS;
-    const retries = options?.retries ?? this.config.retries ?? DEFAULT_RETRIES;
+    const retries =
+      options?.retries ?? (method === "GET" ? (this.config.retries ?? DEFAULT_RETRIES) : 0);
     const retryDelayMs = this.config.retryDelayMs ?? DEFAULT_RETRY_DELAY_MS;
 
     let lastResponse: ApiResponse<T> = {
@@ -143,7 +153,9 @@ export class ApiClient {
 
         if (body !== undefined && method !== "GET") {
           requestInit.body =
-            body instanceof FormData || body instanceof URLSearchParams ? body : JSON.stringify(body);
+            body instanceof FormData || body instanceof URLSearchParams
+              ? body
+              : JSON.stringify(body);
         }
 
         if (this.config.onRequest) {
@@ -200,6 +212,9 @@ export class ApiClient {
         };
 
         if (!isRetryableError(error) || attempt === retries) {
+          if (error.status === 401) {
+            await this.notifySessionExpired(options);
+          }
           return this.config.onResponse ? await this.config.onResponse(lastResponse) : lastResponse;
         }
       } catch (err) {
@@ -279,22 +294,17 @@ export function getDefaultClient(): ApiClient {
 
 export function createDefaultClient(config: {
   baseUrl: string;
+  timeoutMs?: number;
+  retries?: number;
+  retryDelayMs?: number;
   tokenProvider?: () => string | null | Promise<string | null>;
 }): ApiClient {
   return new ApiClient({
     baseUrl: config.baseUrl,
     credentials: "include",
-    timeoutMs: DEFAULT_TIMEOUT_MS,
-    retries: DEFAULT_RETRIES,
-    retryDelayMs: DEFAULT_RETRY_DELAY_MS,
+    timeoutMs: config.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+    retries: config.retries ?? DEFAULT_RETRIES,
+    retryDelayMs: config.retryDelayMs ?? DEFAULT_RETRY_DELAY_MS,
     tokenProvider: config.tokenProvider,
-    onResponse: (response) => {
-      if (response.error?.status === 401) {
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(new CustomEvent("eaip:session-expired"));
-        }
-      }
-      return response;
-    },
   });
 }

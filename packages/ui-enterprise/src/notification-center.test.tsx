@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { NotificationCenter, NotificationDetail, NotificationBell } from "./notification-center";
@@ -62,7 +63,9 @@ describe("NotificationCenter", () => {
   });
 
   it("shows unread count badge", () => {
-    render(<NotificationCenter items={[mockNotification, mockNotificationRead]} counts={mockCounts} />);
+    render(
+      <NotificationCenter items={[mockNotification, mockNotificationRead]} counts={mockCounts} />,
+    );
     expect(screen.getByText("1")).toBeTruthy();
   });
 
@@ -107,7 +110,7 @@ describe("NotificationCenter", () => {
         items={[mockNotification]}
         counts={mockCounts}
         onMarkAllRead={onMarkAllRead}
-      />
+      />,
     );
     const markAllButton = screen.getByText("Mark all read");
     fireEvent.click(markAllButton);

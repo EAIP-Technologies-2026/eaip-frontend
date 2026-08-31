@@ -140,7 +140,7 @@ export interface PlatformState {
 function derivePermissions(user: AuthUser | null): string[] {
   if (!user) return [];
   const permissions = new Set<string>(["view:dashboard"]);
-  for (const role of user.roles) {
+  for (const role of user.roles ?? []) {
     if (role === "admin") {
       permissions.add("admin:users");
       permissions.add("admin:roles");
@@ -224,14 +224,14 @@ export const usePlatformStore = create<PlatformState>()(
     acknowledgeNotification: (id: string) => {
       set((state) => ({
         notifications: state.notifications.map((n) =>
-          n.id === id ? { ...n, acknowledged: true, read: true } : n
+          n.id === id ? { ...n, acknowledged: true, read: true } : n,
         ),
       }));
     },
     dismissNotification: (id: string) => {
       set((state) => ({
         notifications: state.notifications.map((n) =>
-          n.id === id ? { ...n, dismissed: true } : n
+          n.id === id ? { ...n, dismissed: true } : n,
         ),
       }));
     },
@@ -408,8 +408,7 @@ export interface ConductorStore {
 
   setMessages: (
     messages:
-      | ConductorStoreMessage[]
-      | ((prev: ConductorStoreMessage[]) => ConductorStoreMessage[]),
+      ConductorStoreMessage[] | ((prev: ConductorStoreMessage[]) => ConductorStoreMessage[]),
   ) => void;
   addMessage: (message: ConductorStoreMessage) => void;
   updateMessage: (id: string, update: Partial<ConductorStoreMessage>) => void;
@@ -417,8 +416,7 @@ export interface ConductorStore {
   setMode: (mode: "collapsed" | "docked" | "expanded") => void;
   setApprovals: (
     approvals:
-      | ConductorApprovalData[]
-      | ((prev: ConductorApprovalData[]) => ConductorApprovalData[]),
+      ConductorApprovalData[] | ((prev: ConductorApprovalData[]) => ConductorApprovalData[]),
   ) => void;
   setApprovingId: (id: string | null) => void;
   setTtsEnabled: (enabled: boolean) => void;
@@ -474,4 +472,3 @@ export const useConductorStore = create<ConductorStore>()(
     },
   })),
 );
-

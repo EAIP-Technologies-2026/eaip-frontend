@@ -1953,6 +1953,9 @@ importers:
       "@eaip/ui-foundation":
         specifier: workspace:*
         version: link:../ui-foundation
+      "@eaip/utilities":
+        specifier: workspace:*
+        version: link:../utilities
       react:
         specifier: ^19.1.0
         version: 19.2.7

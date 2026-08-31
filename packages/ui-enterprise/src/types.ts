@@ -3,6 +3,7 @@ export interface NavigationItem {
   label: string;
   href: string;
   icon?: string;
+  category?: "OPERATE" | "INTELLIGENCE" | "GOVERN" | "OBSERVE" | "EXTEND";
   requiredPermission?: string;
   children?: NavigationItem[];
 }

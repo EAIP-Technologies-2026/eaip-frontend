@@ -1,29 +1,33 @@
-FROM node:20-alpine AS base
-RUN corepack enable && corepack prepare pnpm@latest --activate
+FROM node:22-alpine AS base
+RUN corepack enable && corepack prepare pnpm@11.9.0 --activate
 
 FROM base AS deps
 WORKDIR /app
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml turbo.json tsconfig.json .npmrc ./
 COPY apps/enterprise-console/package.json ./apps/enterprise-console/
 COPY apps/workspace/package.json ./apps/workspace/
 COPY apps/administration/package.json ./apps/administration/
 COPY apps/mission-control/package.json ./apps/mission-control/
 COPY apps/mobile/package.json ./apps/mobile/
-COPY packages/*/package.json ./packages/
+COPY packages/ ./packages/
 RUN pnpm install --frozen-lockfile
 
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/pnpm-lock.yaml ./
+COPY --from=deps /app/pnpm-lock.yaml ./pnpm-lock.yaml
 COPY . .
-RUN pnpm build
+RUN pnpm install --frozen-lockfile
+RUN pnpm --filter enterprise-console exec next build
 
 FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
+COPY --from=builder /app/package.json /app/pnpm-workspace.yaml /app/pnpm-lock.yaml /app/.npmrc ./
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/apps/enterprise-console/.next ./apps/enterprise-console/.next
 COPY --from=builder /app/apps/enterprise-console/public ./apps/enterprise-console/public
 COPY --from=builder /app/apps/enterprise-console/package.json ./apps/enterprise-console/

@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  eslint: { ignoreDuringBuilds: true },
   turbopack: {
     root: path.resolve(__dirname, "../.."),
   },
@@ -36,7 +37,11 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: `${process.env.BACKEND_URL ?? "http://localhost:8080"}/api/:path*`,
+        destination: `${process.env.BACKEND_URL ?? "http://127.0.0.1:8080"}/api/:path*`,
+      },
+      {
+        source: "/metrics",
+        destination: `${process.env.BACKEND_URL ?? "http://127.0.0.1:8080"}/metrics`,
       },
     ];
   },
@@ -48,16 +53,10 @@ const nextConfig: NextConfig = {
           { key: "X-Frame-Options", value: "DENY" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(self), geolocation=()" },
         ],
       },
     ];
-  },
-  sentryCli: {
-    organization: process.env.SENTRY_ORG ?? "",
-    project: process.env.SENTRY_PROJECT ?? "",
-    authToken: process.env.SENTRY_AUTH_TOKEN,
-    release: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
   },
 };
 

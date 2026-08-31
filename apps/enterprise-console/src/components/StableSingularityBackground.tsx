@@ -1,64 +1,88 @@
-'use client';
+"use client";
 
-import { useEffect, useRef } from 'react';
-import { useTheme } from '@eaip/theme';
-import styles from './StableSingularityBackground.module.css';
-// Removed invalid top-level hook usage
+import { useEffect, useRef } from "react";
+import type * as THREE from "three";
+import type { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { useTheme } from "@eaip/theme";
+import styles from "./StableSingularityBackground.module.css";
+
+interface SceneState {
+  renderer: THREE.WebGLRenderer;
+  scene: THREE.Scene;
+  camera: THREE.PerspectiveCamera;
+  controls: OrbitControls;
+  instancedMesh: THREE.InstancedMesh;
+  dustPoints: THREE.Points;
+  dustMat: THREE.ShaderMaterial;
+}
+
+function setUniform(material: THREE.ShaderMaterial, name: string, value: number): void {
+  const uniform = material.uniforms[name];
+  if (uniform) uniform.value = value;
+}
 
 const StableSingularityBackground = () => {
   const { resolved } = useTheme();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const cursorRef = useRef({ x: 0, y: 0 });
-  const auraMatRef = useRef<any>(null);
-  const diskMaterialRef = useRef<any>(null);
+  const auraMatRef = useRef<THREE.ShaderMaterial | null>(null);
+  const diskMaterialRef = useRef<THREE.ShaderMaterial | null>(null);
+  const stateRef = useRef<SceneState | null>(null);
+  const resolvedRef = useRef(resolved);
+  resolvedRef.current = resolved;
 
   // Enhancement 12: cursor tracking (disabled for touch / reduced-motion)
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    if ('ontouchstart' in window) return;
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if ("ontouchstart" in window) return;
     const onMove = (e: MouseEvent) => {
       cursorRef.current = {
         x: (e.clientX / window.innerWidth) * 2 - 1,
         y: -((e.clientY / window.innerHeight) * 2 - 1),
       };
     };
-    window.addEventListener('mousemove', onMove, { passive: true });
-    return () => window.removeEventListener('mousemove', onMove);
+    window.addEventListener("mousemove", onMove, { passive: true });
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+    };
   }, []);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (typeof window === "undefined") return;
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReduced) return;
 
-    let animationId: number;
-    let renderer: any;
-    let scene: any;
-    let camera: any;
-    let controls: any;
-    let instancedMesh: any;
-    let dustMat: any;
+    let animationId: number | undefined;
     let onResizeFn: (() => void) | undefined;
 
     const init = async () => {
-      const THREE = await import('three');
-      const { OrbitControls } = await import('three/addons/controls/OrbitControls.js');
+      const THREE = await import("three");
+      const { OrbitControls } = await import("three/addons/controls/OrbitControls.js");
 
       const canvas = canvasRef.current;
       if (!canvas) return;
 
-      scene = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000);
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        40,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000,
+      );
       camera.position.set(60, 25, 85);
 
-      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+      const renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        powerPreference: "high-performance",
+      });
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.6;
 
-      controls = new OrbitControls(camera, renderer.domElement);
+      const controls = new OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.03;
       controls.autoRotate = true;
@@ -72,13 +96,14 @@ const StableSingularityBackground = () => {
       coreGroup.add(new THREE.Mesh(bhGeo, bhMat));
 
       // Aura with cursor-reactive rim (Enhancement 12)
-      auraMatRef.current = new THREE.ShaderMaterial({
+      const isDark = resolvedRef.current === "dark";
+      const auraMat = new THREE.ShaderMaterial({
         uniforms: {
           uTime: { value: 0 },
           uIntensity: { value: 1.0 },
           uCursorX: { value: 0.0 },
           uCursorY: { value: 0.0 },
-          uTheme: { value: resolved === 'dark' ? 1.0 : 0.0 },
+          uTheme: { value: isDark ? 1.0 : 0.0 },
         },
         vertexShader: `
           varying vec3 vNormal;
@@ -109,7 +134,8 @@ const StableSingularityBackground = () => {
         transparent: true,
         blending: THREE.AdditiveBlending,
       });
-      coreGroup.add(new THREE.Mesh(new THREE.SphereGeometry(4.25, 64, 64), auraMatRef.current));
+      auraMatRef.current = auraMat;
+      coreGroup.add(new THREE.Mesh(new THREE.SphereGeometry(4.25, 64, 64), auraMat));
 
       const noiseChunk = `
         vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -162,7 +188,7 @@ const StableSingularityBackground = () => {
       const streakGeo = new THREE.CylinderGeometry(0.01, 0.12, 2.2, 3);
       streakGeo.rotateX(Math.PI / 2);
 
-      diskMaterialRef.current = new THREE.ShaderMaterial({
+      const diskMat = new THREE.ShaderMaterial({
         uniforms: {
           uTime: { value: 0 },
           uMorph: { value: 0.1 },
@@ -171,7 +197,7 @@ const StableSingularityBackground = () => {
           uOrbitScale: { value: 1.0 },
           uCursorX: { value: 0.0 },
           uCursorY: { value: 0.0 },
-          uTheme: { value: resolved === 'dark' ? 1 : 0 },
+          uTheme: { value: isDark ? 1 : 0 },
         },
         vertexShader: `
           ${noiseChunk}
@@ -225,14 +251,23 @@ const StableSingularityBackground = () => {
         blending: THREE.AdditiveBlending,
         depthWrite: false,
       });
+      diskMaterialRef.current = diskMat;
 
-      instancedMesh = new THREE.InstancedMesh(streakGeo, diskMaterialRef.current, instanceCount);
+      const instancedMesh = new THREE.InstancedMesh(streakGeo, diskMat, instanceCount);
       const dummy = new THREE.Object3D();
       for (let i = 0; i < instanceCount; i++) {
         const r = 5 + Math.pow(Math.random(), 1.3) * 40;
         const angle = Math.random() * Math.PI * 2;
-        dummy.position.set(Math.cos(angle) * r, (Math.random() - 0.5) * (8 / r), Math.sin(angle) * r);
-        dummy.lookAt(dummy.position.x + Math.sin(angle), dummy.position.y, dummy.position.z - Math.cos(angle));
+        dummy.position.set(
+          Math.cos(angle) * r,
+          (Math.random() - 0.5) * (8 / r),
+          Math.sin(angle) * r,
+        );
+        dummy.lookAt(
+          dummy.position.x + Math.sin(angle),
+          dummy.position.y,
+          dummy.position.z - Math.cos(angle),
+        );
         dummy.updateMatrix();
         instancedMesh.setMatrixAt(i, dummy.matrix);
       }
@@ -254,11 +289,11 @@ const StableSingularityBackground = () => {
         dustOp[i] = 0.04 + Math.random() * 0.08;
       }
       const dustGeo = new THREE.BufferGeometry();
-      dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
-      dustGeo.setAttribute('aSize', new THREE.BufferAttribute(dustSz, 1));
-      dustGeo.setAttribute('aOpacity', new THREE.BufferAttribute(dustOp, 1));
+      dustGeo.setAttribute("position", new THREE.BufferAttribute(dustPos, 3));
+      dustGeo.setAttribute("aSize", new THREE.BufferAttribute(dustSz, 1));
+      dustGeo.setAttribute("aOpacity", new THREE.BufferAttribute(dustOp, 1));
 
-      dustMat = new THREE.ShaderMaterial({
+      const dustMat = new THREE.ShaderMaterial({
         uniforms: { uTime: { value: 0 } },
         vertexShader: `
           attribute float aSize;
@@ -293,6 +328,8 @@ const StableSingularityBackground = () => {
       const dustPoints = new THREE.Points(dustGeo, dustMat);
       scene.add(dustPoints);
 
+      stateRef.current = { renderer, scene, camera, controls, instancedMesh, dustPoints, dustMat };
+
       onResizeFn = () => {
         const w = window.innerWidth;
         const h = window.innerHeight;
@@ -300,60 +337,79 @@ const StableSingularityBackground = () => {
         camera.updateProjectionMatrix();
         renderer.setSize(w, h);
       };
-      window.addEventListener('resize', onResizeFn);
+      window.addEventListener("resize", onResizeFn);
 
-      const clock = new THREE.Clock();
+      const startTime = performance.now();
+      let smoothX = 0;
+      let smoothY = 0;
       const animate = () => {
-        const t = clock.getElapsedTime();
-        diskMaterialRef.current.uniforms.uTime.value = t;
-        auraMatRef.current.uniforms.uTime.value = t;
-        dustMat.uniforms.uTime.value = t;
+        const t = (performance.now() - startTime) / 1000;
+        const state = stateRef.current;
+        const disk = diskMaterialRef.current;
+        const aura = auraMatRef.current;
+        if (!state || !disk || !aura) return;
+
+        setUniform(disk, "uTime", t);
+        setUniform(aura, "uTime", t);
+        setUniform(state.dustMat, "uTime", t);
 
         // Smoothed cursor-reactive uniforms (Enhancement 12)
         const cx = cursorRef.current.x;
         const cy = cursorRef.current.y;
-        diskMaterialRef.current.uniforms.uCursorX.value += (cx - diskMaterialRef.current.uniforms.uCursorX.value) * 0.04;
-        diskMaterialRef.current.uniforms.uCursorY.value += (cy - diskMaterialRef.current.uniforms.uCursorY.value) * 0.04;
-        auraMatRef.current.uniforms.uCursorX.value = diskMaterialRef.current.uniforms.uCursorX.value;
-        auraMatRef.current.uniforms.uCursorY.value = diskMaterialRef.current.uniforms.uCursorY.value;
+        smoothX += (cx - smoothX) * 0.04;
+        smoothY += (cy - smoothY) * 0.04;
+        setUniform(disk, "uCursorX", smoothX);
+        setUniform(disk, "uCursorY", smoothY);
+        setUniform(aura, "uCursorX", smoothX);
+        setUniform(aura, "uCursorY", smoothY);
 
-        instancedMesh.rotation.y += 0.0005;
-        dustPoints.rotation.y += 0.00008;
-        dustPoints.rotation.x += 0.00003;
+        state.instancedMesh.rotation.y += 0.0005;
+        state.dustPoints.rotation.y += 0.00008;
+        state.dustPoints.rotation.x += 0.00003;
 
-        controls.update();
-        renderer.render(scene, camera);
+        state.controls.update();
+        state.renderer.render(state.scene, state.camera);
         animationId = requestAnimationFrame(animate);
       };
       animate();
     };
 
-    init();
-    
+    void init();
+
     return () => {
-      cancelAnimationFrame(animationId);
-      if (onResizeFn) window.removeEventListener('resize', onResizeFn);
-      if (renderer) renderer.dispose();
-      if (diskMaterialRef.current) diskMaterialRef.current.dispose();
-      if (auraMatRef.current) auraMatRef.current.dispose();
-      if (dustMat) dustMat.dispose();
-      if (scene) {
-        scene.traverse((obj: any) => {
-          if (obj.geometry) obj.geometry.dispose();
-          if (obj.material) {
-            if (Array.isArray(obj.material)) obj.material.forEach((m: any) => m.dispose());
-            else obj.material.dispose();
+      if (animationId !== undefined) cancelAnimationFrame(animationId);
+      if (onResizeFn) window.removeEventListener("resize", onResizeFn);
+      const state = stateRef.current;
+      if (state) {
+        state.renderer.dispose();
+        state.scene.traverse((obj) => {
+          const disposable = obj as {
+            geometry?: THREE.BufferGeometry;
+            material?: THREE.Material | THREE.Material[];
+          };
+          if (disposable.geometry) disposable.geometry.dispose();
+          if (disposable.material) {
+            if (Array.isArray(disposable.material)) {
+              disposable.material.forEach((m) => {
+                m.dispose();
+              });
+            } else {
+              disposable.material.dispose();
+            }
           }
         });
       }
+      diskMaterialRef.current?.dispose();
+      auraMatRef.current?.dispose();
+      stateRef.current = null;
     };
   }, []);
 
-// eslint-disable-next-line react-hooks/exhaustive-deps
-useEffect(() => {
-  if (auraMatRef.current) auraMatRef.current.uniforms.uTheme.value = resolved === 'dark' ? 1 : 0;
-  if (diskMaterialRef.current?.uniforms?.uTheme) diskMaterialRef.current.uniforms.uTheme.value = resolved === 'dark' ? 1 : 0;
-}, [resolved]);
+  useEffect(() => {
+    const themeValue = resolved === "dark" ? 1 : 0;
+    if (auraMatRef.current) setUniform(auraMatRef.current, "uTheme", themeValue);
+    if (diskMaterialRef.current) setUniform(diskMaterialRef.current, "uTheme", themeValue);
+  }, [resolved]);
 
   return (
     <>

@@ -8,6 +8,7 @@ export type PersonalAssistantMarkState =
   | "speaking"
   | "listening"
   | "transcribing"
+  | "paused"
   | "approval"
   | "error";
 
@@ -37,11 +38,11 @@ export function PersonalAssistantMark({
   return (
     <span
       className={cn(
-        "relative inline-flex shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-surface-glass shadow-[0_0_24px_rgba(56,189,248,0.18)]",
+        "bg-surface-glass relative inline-flex shrink-0 items-center justify-center rounded-2xl border border-white/20 shadow-[0_0_24px_rgba(56,189,248,0.18)]",
         sizeClasses[size],
         active && "motion-safe:animate-pulse",
-        state === "approval" && "ring-2 ring-warning/40",
-        state === "error" && "ring-2 ring-danger/30",
+        state === "approval" && "ring-warning/40 ring-2",
+        state === "error" && "ring-danger/30 ring-2",
         className,
       )}
       aria-label={label}
@@ -49,7 +50,14 @@ export function PersonalAssistantMark({
     >
       <svg viewBox="0 0 48 48" fill="none" aria-hidden="true" className="h-[72%] w-[72%]">
         <defs>
-          <linearGradient id={gradientId} x1="7" y1="7" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+          <linearGradient
+            id={gradientId}
+            x1="7"
+            y1="7"
+            x2="42"
+            y2="42"
+            gradientUnits="userSpaceOnUse"
+          >
             <stop stopColor="#22D3EE" />
             <stop offset="0.42" stopColor="#3B82F6" />
             <stop offset="0.72" stopColor="#8B5CF6" />

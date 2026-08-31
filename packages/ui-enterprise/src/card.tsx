@@ -6,6 +6,7 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   padding?: "none" | "sm" | "md" | "lg";
   shadow?: "none" | "card" | "elevated";
   liquid?: boolean;
+  interactive?: boolean;
 }
 
 export function Card({
@@ -13,11 +14,15 @@ export function Card({
   padding = "md",
   shadow = "card",
   liquid = false,
+  interactive = false,
   className,
   ...props
 }: CardProps) {
   const liquidStyles = liquid
-    ? "bg-surface-glass backdrop-blur-xl saturate-150 border-white/[0.18] dark:border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_4px_16px_rgba(17,24,39,0.05)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_4px_16px_rgba(0,0,0,0.3)] hover:translate-y-[-2px] hover:shadow-elevated hover:border-primary/20"
+    ? cn(
+        "bg-surface-glass backdrop-blur-xl saturate-150 border-white/[0.18] dark:border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_4px_16px_rgba(17,24,39,0.05)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_4px_16px_rgba(0,0,0,0.3)]",
+        interactive && "hover:translate-y-[-2px] hover:shadow-elevated hover:border-primary/20",
+      )
     : "";
 
   return (
@@ -25,7 +30,9 @@ export function Card({
       className={cn(
         "rounded-card border transition-all duration-280",
         liquid ? liquidStyles : "border-border bg-surface",
-        !liquid && shadow === "card" && "shadow-card hover:shadow-elevated",
+        !liquid &&
+          shadow === "card" &&
+          cn("shadow-card", interactive && "hover:shadow-elevated hover:translate-y-[-2px]"),
         !liquid && shadow === "elevated" && "shadow-elevated",
         padding === "sm" && "p-3",
         padding === "md" && "p-4",
@@ -48,7 +55,7 @@ export function CardHeader({ children, action, className, ...props }: CardHeader
   return (
     <div
       className={cn(
-        "flex items-center justify-between gap-3 border-b border-border pb-3 mb-3",
+        "border-border mb-3 flex items-center justify-between gap-3 border-b pb-3",
         className,
       )}
       {...props}
@@ -66,10 +73,7 @@ export interface CardTitleProps extends HTMLAttributes<HTMLHeadingElement> {
 
 export function CardTitle({ children, as: Component = "h3", className, ...props }: CardTitleProps) {
   return (
-    <Component
-      className={cn("text-base font-semibold text-text", className)}
-      {...props}
-    >
+    <Component className={cn("text-text text-base font-semibold", className)} {...props}>
       {children}
     </Component>
   );
@@ -81,7 +85,7 @@ export interface CardContentProps extends HTMLAttributes<HTMLDivElement> {
 
 export function CardContent({ children, className, ...props }: CardContentProps) {
   return (
-    <div className={cn("text-sm text-text-secondary", className)} {...props}>
+    <div className={cn("text-text-secondary text-sm", className)} {...props}>
       {children}
     </div>
   );
@@ -95,7 +99,7 @@ export function CardFooter({ children, className, ...props }: CardFooterProps) {
   return (
     <div
       className={cn(
-        "flex items-center justify-end gap-2 border-t border-border pt-3 mt-3",
+        "border-border mt-3 flex items-center justify-end gap-2 border-t pt-3",
         className,
       )}
       {...props}

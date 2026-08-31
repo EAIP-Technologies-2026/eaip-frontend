@@ -2,8 +2,11 @@ import { forwardRef, type ElementType, type HTMLAttributes, type ReactNode } fro
 
 export type TextSize = "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
 export type TextWeight = "normal" | "medium" | "semibold" | "bold";
-export type TextColor = "default" | "secondary" | "muted" | "inverse" | "primary" | "success" | "warning" | "danger";
+export type TextColor =
+  "default" | "secondary" | "muted" | "inverse" | "primary" | "success" | "warning" | "danger";
 export type TextAlign = "left" | "center" | "right" | "justify";
+
+export type TextTracking = "tight" | "snug" | "normal" | "wide" | "metadata";
 
 export interface TextProps extends HTMLAttributes<HTMLElement> {
   as?: ElementType;
@@ -11,6 +14,11 @@ export interface TextProps extends HTMLAttributes<HTMLElement> {
   weight?: TextWeight;
   color?: TextColor;
   align?: TextAlign;
+  tracking?: TextTracking;
+  tabular?: boolean;
+  relaxed?: boolean;
+  balance?: boolean;
+  pretty?: boolean;
   truncate?: boolean;
   lineClamp?: 1 | 2 | 3 | 4 | 5 | 6;
   children: ReactNode;
@@ -50,6 +58,14 @@ const alignMap: Record<TextAlign, string> = {
   justify: "text-justify",
 };
 
+const trackingMap: Record<TextTracking, string> = {
+  tight: "tracking-tight-enterprise",
+  snug: "tracking-snug-enterprise",
+  normal: "tracking-normal",
+  wide: "tracking-wide",
+  metadata: "tracking-metadata",
+};
+
 export const Text = forwardRef<HTMLElement, TextProps>(
   (
     {
@@ -58,6 +74,11 @@ export const Text = forwardRef<HTMLElement, TextProps>(
       weight = "normal",
       color = "default",
       align,
+      tracking,
+      tabular = false,
+      relaxed = false,
+      balance = false,
+      pretty = false,
       truncate = false,
       lineClamp,
       children,
@@ -71,6 +92,11 @@ export const Text = forwardRef<HTMLElement, TextProps>(
       weightMap[weight],
       colorMap[color],
       align && alignMap[align],
+      tracking && trackingMap[tracking],
+      tabular && "tabular-nums",
+      relaxed && "leading-relaxed",
+      balance && "text-balance",
+      pretty && "text-pretty",
       truncate && "truncate",
       lineClamp && `line-clamp-${String(lineClamp)}`,
       className,
